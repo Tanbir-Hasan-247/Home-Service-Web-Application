@@ -1,0 +1,110 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Manage Customers{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Manage Customers</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_processing,
+    .dataTables_wrapper .dataTables_paginate {
+        color: var(--text-secondary) !important;
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        background-color: var(--dark-bg-primary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--border-color) !important;
+        margin: 0 !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: var(--primary-color) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--primary-color) !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: var(--border-color) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-color) !important;
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Manage Customers</h1>
+    <a href="{% url 'user_registration' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add New Customer</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="usersTable" class="table table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Contact Info</th>
+                        <th>Address</th>
+                        <th>Date Joined</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in users_records %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ record.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="{{ record.admin.get_full_name }}">
+                                <div class="ms-3">
+                                    <p class="fw-bold mb-1 text-white">{{ record.admin.get_full_name }}</p>
+                                    <p class="text-muted mb-0">{{ record.admin.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ record.contact_number }}</td>
+                        <td>{{ record.Address }}</td>
+                        <td>{{ record.admin.date_joined|date:"d M, Y" }}</td>
+                        <td>
+                            {% if record.admin.is_active %}
+                                <span class="badge bg-success-subtle text-success-emphasis p-2">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger-emphasis p-2">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger" title="Delete User"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#usersTable').DataTable({
+            "order": [[ 3, "desc" ]] // Order by "Date Joined" column descending by default
+        });
+    });
+</script>
+
+{% endblock %}

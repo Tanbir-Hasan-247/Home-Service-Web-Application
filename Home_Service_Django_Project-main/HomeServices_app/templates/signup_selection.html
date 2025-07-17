@@ -1,0 +1,132 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    .selection-page-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 0;
+    }
+
+    .selection-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 850px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .selection-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    
+    .selection-header h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+    
+    .selection-header p {
+        color: var(--text-secondary);
+        max-width: 500px;
+        margin: 0.5rem auto 0 auto;
+    }
+    
+    .option-card {
+        background-color: var(--dark-bg-primary);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        border-radius: 0.75rem;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    
+    .option-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+    }
+
+    .option-card .icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .option-card h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .option-card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        flex-grow: 1;
+        margin-bottom: 1.5rem;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 2.5rem;
+        font-size: 1rem;
+    }
+
+    .login-link a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container selection-page-container">
+    <div class="selection-card">
+        <div class="selection-header">
+            <h2>Join ServiceHub</h2>
+            <p>Choose your path. Whether you're looking for expert help or offering your professional skills, we've got you covered.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <a href="{% url 'user_registration' %}" class="text-decoration-none">
+                    <div class="option-card">
+                        <div>
+                            <div class="icon"><i class="fa-solid fa-house-user"></i></div>
+                            <h3>As a Customer</h3>
+                            <p>Find and book trusted professionals for all your home service needs with just a few clicks.</p>
+                        </div>
+                        <div class="btn btn-secondary w-100">Sign Up as a Customer</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'Worker_Register' %}" class="text-decoration-none">
+                    <div class="option-card">
+                        <div>
+                            <div class="icon"><i class="fa-solid fa-briefcase"></i></div>
+                            <h3>As a Service Provider</h3>
+                            <p>Join our network of skilled professionals, find new clients, and grow your business.</p>
+                        </div>
+                        <div class="btn btn-secondary w-100">Sign Up as a Provider</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="login-link">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

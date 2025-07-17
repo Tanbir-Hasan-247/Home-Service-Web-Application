@@ -1,0 +1,149 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    .page-header-about {
+        padding: 6rem 0;
+        background: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.8)), url('https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1470&q=80');
+        background-size: cover;
+        background-position: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .value-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        padding: 2.5rem;
+        border-radius: .75rem;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .value-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+    }
+    .value-card .icon-wrapper {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .team-card {
+        background-color: var(--dark-bg-secondary);
+        padding: 2rem;
+        border-radius: .75rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .team-card .team-img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 4px solid var(--border-color);
+    }
+    
+    .team-card .social-links a {
+        color: var(--text-secondary);
+        margin: 0 0.5rem;
+        font-size: 1.2rem;
+        transition: color 0.2s;
+    }
+    .team-card .social-links a:hover {
+        color: var(--primary-color);
+    }
+</style>
+
+<div class="container-fluid page-header-about text-center">
+    <div class="container">
+        <h1 class="display-3 text-white mb-3">About ServiceHub</h1>
+        <p class="lead text-secondary mx-auto" style="max-width: 600px;">We're on a mission to make professional home care accessible, reliable, and hassle-free for everyone.</p>
+    </div>
+</div>
+<div class="container py-5 mt-5">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <img class="img-fluid rounded-3" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1470&q=80" alt="About Us Image">
+        </div>
+        <div class="col-lg-6">
+            <h5 class="text-primary">Who We Are</h5>
+            <h1 class="display-5 mb-4">Reimagining Home Services</h1>
+            <p class="mb-4">ServiceHub was founded on a simple idea: getting professional help for your home shouldn't be complicated. We saw a need for a single, trustworthy platform where users could instantly connect with vetted, skilled professionals for any task, from emergency repairs to routine maintenance.</p>
+            <p class="mb-4">Our platform leverages technology to provide instant quotes, secure booking, real-time tracking, and seamless payments. We are committed to building a community of excellence, empowering both our customers and our dedicated service providers.</p>
+        </div>
+    </div>
+</div>
+<div class="container py-5">
+    <div class="text-center mx-auto mb-5" style="max-width: 600px;">
+        <h1 class="display-5 mb-3">Our Core Values</h1>
+        <p class="text-secondary">The principles that guide every decision we make.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="value-card">
+                <div class="icon-wrapper"><i class="fas fa-shield-alt"></i></div>
+                <h4>Trust & Safety</h4>
+                <p>Your peace of mind is our top priority. Every professional on our platform undergoes a rigorous verification process, including background checks and skill assessments.</p>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="value-card">
+                <div class="icon-wrapper"><i class="fas fa-check-double"></i></div>
+                <h4>Uncompromising Quality</h4>
+                <p>We believe in a job done right. We partner with experienced professionals who take pride in their work, ensuring you receive the highest standard of service every time.</p>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="value-card">
+                <div class="icon-wrapper"><i class="fas fa-hand-sparkles"></i></div>
+                <h4>Effortless Convenience</h4>
+                <p>From finding a provider to making a payment, we've designed every step to be simple, intuitive, and stress-free, saving you valuable time and effort.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container py-5">
+    <div class="text-center mx-auto mb-5" style="max-width: 600px;">
+        <h1 class="display-5 mb-3">Meet Our Leadership</h1>
+        <p class="text-secondary">The dedicated team working to build the future of home services.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-4 col-md-6">
+            <div class="team-card text-center">
+                <img class="team-img rounded-circle mb-4" src="{% static 'user_assets/img/team-1.jpg' %}" alt="Team Member">
+                <h5 class="mb-1">Jane Doe</h5>
+                <p class="text-primary">Founder & CEO</p>
+                <p class="text-secondary small mb-3">With over a decade of experience in tech and operations, Jane is passionate about using technology to solve everyday problems and empower communities.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="team-card text-center">
+                <img class="team-img rounded-circle mb-4" src="{% static 'user_assets/img/team-2.jpg' %}" alt="Team Member">
+                <h5 class="mb-1">John Smith</h5>
+                <p class="text-primary">Head of Operations</p>
+                <p class="text-secondary small mb-3">John ensures our platform runs smoothly. His expertise in logistics and provider management guarantees a seamless experience for users and partners.</p>
+                 <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="team-card text-center">
+                <img class="team-img rounded-circle mb-4" src="{% static 'user_assets/img/team-3.jpg' %}" alt="Team Member">
+                <h5 class="mb-1">Emily White</h5>
+                <p class="text-primary">Lead Product Designer</p>
+                <p class="text-secondary small mb-3">Emily is the creative mind behind our user-friendly interface. She is dedicated to making ServiceHub intuitive, accessible, and enjoyable to use.</p>
+                 <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

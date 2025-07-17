@@ -1,0 +1,112 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Service Requests{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Service Requests</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* A little extra padding for table cells for a cleaner look */
+    .table td, .table th {
+        vertical-align: middle;
+        padding: 0.9rem;
+    }
+
+    /* Dark theme styles for DataTables controls */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: var(--text-secondary) !important;
+    }
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        background-color: var(--dark-bg-primary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: var(--text-secondary) !important; border: 1px solid var(--border-color) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary-color) !important; color: var(--text-primary) !important; border-color: var(--primary-color) !important;
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Incoming Service Requests</h1>
+</div>
+<p class="text-secondary mb-4">Review new requests from customers and assign them to available service providers.</p>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="requestsTable" class="table table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Service Details</th>
+                        <th>Location</th>
+                        <th>Requested On</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in request_records %}
+                        {% if not record.status %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ record.user.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="{{ record.user.admin.get_full_name }}">
+                                    <div class="ms-3">
+                                        <p class="fw-bold mb-1 text-white">{{ record.user.admin.get_full_name }}</p>
+                                        <p class="text-muted mb-0">{{ record.user.contact_number }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="fw-bold text-white mb-1">{{ record.service.Name }}</p>
+                                <small class="text-secondary d-block" style="max-width: 250px;">{{ record.Problem_Description|truncatechars:70 }}</small>
+                            </td>
+                            <td>
+                                <p class="mb-1">{{ record.Address }}, {{ record.House_No }}</p>
+                                <small class="text-secondary">{{ record.city.name }} - {{ record.pin }}</small>
+                            </td>
+                            <td>{{ record.dateofrequest|date:"d M, Y" }}</td>
+                            <td>
+                                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis p-2">
+                                    <i class="fas fa-clock me-1"></i>Pending Assignment
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'AssignWorker' id=record.id %}" class="btn btn-sm btn-primary" title="Assign a Worker">
+                                    <i class="fas fa-user-plus"></i> Assign
+                                </a>
+                                <a href="{% url 'CancelRequest' id=record.id %}" class="btn btn-sm btn-outline-danger ms-1" title="Cancel Request" onclick="return confirm('Are you sure you want to cancel this request?');">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#requestsTable').DataTable({
+            "order": [[ 3, "desc" ]] // Order by "Requested On" column descending
+        });
+    });
+</script>
+{% endblock %}

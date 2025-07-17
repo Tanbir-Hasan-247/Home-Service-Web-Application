@@ -1,0 +1,171 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* Page-specific styles for the registration form container */
+    .register-page-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 0;
+    }
+
+    .register-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 800px; /* Wider for a two-column form */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .register-header h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+    
+    .register-header p {
+        color: var(--text-secondary);
+    }
+    
+    /* Form element styling */
+    .form-label {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--dark-bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--dark-bg-primary);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .form-select {
+        /* For dark theme dropdown arrow */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .login-link a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Message styling */
+    .form-message {
+        color: #22c55e; /* Green for success */
+        background-color: rgba(34, 197, 94, 0.1);
+        border: 1px solid #22c55e;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+</style>
+
+<div class="container register-page-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h2>Create a New Account</h2>
+            <p>Join ServiceHub to book trusted professionals for your home.</p>
+        </div>
+
+        {% if msg %}
+            <div class="form-message">{{ msg }}</div>
+        {% endif %}
+
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="firstname" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstname" name="firstname" placeholder="John" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Doe" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="contactnumber" class="form-label">Contact Number</label>
+                <input type="tel" class="form-control" id="contactnumber" name="contactnumber" placeholder="+880 1234 567890" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3" placeholder="123 Main St, Dhaka" required></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="" selected disabled>Select...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="profile_pic" class="form-label">Profile Picture</label>
+                    <input type="file" class="form-control" id="profile_pic" name="profile_pic">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cpassword" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="cpassword" name="cpassword" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary px-5 py-2">Create Account</button>
+            </div>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

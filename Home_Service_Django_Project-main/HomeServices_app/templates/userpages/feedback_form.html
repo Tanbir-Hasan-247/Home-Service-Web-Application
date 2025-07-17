@@ -1,0 +1,128 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    .feedback-container {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
+
+    .feedback-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    /* Star Rating System Styles */
+    .rating-stars-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+    .rating-stars {
+        display: inline-flex;
+        /* Stars are in reverse order in HTML, this makes them appear correctly */
+        flex-direction: row-reverse; 
+        justify-content: center;
+    }
+
+    .rating-stars input[type="radio"] {
+        display: none; /* Hide the actual radio button */
+    }
+
+    .rating-stars label {
+        font-size: 2.5rem;
+        color: var(--border-color); /* Color of an unselected star */
+        cursor: pointer;
+        transition: color 0.2s ease-out;
+    }
+
+    .rating-stars label:before {
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        content: "\f005"; /* Font Awesome solid star unicode */
+    }
+
+    /* Lit up stars on hover */
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label {
+        color: #f59e0b; /* A nice gold/yellow color for hover */
+    }
+
+    /* Persistent color for selected stars */
+    .rating-stars input[type="radio"]:checked ~ label {
+        color: #f59e0b;
+    }
+    
+    .form-select, .form-control {
+        background-color: var(--dark-bg-primary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    .form-select:focus, .form-control:focus {
+        background-color: var(--dark-bg-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+        color: var(--text-primary);
+    }
+
+</style>
+
+<div class="container feedback-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="text-center mb-5">
+                <h1 class="display-5">Share Your Experience</h1>
+                <p class="lead text-secondary">Your valuable feedback helps us maintain quality and allows our professionals to shine.</p>
+            </div>
+
+            <div class="card feedback-card p-4 p-md-5">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-5">
+                        <label for="employ" class="form-label fs-5 text-white">Which service provider are you reviewing?</label>
+                        <p class="text-secondary small mt-n2">Select the professional who performed the service.</p>
+                        <select class="form-select form-select-lg" id="employ" name="employ" required>
+                            <option value="" disabled selected>-- Choose a professional --</option>
+                            {% for worker in workers %}
+                                <option value="{{ worker.id }}">{{ worker.admin.first_name }} {{ worker.admin.last_name }} ({{ worker.designation }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-5 text-center">
+                        <label class="form-label fs-5 text-white">How would you rate the service?</label>
+                        <div class="rating-stars-wrapper">
+                            <div class="rating-stars">
+                                <input type="radio" id="rating-5" name="rating" value="5" required><label for="rating-5" title="Excellent"></label>
+                                <input type="radio" id="rating-4" name="rating" value="4"><label for="rating-4" title="Good"></label>
+                                <input type="radio" id="rating-3" name="rating" value="3"><label for="rating-3" title="Average"></label>
+                                <input type="radio" id="rating-2" name="rating" value="2"><label for="rating-2" title="Poor"></label>
+                                <input type="radio" id="rating-1" name="rating" value="1"><label for="rating-1" title="Terrible"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label fs-5 text-white">Share your comments</label>
+                        <p class="text-secondary small mt-n2">What went well? What could be improved?</p>
+                        <textarea class="form-control form-control-lg" id="description" name="description" rows="5" placeholder="Tell us about your experience..." required></textarea>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Your Feedback
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

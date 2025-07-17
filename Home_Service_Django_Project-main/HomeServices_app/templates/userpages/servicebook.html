@@ -1,0 +1,181 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    .booking-form-section {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .booking-form-section .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .booking-form-section .section-step {
+        background-color: var(--primary-color);
+        color: var(--text-primary);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin-right: 1rem;
+    }
+    .form-control, .form-select {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+        padding: .75rem 1rem;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+    .input-group .input-group-text {
+        background-color: var(--dark-bg-primary);
+        border-color: var(--border-color);
+        color: var(--primary-color);
+    }
+
+    .summary-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        position: sticky;
+        top: 100px; /* Adjust based on your navbar height */
+        overflow: hidden;
+    }
+    .summary-card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .summary-card .list-group-item {
+        background-color: transparent;
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+    }
+    .summary-card .list-group-item i {
+        color: #22c55e; /* A nice green color for checks */
+    }
+
+</style>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <div class="booking-header mb-4">
+                <p class="text-primary fw-bold mb-1">Schedule Your Service</p>
+                <h1 class="display-5">Complete Your Booking</h1>
+                <p class="text-secondary">Fill in the details below to confirm your appointment for a professional {{ services.Name }} service.</p>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="booking-form-section">
+                    <div class="section-header">
+                        <span class="section-step">1</span>
+                        <h4>Describe Your Issue</h4>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Problem_Description" class="form-label">What do you need help with?</label>
+                        <textarea class="form-control" name="Problem_Description" id="Problem_Description" rows="5" placeholder="Please provide as much detail as possible..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="booking-form-section">
+                    <div class="section-header">
+                        <span class="section-step">2</span>
+                        <h4>Service Location</h4>
+                    </div>
+                     <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
+                        <input type="text" class="form-control" name="Address" placeholder="Street Address" required>
+                    </div>
+                     <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                <select class="form-select" name="city" required>
+                                     <option value="" disabled selected>Select City</option>
+                                     {% for c in city %}
+                                        <option value="{{ c.id }}">{{ c.name }}</option>
+                                     {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-thumbtack"></i></span>
+                                <input type="text" class="form-control" name="Pincode" placeholder="Pincode" required>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="row g-3 mt-0">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                <input type="text" class="form-control" name="House_No" placeholder="Apt / House No." required>
+                            </div>
+                        </div>
+                         <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-landmark"></i></span>
+                                <input type="text" class="form-control" name="landmark" placeholder="Landmark (Optional)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-form-section">
+                    <div class="section-header">
+                        <span class="section-step">3</span>
+                        <h4>Contact Information</h4>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
+                        <input type="tel" class="form-control" name="contact" placeholder="Your best contact number" required>
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold">
+                        <i class="fas fa-check-circle me-2"></i>Confirm & Book Service
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="summary-card">
+                <img src="{{ services.img.url }}" class="summary-card-img" alt="{{ services.Name }}">
+                <div class="p-4">
+                    <p class="text-primary fw-bold mb-1">YOU ARE BOOKING</p>
+                    <h2 class="text-white">{{ services.Name }}</h2>
+                    <p class="text-secondary border-bottom pb-3 mb-3" style="border-color: var(--border-color) !important;">{{ services.Description }}</p>
+                    
+                    <h5 class="text-white">Our Promise</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><i class="fas fa-check-circle me-2"></i>Verified & Trusted Professionals</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle me-2"></i>Upfront & Transparent Pricing</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle me-2"></i>Secure Online Payments</li>
+                        <li class="list-group-item"><i class="fas fa-check-circle me-2"></i>24/7 Customer Support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

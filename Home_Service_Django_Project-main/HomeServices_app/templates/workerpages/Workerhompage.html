@@ -1,0 +1,141 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card a { text-decoration: none; }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .stat-icon {
+        font-size: 1.75rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="mb-4">
+    <h1 class="page-title">Welcome back, {{ request.user.first_name|default:request.user.username }}!</h1>
+    <p class="text-secondary">Here's a summary of your performance and current tasks.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'WorkerpendingTask' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-info bg-opacity-25 text-info me-4"><i class="fas fa-tasks"></i></div>
+                <div>
+                    <div class="stat-value">{{ active_jobs }}</div>
+                    <div class="stat-label">Active Jobs</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-success bg-opacity-25 text-success me-4"><i class="fas fa-check-double"></i></div>
+            <div>
+                <div class="stat-value">{{ completed_jobs }}</div>
+                <div class="stat-label">Jobs Completed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'viewworkerfeedbacks' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning bg-opacity-25 text-warning me-4"><i class="fas fa-star"></i></div>
+                <div>
+                    <div class="stat-value">{{ average_rating|floatformat:2 }}</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+         <a href="{% url 'viewworkerfeedbacks' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary bg-opacity-25 text-primary me-4"><i class="fas fa-comments"></i></div>
+                <div>
+                    <div class="stat-value">{{ total_reviews }}</div>
+                    <div class="stat-label">Total Reviews</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Your Latest Active Jobs</h5>
+                <a href="{% url 'WorkerpendingTask' %}" class="btn btn-sm btn-outline-secondary">View All Active Jobs</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Customer</th>
+                                <th>Location</th>
+                                <th class="text-end">Accepted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in recent_jobs %}
+                                <tr>
+                                    <td>
+                                        <p class="fw-bold text-white mb-0">{{ job.requests.service.Name }}</p>
+                                    </td>
+                                    <td>{{ job.requests.user.admin.get_full_name }}</td>
+                                    <td>{{ job.requests.city.name }}</td>
+                                    <td class="text-end text-secondary">{{ job.Date|date:"d M, Y" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <i class="fas fa-party fa-3x text-success"></i>
+                                        <h5 class="mt-3 text-white">No active jobs!</h5>
+                                        <p class="text-secondary">You're all caught up. Check the "Available Jobs" page for new opportunities.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* Your existing styles are perfect, no changes needed here. */
+    body {
+        background-color: var(--dark-bg-primary);
+    }
+    .profile-banner {
+        height: 250px;
+        background: linear-gradient(to right, var(--primary-color), #6366f1);
+        border-radius: 0 0 1rem 1rem;
+    }
+    .profile-header-content {
+        position: relative;
+        margin-top: -100px;
+    }
+    .profile-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .profile-avatar-card {
+        position: sticky;
+        top: 100px;
+    }
+    .profile-avatar {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: -80px;
+        border: 5px solid var(--dark-bg-secondary);
+    }
+    .profile-avatar-initials {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        margin-top: -80px;
+        border: 5px solid var(--dark-bg-secondary);
+        background-color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-avatar-initials span {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .info-list-item {
+        display: flex;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid var(--border-color);
+        align-items: flex-start;
+    }
+    .info-list-item:last-child { border-bottom: none; }
+    .info-list-item .icon { color: var(--primary-color); font-size: 1.2rem; width: 40px; text-align: center; margin-top: 4px; }
+    .info-list-item .label { color: var(--text-secondary); font-size: 0.9rem; }
+    .info-list-item .value { color: var(--text-primary); font-weight: 500; font-size: 1rem; }
+</style>
+
+<div class="profile-banner"></div>
+
+<div class="container profile-header-content pb-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="profile-card profile-avatar-card text-center p-4">
+                {% if data.profile_pic %}
+                    <img src="{{ data.profile_pic.url }}" alt="Avatar" class="profile-avatar mx-auto mb-3">
+                {% else %}
+                    <div class="profile-avatar-initials mx-auto mb-3">
+                        <span>{{ data.admin.first_name|first|upper }}{{ data.admin.last_name|first|upper }}</span>
+                    </div>
+                {% endif %}
+                
+                <h3 class="text-white">{{ data.admin.get_full_name }}</h3>
+                <p class="text-secondary mb-3">@{{ data.admin.username }}</p>
+                <span class="badge rounded-pill bg-primary bg-opacity-25 text-primary-emphasis py-2 px-3">Customer</span>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{% url 'edit_profile' %}" class="btn btn-primary"><i class="fas fa-edit me-2"></i>Edit Profile</a>
+                    <a href="{% url 'password-reset' %}" class="btn btn-secondary">Change Password</a>
+                </div>
+
+                <div class="mt-4 border-top pt-3" style="border-color: var(--border-color) !important;">
+                     <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteProfileModal">
+                        <i class="fas fa-trash-alt me-2"></i>Delete My Account
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="profile-card p-4">
+                <div class="info-card-header pb-3 mb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                    <h4 class="mb-0">My Profile Information</h4>
+                </div>
+                <div class="info-list">
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-envelope"></i></div><div class="ms-3"><div class="label">Email Address</div><div class="value">{{ data.admin.email }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-phone-alt"></i></div><div class="ms-3"><div class="label">Phone Number</div><div class="value">{{ data.contact_number }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-venus-mars"></i></div><div class="ms-3"><div class="label">Gender</div><div class="value">{{ data.gender }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-map-marker-alt"></i></div><div class="ms-3"><div class="label">Address</div><div class="value">{{ data.Address }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-calendar-check"></i></div><div class="ms-3"><div class="label">Member Since</div><div class="value">{{ data.admin.date_joined|date:"F j, Y" }}</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteProfileModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--dark-bg-secondary); border-color: var(--border-color);">
+      <div class="modal-header" style="border-bottom-color: var(--border-color);">
+        <h5 class="modal-title text-white" id="deleteModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirm Account Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-secondary">
+        <p>Are you sure you want to delete your account? This action is permanent and cannot be undone. All of your data, including appointment history, will be removed.</p>
+      </div>
+      <div class="modal-footer" style="border-top-color: var(--border-color);">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="{% url 'delete_profile' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete My Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
