@@ -638,24 +638,35 @@ class EditServices(LoginRequiredMixin, View):
         service.save()
         return HttpResponse("Update Successful")
     
+# At the top of your views.py, make sure these are imported
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+# ... your other imports and views
+
 class feedback_form(LoginRequiredMixin, View):
     login_url = common_lib.DEFAULT_REDIRECT_PATH['ROOT']
-    def get(self,request):
+    
+    def get(self, request):
         worker = workers.objects.all()
         return render(request, 'userpages/feedback_form.html', {'workers': worker})
-    def post(self,request):
+    
+    def post(self, request):
         rating = int(request.POST['rating'])
         description = request.POST['description']
-        user = request.user  # Get the currently logged-in user instance
+        user = request.user
         employ_id = request.POST['employ']
         employ = workers.objects.get(id=employ_id)
         date = datetime.now()
 
-        # Create a new Feedback instance and assign the user, employ, and date
         feedback = Feedback.objects.create(Rating=rating, Description=description, User=user, Employ=employ, Date=date)
-        feedback.save()
-
-        return HttpResponse('feedback_success')
+        
+        # --- THIS IS THE UPDATED PART ---
+        # 1. Add a success message
+        messages.success(request, 'Thank you! Your feedback has been successfully submitted.')
+        
+        # 2. Redirect back to the feedback form page
+        return redirect('feedback_form')
 
 # At the top of your views.py, add this for calculations
 from django.db.models import Avg, Count

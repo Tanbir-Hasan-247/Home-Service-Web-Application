@@ -97,7 +97,7 @@
             <div class="mb-3">
                  <div class="d-flex justify-content-between">
                     <label for="psw" class="form-label">Password</label>
-                    <a href="#" class="text-small text-link">Forgot Password?</a>
+                    <a href="{% url 'password-reset' %}" class="text-small text-link">Forgot Password?</a>
                  </div>
                 <input type="password" class="form-control" placeholder="Enter your password" name="psw" id="psw" required>
             </div>
@@ -107,7 +107,7 @@
             <div class="text-center text-small">
                 <p>
                     Don't have an account? 
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#registerTypeModal" class="text-link">Sign Up</a>
+                    <a href="{% url 'signup_selection' %}" class="text-link">Sign Up</a>
                 </p>
             </div>
         </form>

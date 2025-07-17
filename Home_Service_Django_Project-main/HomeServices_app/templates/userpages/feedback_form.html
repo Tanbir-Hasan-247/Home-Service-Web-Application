@@ -3,71 +3,24 @@
 {% load static %}
 
 <style>
-    .feedback-container {
-        padding-top: 5rem;
-        padding-bottom: 5rem;
-    }
-
-    .feedback-card {
-        background-color: var(--dark-bg-secondary);
-        border: 1px solid var(--border-color);
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
-
-    /* Star Rating System Styles */
-    .rating-stars-wrapper {
-        display: flex;
-        justify-content: center;
-        margin-top: 0.5rem;
-    }
-    .rating-stars {
-        display: inline-flex;
-        /* Stars are in reverse order in HTML, this makes them appear correctly */
-        flex-direction: row-reverse; 
-        justify-content: center;
-    }
-
-    .rating-stars input[type="radio"] {
-        display: none; /* Hide the actual radio button */
-    }
-
-    .rating-stars label {
-        font-size: 2.5rem;
-        color: var(--border-color); /* Color of an unselected star */
-        cursor: pointer;
-        transition: color 0.2s ease-out;
-    }
-
-    .rating-stars label:before {
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        content: "\f005"; /* Font Awesome solid star unicode */
-    }
-
-    /* Lit up stars on hover */
-    .rating-stars label:hover,
-    .rating-stars label:hover ~ label {
-        color: #f59e0b; /* A nice gold/yellow color for hover */
-    }
-
-    /* Persistent color for selected stars */
-    .rating-stars input[type="radio"]:checked ~ label {
-        color: #f59e0b;
-    }
+    /* ... your existing styles for the feedback form ... */
+    .feedback-container { padding-top: 5rem; padding-bottom: 5rem; }
+    .feedback-card { background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); border-radius: 0.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .rating-stars { display: inline-flex; flex-direction: row-reverse; justify-content: center; }
+    .rating-stars input[type="radio"] { display: none; }
+    .rating-stars label { font-size: 2.5rem; color: var(--border-color); cursor: pointer; transition: color 0.2s ease-out; }
+    .rating-stars label:before { font-family: "Font Awesome 6 Free"; font-weight: 900; content: "\f005"; }
+    .rating-stars label:hover, .rating-stars label:hover ~ label, .rating-stars input[type="radio"]:checked ~ label { color: #f59e0b; }
+    .form-select, .form-control { background-color: var(--dark-bg-primary); border-color: var(--border-color); color: var(--text-primary); }
+    .form-select:focus, .form-control:focus { background-color: var(--dark-bg-primary); border-color: var(--primary-color); box-shadow: none; color: var(--text-primary); }
     
-    .form-select, .form-control {
-        background-color: var(--dark-bg-primary);
-        border-color: var(--border-color);
-        color: var(--text-primary);
+    /* Style for the success message card */
+    .success-card {
+        background: linear-gradient(90deg, #10B981, #22C55E);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2);
     }
-    .form-select:focus, .form-control:focus {
-        background-color: var(--dark-bg-primary);
-        border-color: var(--primary-color);
-        box-shadow: none;
-        color: var(--text-primary);
-    }
-
 </style>
 
 <div class="container feedback-container">
@@ -78,6 +31,23 @@
                 <h1 class="display-5">Share Your Experience</h1>
                 <p class="lead text-secondary">Your valuable feedback helps us maintain quality and allows our professionals to shine.</p>
             </div>
+            
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                        <div class="card success-card shadow-lg">
+                            <div class="card-body p-4 d-flex align-items-center">
+                                <i class="fas fa-check-circle fa-3x me-4"></i>
+                                <div>
+                                    <h4 class="card-title text-white mb-0">{{ message }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <div class="card feedback-card p-4 p-md-5">
                 <form method="post">
