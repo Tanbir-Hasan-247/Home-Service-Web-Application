@@ -188,3 +188,38 @@ Follow the steps below to run the project locally.
 ---
 
 ## 📁 Project Structure
+```bash
+
+ServiceHub/
+
+├── manage.py
+
+├── requirements.txt
+
+├── your_project/
+
+│   ├── settings.py
+
+│   ├── urls.py
+
+│   └── ...
+
+├── apps/
+
+│   ├── users/
+
+│   ├── services/
+
+│   ├── bookings/
+
+│   └── ...
+
+```
+
+
+
+### 📬 Contact
+
+- **Email: tanbirhasan569@gmail.com**
+
+- **GitHub:  http://github.com/Tanbir-Hasan-247**
