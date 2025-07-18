@@ -150,3 +150,54 @@ DATABASES = {
     }
 }
 ```
+### 5️⃣ 📧 Configure Email (for Password Reset)
+
+In the same settings.py file, add:
+```python
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-app-password'
+
+💡 For Gmail, enable 2FA and use a 16-character App Password.
+```
+
+### 6️⃣ 🔃 Run Migrations
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 7️⃣ 👑 Create Superuser
+```bash
+python manage.py createsuperuser
+```
+### 8️⃣ ▶️ Run the Server
+```bash
+python manage.py runserver
+```
+- **Open your browser at: http://127.0.0.1:8000**
+
+- **Admin Panel: http://127.0.0.1:8000/admin/**
+
+### 📁 Recommended Folder Structure
+```bash
+ServiceHub/
+├── manage.py
+├── requirements.txt
+├── your_project/
+│   ├── settings.py
+│   ├── urls.py
+│   └── ...
+├── apps/
+│   ├── users/
+│   ├── services/
+│   ├── bookings/
+│   └── ...
+```
+
+### 📬 Contact
+Email: tanbirhasan569@gmail.com
+GitHub: github.com/Tanbir-Hasan-247
