@@ -111,7 +111,7 @@ Follow the steps below to run the project locally for development/testing.
 ```bash
 git clone <your-repository-url>
 cd <repository-folder>
-
+```
 ### 2️⃣ Create and Activate Virtual Environment
 
 ```bash
@@ -122,6 +122,31 @@ python -m venv venv
 # macOS/Linux
 python3 -m venv venv
 source venv/bin/activate
+```
 
-###3️⃣ Install Dependencies
-Create a requirements.txt file and add:
+### 3️⃣ Install Dependencies
+-Create a requirements.txt file and add:
+```php
+Django
+psycopg2-binary
+Pillow
+
+Then install them:
+
+```bash
+pip install -r requirements.txt
+```
+### 4️⃣ 🛠️ Configure PostgreSQL Database
+-Open your_project/settings.py and update:
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'your_db_name',
+        'USER': 'your_db_user',
+        'PASSWORD': 'your_db_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+```
