@@ -6,6 +6,7 @@ ServiceHub is a modern, full-featured web application built with Python and Djan
 ![Django](https://img.shields.io/badge/Django-5.2-darkgreen?style=for-the-badge&logo=django&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14.0-blue?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple?style=for-the-badge&logo=bootstrap&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-3.4-yellow?style=for-the-badge&logo=javascript&logoColor=black)
 
 ---
 
