@@ -111,3 +111,17 @@ Follow the steps below to run the project locally for development/testing.
 ```bash
 git clone <your-repository-url>
 cd <repository-folder>
+
+### 2️⃣ Create and Activate Virtual Environment
+
+```bash
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+###3️⃣ Install Dependencies
+Create a requirements.txt file and add:
