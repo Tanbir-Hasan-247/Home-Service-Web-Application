@@ -25,23 +25,24 @@
         text-align: center;
         margin-bottom: 2rem;
     }
-    
+
     .register-header h2 {
         color: var(--text-primary);
         font-weight: 700;
     }
-    
+
     .register-header p {
         color: var(--text-secondary);
     }
-    
+
     .form-label {
         color: var(--text-secondary);
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
     }
-    
-    .form-control, .form-select {
+
+    .form-control,
+    .form-select {
         background-color: var(--dark-bg-primary);
         border: 1px solid var(--border-color);
         color: var(--text-primary);
@@ -49,13 +50,14 @@
         border-radius: 0.5rem;
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
         background-color: var(--dark-bg-primary);
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         color: var(--text-primary);
     }
-    
+
     .form-select {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     }
@@ -96,7 +98,7 @@
         </div>
 
         {% if msg %}
-            <div class="form-message">{{ msg }}</div>
+        <div class="form-message">{{ msg }}</div>
         {% endif %}
 
         <form action="" method="post" enctype="multipart/form-data">
@@ -141,25 +143,28 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="designation" class="form-label">Primary Service (Designation)</label>
+
                     <select class="form-select" name="designation" id="designation" required>
-                        <option disabled selected>Select Your Primary Service</option>
+                        <option disabled selected value="">Select Your Primary Service</option>
                         {% for cc in designations %}
-                            <option value="{{ cc.Name }}">{{ cc.Name }}</option>
+                        <option value="{{ cc.Name }}">{{ cc.Name }}</option>
                         {% endfor %}
                         <option value="Other">Other</option>
                     </select>
                 </div>
-                 <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="profile_pic" class="form-label">Profile Picture</label>
                     <input type="file" class="form-control" id="profile_pic" name="profile_pic">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="password" class="form-label">Set Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••"
+                        required>
                 </div>
                 <div class="col-md-6 mb-4">
                     <label for="cpassword" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="cpassword" name="cpassword" placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="cpassword" name="cpassword" placeholder="••••••••"
+                        required>
                 </div>
             </div>
             <div class="col-12 text-center mt-3">

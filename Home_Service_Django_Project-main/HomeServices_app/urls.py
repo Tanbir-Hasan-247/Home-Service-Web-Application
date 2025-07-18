@@ -52,6 +52,8 @@ urlpatterns = [
     path('ManageServices/', views.ManageServices.as_view(), name='ManageServices'),
     path('DeleteServices/<int:id>',views.DeleteServices.as_view(),name='DeleteServices'),
     path('EditServices/<int:id>',views.EditServices.as_view(),name='EditServices'),
+    path('admin/users/delete/<int:user_id>/', views.DeleteUserView.as_view(), name='delete_user'),
+    path('admin/workers/delete/<int:worker_id>/', views.DeleteWorkerView.as_view(), name='delete_worker'),
 
     path('AssignWorker/<int:id>',views.AssignWorker.as_view(),name='AssignWorker'),
    

@@ -20,7 +20,7 @@ from django.urls import path, include
 from HomeServices_project import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
     path('', include('HomeServices_app.urls')),
 ]
 # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_URL)

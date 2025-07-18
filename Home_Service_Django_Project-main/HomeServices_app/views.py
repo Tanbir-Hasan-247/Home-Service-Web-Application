@@ -154,55 +154,63 @@ class DeleteProfileView(LoginRequiredMixin, View):
         return redirect('index') # Redirect to the homepage after deletion
 
 
+# In your views.py file
+
 class Worker_Register(View):
     def get(self, request):
-        designations=ServiceCatogarys.objects.all()
-        contaxt={
-            'designations':designations,
-        }
-        return render(request, 'workers_registration.html',contaxt)
+        designations = ServiceCatogarys.objects.all()
+        context = { 'designations': designations }
+        return render(request, 'workers_registration.html', context)
 
     def post(self, request):
         firstname = request.POST.get('firstname')
         lastname = request.POST.get('lastname')
         email = request.POST.get('email')
-        contactnumber = request.POST.get('contactnumber')
-        dob = request.POST.get('dob')
-        gender = request.POST.get('gender')
-        city = request.POST.get('city')
-        address = request.POST.get('address')
-        designation = request.POST.get('designation')
-        profile_pic = request.FILES.get('profile_pic')
+        # ... get other form fields ...
         password = request.POST.get('password')
         cpassword = request.POST.get('cpassword')
-        # user_type= 3
-        # Check if passwords match
-        if password == cpassword:
-            new_user = User.objects.create(
-                username=email,
-                email=email,
-                password=make_password(password),
-                first_name=firstname,
-                last_name=lastname,
-                is_active=True,
-                is_staff=True,
-            )
 
-            # For 'users'
-            new_worker = workers(admin=new_user, contact_number=contactnumber, dob=dob, Address=address, city=city,
-                                 gender=gender, designation=designation, profile_pic=profile_pic,
-                                 acc_activation=False, avalability_status=True)
-            new_worker.save()
+        # --- THIS IS THE FIX ---
+        # 1. Check if a user with this email already exists
+        if User.objects.filter(username=email).exists():
+            # If the user exists, show an error message and re-render the form
+            messages.error(request, 'An account with this email address already exists.')
+            designations = ServiceCatogarys.objects.all()
+            return render(request, 'workers_registration.html', {'designations': designations})
 
-            return render(request, 'login.html', {'msg': "Addd succsfully!"})
+        # 2. Check if passwords match
+        if password != cpassword:
+            messages.error(request, 'Passwords do not match!')
+            designations = ServiceCatogarys.objects.all()
+            return render(request, 'workers_registration.html', {'designations': designations})
+        
+        # --- END OF FIX ---
+        
+        # If checks pass, create the user
+        new_user = User.objects.create_user( # Using create_user is safer
+            username=email,
+            email=email,
+            password=password,
+            first_name=firstname,
+            last_name=lastname,
+            is_active=True,
+            is_staff=True,
+        )
 
-            # return render(request, 'user_register.html', {'msg': "Passwords do not match!"})
-
-
-        else:
-            return render(request, 'workers_registration.html', {'msg': "Passwords do not match!"})
-
-        return render(request, 'workers_registration.html', {'msg': "Something went wrong"})
+        # Create the worker profile
+        workers.objects.create(
+            admin=new_user,
+            contact_number=request.POST.get('contactnumber'),
+            dob=request.POST.get('dob'),
+            Address=request.POST.get('address'),
+            city=request.POST.get('city'),
+            gender=request.POST.get('gender'),
+            designation=request.POST.get('designation'),
+            profile_pic=request.FILES.get('profile_pic')
+        )
+        
+        messages.success(request, 'Registration successful! Please log in.')
+        return redirect('login')
 
 
 # HomeServices_app/views.py
@@ -446,17 +454,21 @@ class manageworker(LoginRequiredMixin, View):
         context={'workers_records':workers_records}
         return render(request,'adminpages/Manage_Workers.html',context)
 
+# In your views.py file
+from django.contrib import messages # Make sure messages is imported
+
 class verify_worker(LoginRequiredMixin, View):
     login_url = common_lib.DEFAULT_REDIRECT_PATH['ROOT']
-    def get(self,request, action, id):
-        btn = workers.objects.get(id=id)
-        if action == 'active' and btn.acc_activation == False:
-            workers.objects.filter(id=id).update(acc_activation=True)
-            return HttpResponseRedirect('/manageworker')
-        else:
-            return HttpResponse("Something Went Wrong")
+    def get(self, request, action, id):
+        worker_to_verify = get_object_or_404(workers, id=id)
+
+        if action == 'active' and not worker_to_verify.acc_activation:
+            worker_to_verify.acc_activation = True
+            worker_to_verify.save()
+            # Add a success message
+            messages.success(request, f"Worker '{worker_to_verify.admin.get_full_name()}' has been successfully verified.")
         
-        return HttpResponseRedirect('/manageworker')
+        return redirect('manageworker')
 
 class manageusers(LoginRequiredMixin, View):
     login_url = common_lib.DEFAULT_REDIRECT_PATH['ROOT']
@@ -495,7 +507,49 @@ class DeleteCountry(LoginRequiredMixin, View):
         return HttpResponseRedirect('/ManageCountry')
 
 
+# ... your other imports
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib import messages
+# ... your other imports
 
+class DeleteUserView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Handles the deletion of a user account by a superuser.
+    """
+    def post(self, request, user_id):
+        # Check if the admin is trying to delete their own account
+        if request.user.id == user_id:
+            messages.error(request, "You cannot delete your own admin account.")
+            return redirect('manageusers')
+        
+        # If not deleting self, proceed with the deletion
+        user_to_delete = get_object_or_404(User, pk=user_id)
+        messages.success(request, f"Successfully deleted user: {user_to_delete.username}")
+        user_to_delete.delete()
+        return redirect('manageusers')
+
+    def test_func(self):
+        # This part is correct and ensures only superusers can access this view
+        return self.request.user.is_superuser
+
+class DeleteWorkerView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Handles the final deletion of a worker account.
+    """
+    def post(self, request, worker_id):
+        worker_to_delete = get_object_or_404(workers, pk=worker_id)
+        
+        # It's safer to delete the User object, which will cascade to the worker profile
+        user_account = worker_to_delete.admin
+        
+        messages.success(request, f"Successfully deleted worker: {user_account.username}")
+        user_account.delete()
+        
+        return redirect('manageworker')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+    
 # HomeServices_app/views.py
 from .forms import stateform # Make sure this is imported at the top
 
