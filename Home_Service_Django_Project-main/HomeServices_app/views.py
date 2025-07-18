@@ -294,7 +294,7 @@ class home( View):
         }
         return render(request, 'userpages/index.html', context)
 
-class about(LoginRequiredMixin, View):
+class about(View):
     login_url = common_lib.DEFAULT_REDIRECT_PATH['ROOT']
     def get(self,request):
         return render(request, 'userpages/about.html')
