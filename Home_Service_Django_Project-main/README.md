@@ -57,9 +57,9 @@ The platform supports **three distinct user roles**, each with its own dedicated
 
 *(Here you can add screenshots of your application)*
 
-| Homepage | Admin Dashboard | Worker Profile |
+| Homepage | Admin Dashboard | Worker Dashboard |
 | :---: | :---: | :---: |
-| ![Homepage](<media/ss/home.png>) | ![Admin Dashboard](<path/to/your/admin_dashboard_screenshot.png>) | ![Worker Profile](<path/to/your/worker_profile_screenshot.png>) |
+| ![Homepage](<media/ss/home.png>) | ![Admin Dashboard](<media/ss/admin.png>) | ![Worker Profile](<media/ss/worker.png>) |
 
 ---
 
