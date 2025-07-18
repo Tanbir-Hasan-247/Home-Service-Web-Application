@@ -59,7 +59,7 @@ The platform supports **three distinct user roles**, each with its own dedicated
 
 | Homepage | Admin Dashboard | Worker Dashboard |
 | :---: | :---: | :---: |
-| ![Homepage](<media/ss/home.png>) | ![Admin Dashboard](<media/ss/admin.png>) | ![Worker Profile](<media/ss/worker.png>) |
+| ![Homepage](<Home_Service_Django_Project-main/media/ss/home.png>) | ![Admin Dashboard](<Home_Service_Django_Project-main/media/ss/admin.png>) | ![Worker Profile](<Home_Service_Django_Project-main/media/ss/worker.png>) |
 
 ---
 
