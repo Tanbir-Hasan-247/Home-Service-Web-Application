@@ -199,5 +199,5 @@ ServiceHub/
 ```
 
 ### 📬 Contact
-Email: tanbirhasan569@gmail.com
-GitHub: github.com/Tanbir-Hasan-247
+- **Email: tanbirhasan569@gmail.com**
+- **GitHub: github.com/Tanbir-Hasan-247**
