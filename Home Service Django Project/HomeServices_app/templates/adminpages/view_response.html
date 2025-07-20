@@ -10,36 +10,21 @@
 {% block content %}
 <style>
     .table td, .table th { vertical-align: middle; padding: 0.9rem; }
-
     /* Dark theme styles for DataTables controls */
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        color: var(--text-secondary) !important;
-    }
-    .dataTables_wrapper .dataTables_length select,
-    .dataTables_wrapper .dataTables_filter input {
-        background-color: var(--dark-bg-primary) !important; color: var(--text-primary) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        color: var(--text-secondary) !important; border: 1px solid var(--border-color) !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background: var(--primary-color) !important; color: var(--text-primary) !important; border-color: var(--primary-color) !important;
-    }
-
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-secondary) !important; }
+    .dataTables_wrapper .dataTables_length select, .dataTables_wrapper .dataTables_filter input { background-color: var(--dark-bg-primary) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-secondary) !important; border: 1px solid var(--border-color) !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--primary-color) !important; color: var(--text-primary) !important; border-color: var(--primary-color) !important; }
     /* Filter button styling */
-    .filter-btn-group .btn {
-        border-color: var(--border-color);
-        color: var(--text-secondary);
-        background-color: var(--dark-bg-primary);
-    }
-    .filter-btn-group .btn.active {
-        background-color: var(--primary-color);
-        color: var(--text-primary);
-        border-color: var(--primary-color);
+    .filter-btn-group .btn { border-color: var(--border-color); color: var(--text-secondary); background-color: var(--dark-bg-primary); }
+    .filter-btn-group .btn.active { background-color: var(--primary-color); color: var(--text-primary); border-color: var(--primary-color); }
+
+    /* ADDED: Style for default avatar with initials */
+    .avatar-initials {
+        width: 45px; height: 45px; border-radius: 50%;
+        background-color: var(--primary-color); color: var(--text-primary);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 600; font-size: 0.9rem;
     }
 </style>
 
@@ -75,7 +60,11 @@
                         </td>
                         <td>
                              <div class="d-flex align-items-center">
-                                <img src="{{ record.requests.user.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="">
+                                {% if record.requests.user.profile_pic %}
+                                    <img src="{{ record.requests.user.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="">
+                                {% else %}
+                                    <div class="avatar-initials"><span>{{ record.requests.user.admin.first_name|first|upper }}{{ record.requests.user.admin.last_name|first|upper }}</span></div>
+                                {% endif %}
                                 <div class="ms-3">
                                     <p class="fw-bold mb-1 text-white">{{ record.requests.user.admin.get_full_name }}</p>
                                     <p class="text-muted mb-0">{{ record.requests.user.admin.email }}</p>
@@ -84,7 +73,11 @@
                         </td>
                         <td>
                              <div class="d-flex align-items-center">
-                                <img src="{{ record.assigned_worker.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="">
+                                {% if record.assigned_worker.profile_pic %}
+                                    <img src="{{ record.assigned_worker.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="">
+                                {% else %}
+                                     <div class="avatar-initials"><span>{{ record.assigned_worker.admin.first_name|first|upper }}{{ record.assigned_worker.admin.last_name|first|upper }}</span></div>
+                                {% endif %}
                                 <div class="ms-3">
                                     <p class="fw-bold mb-1 text-white">{{ record.assigned_worker.admin.get_full_name }}</p>
                                     <p class="text-muted mb-0">{{ record.assigned_worker.designation }}</p>
@@ -112,21 +105,14 @@
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize the DataTable
         var table = $('#jobsTable').DataTable({
-            "order": [[ 3, "desc" ]] // Order by "Date Assigned" column descending
+            "order": [[ 3, "desc" ]]
         });
 
-        // Handle the custom filter buttons
         $('#statusFilter .btn').on('click', function() {
-            // Remove 'active' class from all buttons and add it to the clicked one
             $('#statusFilter .btn').removeClass('active');
             $(this).addClass('active');
-
             var status = $(this).data('status');
-            
-            // Use DataTable's API to search the 'Status' column (column index 4)
-            // The '^' and '$' ensure it matches the whole word, not substrings
             table.column(4).search(status ? '^' + status + '$' : '', true, false).draw();
         });
     });
