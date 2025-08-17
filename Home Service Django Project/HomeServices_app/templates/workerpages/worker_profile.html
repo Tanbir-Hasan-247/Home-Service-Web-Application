@@ -14,7 +14,30 @@
     .profile-banner { height: 200px; background: linear-gradient(to right, #06b6d4, #3b82f6); border-radius: .75rem; }
     .profile-content { position: relative; margin-top: -80px; }
     .profile-card { background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); border-radius: .75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
-    .profile-avatar { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin-top: -75px; border: 5px solid var(--dark-bg-secondary); }
+    .profile-avatar {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: -80px;
+        border: 5px solid var(--dark-bg-secondary);
+    }
+    .profile-avatar-initials {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        margin-top: -80px;
+        border: 5px solid var(--dark-bg-secondary);
+        background-color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-avatar-initials span {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
     .info-list-item { display: flex; padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); align-items: flex-start; }
     .info-list-item:last-child { border-bottom: none; }
     .info-list-item .icon { color: var(--primary-color); font-size: 1.1rem; width: 40px; text-align: center; margin-top: 4px; }
@@ -39,7 +62,13 @@
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="profile-card text-center p-4" style="position: sticky; top: 2rem;">
-                <img src="{{ data.profile_pic.url }}" alt="Avatar" class="profile-avatar mx-auto mb-3">
+                {% if data.profile_pic %}
+                    <img src="{{ data.profile_pic.url }}" alt="Avatar" class="profile-avatar mx-auto mb-3">
+                {% else %}
+                    <div class="profile-avatar-initials mx-auto mb-3">
+                        <span>{{ data.admin.first_name|first|upper }}{{ data.admin.last_name|first|upper }}</span>
+                    </div>
+                {% endif %}
                 <h3 class="text-white">{{ data.admin.get_full_name }}</h3>
                 <p class="text-primary fw-bold">{{ data.designation }}</p>
 

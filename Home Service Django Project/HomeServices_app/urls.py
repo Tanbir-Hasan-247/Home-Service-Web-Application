@@ -59,6 +59,7 @@ urlpatterns = [
    
 
     path('feedback_form/', views.feedback_form.as_view(), name='feedback_form'),
+    path('feedback/<int:worker_id>/', views.feedback_form.as_view(), name='feedback_form_for_worker'),
     path('viewfeedbacks/', views.viewfeedbacks.as_view(), name='viewfeedbacks'),
     path('ViewRequests/', views.ViewRequests.as_view(), name='ViewRequests'),
     path('viewresponse/',views.viewresponse.as_view(),name='viewresponse'),
