@@ -10,7 +10,8 @@
     <link href="{% static 'user_assets/img/favicon.ico' %}" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
@@ -33,7 +34,12 @@
             font-family: 'Inter', sans-serif;
         }
 
-        h1, h2, h3, h4, h5, h6 {
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             color: var(--text-primary);
             font-weight: 700;
         }
@@ -54,7 +60,7 @@
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
         }
-        
+
         /* Navbar */
         .navbar {
             background-color: var(--dark-bg-primary);
@@ -67,10 +73,22 @@
             font-weight: 800;
             color: var(--text-primary);
         }
-        .navbar-brand i { color: var(--primary-color); }
-        .nav-link { color: var(--text-secondary); font-weight: 500; margin: 0 0.75rem; }
-        .nav-link:hover, .nav-link.active { color: var(--text-primary); }
-        
+
+        .navbar-brand i {
+            color: var(--primary-color);
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin: 0 0.75rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary);
+        }
+
         /* Footer */
         .footer {
             background-color: var(--dark-bg-primary);
@@ -78,11 +96,35 @@
             font-size: 0.9rem;
             border-top: 1px solid var(--border-color);
         }
-        .footer .footer-heading { font-weight: 600; color: var(--text-primary); margin-bottom: 1.5rem; }
-        .footer .footer-link { display: block; color: var(--text-secondary); text-decoration: none; margin-bottom: 0.75rem; }
-        .footer .social-icon { color: var(--text-secondary); font-size: 1.25rem; margin-right: 1.5rem; }
-        .footer .copyright-bar { border-top: 1px solid var(--border-color); padding-top: 1.5rem; margin-top: 3rem; }
-        
+
+        .footer .footer-heading {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer .footer-link {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer .social-icon {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            margin-right: 1.5rem;
+        }
+
+        .footer .copyright-bar {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            padding-bottom: 1rem;
+            margin-top: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -102,43 +144,51 @@
                     <a href="{% url 'services' %}" class="nav-item nav-link">Services</a>
                     <a href="{% url 'index' %}#how-it-works-section" class="nav-item nav-link">How it Works</a>
                     {% if user.is_authenticated and not user.is_staff %}
-                        <a href="{% url 'feedback_form' %}" class="nav-item nav-link">Give Feedback</a>
+                    <a href="{% url 'feedback_form' %}" class="nav-item nav-link">Give Feedback</a>
                     {% endif %}
                     <a href="{% url 'about' %}" class="nav-item nav-link">About</a>
                 </div>
                 <div class="d-flex align-items-center">
                     {% if user.is_authenticated %}
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle d-flex align-items-center" type="button"
-                                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa fa-user me-2"></i> {{ user.get_full_name|default:user.username }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
-                                
-                                {% if user.is_superuser %}
-                                    <li><a class="dropdown-item" href="{% url 'admmin_home' %}"><i class="fas fa-shield-halved fa-fw me-2"></i>Admin Dashboard</a></li>
-                                
-                                {% elif user.is_staff %}
-                                    <li><a class="dropdown-item" href="{% url 'workers_home' %}"><i class="fas fa-briefcase fa-fw me-2"></i>Worker Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'workerprofile' %}"><i class="fas fa-user-cog fa-fw me-2"></i>My Profile</a></li>
-                                
-                                {% else %}
-                                    <li><a class="dropdown-item" href="{% url 'userprofile' %}"><i class="fas fa-user-circle fa-fw me-2"></i>My Profile</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'Viewappointment_history' %}"><i class="fas fa-list-alt fa-fw me-2"></i>My Appointments</a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Logout</a></li>
-                            </ul>
-                        </div>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle d-flex align-items-center" type="button"
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-user me-2"></i> {{ user.get_full_name|default:user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
+
+                            {% if user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'admmin_home' %}"><i
+                                        class="fas fa-shield-halved fa-fw me-2"></i>Admin Dashboard</a></li>
+
+                            {% elif user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'workers_home' %}"><i
+                                        class="fas fa-briefcase fa-fw me-2"></i>Worker Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'workerprofile' %}"><i
+                                        class="fas fa-user-cog fa-fw me-2"></i>My Profile</a></li>
+
+                            {% else %}
+                            <li><a class="dropdown-item" href="{% url 'userprofile' %}"><i
+                                        class="fas fa-user-circle fa-fw me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'Viewappointment_history' %}"><i
+                                        class="fas fa-list-alt fa-fw me-2"></i>My Appointments</a></li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i
+                                        class="fas fa-sign-out-alt fa-fw me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-dark">Sign In</a>
-                        <a href="{% url 'signup_selection' %}" class="btn btn-primary ms-2">Get Started</a>
+                    <a href="{% url 'login' %}" class="btn btn-dark">Sign In</a>
+                    <a href="{% url 'signup_selection' %}" class="btn btn-primary ms-2">Get Started</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
-    
+
     {% block content %}
     {% endblock %}
 
@@ -147,9 +197,10 @@
             <div class="row g-5">
                 <div class="col-lg-4 col-md-6">
                     <a href="{% url 'index' %}" class="navbar-brand d-inline-block mb-3">
-                         <i class="fa-solid fa-house-chimney-window me-2"></i>ServiceHub
+                        <i class="fa-solid fa-house-chimney-window me-2"></i>ServiceHub
                     </a>
-                    <p class="mb-4">Connecting customers with trusted service professionals for all home service needs.</p>
+                    <p class="mb-4">Connecting customers with trusted service professionals for all home service needs.
+                    </p>
                     <div>
                         <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
@@ -178,12 +229,12 @@
                 </div>
             </div>
 
-            <div class="copyright-bar d-md-flex justify-content-between align-items-center">
+            <div class="copyright-bar">
                 <p class="mb-3 mb-md-0">&copy; {% now "Y" %} ServiceHub. All rights reserved.</p>
             </div>
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+</body>
 
 </html>
