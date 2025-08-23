@@ -493,43 +493,60 @@ from django.db.models import Avg, Count
 # ... your other imports and views
 
 
-# REPLACE your old workers_home view with this one
-class workers_home(LoginRequiredMixin, View):
-    login_url = common_lib.DEFAULT_REDIRECT_PATH["ROOT"]
+# In your views.py
 
+# Make sure these are all imported at the top of your file
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from django.db.models import Avg, Count
+import json
+
+class workers_home(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request):
-        try:
-            # Get the worker instance linked to the logged-in user
-            worker_instance = get_object_or_404(workers, admin=request.user)
+        worker_instance = get_object_or_404(workers, admin=request.user)
+        my_responses = Response.objects.filter(assigned_worker=worker_instance)
+        
+        # Get all of the worker's feedbacks, ordered from oldest to newest
+        my_feedbacks = Feedback.objects.filter(Employ=worker_instance).order_by('Date')
+        
+        # --- Existing stats are fine ---
+        stats = my_feedbacks.aggregate(avg=Avg('Rating'))
+        rating_counts = my_feedbacks.values('Rating').annotate(count=Count('Rating')).order_by('-Rating')
+        ratings_data = {str(i): 0 for i in range(1, 6)}
+        for item in rating_counts: ratings_data[str(item['Rating'])] = item['count']
+        
+        # --- NEW: Calculate the CUMULATIVE average rating trend ---
+        rating_trend_labels = []
+        rating_trend_data = []
+        total_rating_sum = 0
+        review_count = 0
 
-            # Get all jobs (responses) assigned to this worker
-            my_responses = Response.objects.filter(assigned_worker=worker_instance)
+        for feedback in my_feedbacks:
+            review_count += 1
+            total_rating_sum += feedback.Rating
+            current_average = total_rating_sum / review_count
+            
+            rating_trend_labels.append(f"Review #{review_count}")
+            rating_trend_data.append(round(current_average, 2))
+        # --- END OF NEW CODE ---
 
-            # Calculate personalized stats
-            my_completed_jobs = my_responses.filter(status=True).count()
-            my_active_jobs = my_responses.filter(status=False).count()
-
-            # Get feedback stats for this worker
-            my_feedbacks = Feedback.objects.filter(Employ=worker_instance)
-            my_total_reviews = my_feedbacks.count()
-            my_avg_rating_result = my_feedbacks.aggregate(avg=Avg("Rating"))
-            my_avg_rating = my_avg_rating_result["avg"] or 0
-
-            # Get the 3 most recent active jobs to show as a to-do list
-            recent_active_jobs = my_responses.filter(status=False).order_by("-Date")[:3]
-
-            context = {
-                "completed_jobs": my_completed_jobs,
-                "active_jobs": my_active_jobs,
-                "total_reviews": my_total_reviews,
-                "average_rating": my_avg_rating,
-                "recent_jobs": recent_active_jobs,
-            }
-        except workers.DoesNotExist:
-            # Handle case where user is staff but not in worker table
-            context = {}
-
+        context = {
+            'completed_jobs': my_responses.filter(status=True).count(),
+            'active_jobs': my_responses.filter(status=False).count(),
+            'total_reviews': my_feedbacks.count(),
+            'average_rating': stats['avg'] or 0,
+            'recent_jobs': my_responses.filter(status=False).order_by('-Date')[:3],
+            'ratings_chart_labels': json.dumps([f"{star} Star" for star in ratings_data.keys()]),
+            'ratings_chart_data': json.dumps(list(ratings_data.values())),
+            
+            # Pass the new trend data to the template
+            'rating_trend_labels': json.dumps(rating_trend_labels),
+            'rating_trend_data': json.dumps(rating_trend_data),
+        }
         return render(request, "workerpages/Workerhompage.html", context)
+
+    def test_func(self):
+        return self.request.user.is_staff and not self.request.user.is_superuser
 
 
 class contact(LoginRequiredMixin, View):
