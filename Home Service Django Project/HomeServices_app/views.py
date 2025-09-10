@@ -64,9 +64,23 @@ def logout_view(request):
     return redirect("login")
 
 
+# In HomeServices_app/views.py
+
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from django.shortcuts import render, redirect
+from django.views import View
+from .models import users # Assuming 'users' is your custom user profile model
+# from django.db import IntegrityError # You might not need to import this if using the .exists() check
+
 class User_Register(View):
+    # Keep the template name consistent as requested
+    template_name = "user_register.html" 
+    
     def get(self, request):
-        return render(request, "user_register.html")
+        # On GET request, just render the empty form
+        return render(request, self.template_name)
 
     def post(self, request):
         first_name = request.POST.get("firstname")
@@ -76,40 +90,80 @@ class User_Register(View):
         address = request.POST.get("address")
         profile_pics = request.FILES.get("profile_pic")
         gender = request.POST.get("gender")
-        # user_type = request.POST.get('usertype')
         password = request.POST.get("password")
         cpassword = request.POST.get("cpassword")
-        # user_type= 3
-        # Check if passwords match
-        if password == cpassword:
+
+        # Create a dictionary to hold the form data for re-rendering on error
+        # Exclude passwords for security reasons
+        form_data = {
+            'firstname': first_name,
+            'lastname': last_name,
+            'email': email,
+            'contactnumber': contact_number,
+            'address': address,
+            'gender': gender,
+            # 'profile_pic' is a FileField, generally not repopulated this way for security
+        }
+
+        # --- VALIDATION CHECKS ---
+
+        # 1. Check if passwords match
+        if password != cpassword:
+            messages.error(request, "Passwords do not match!")
+            return render(request, self.template_name, {'request': request, 'form_data': form_data}) # Pass request.POST for pre-filling
+
+        # 2. Basic password strength (optional but recommended)
+        if len(password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
+            return render(request, self.template_name, {'request': request, 'form_data': form_data})
+
+        # 3. Check if a user with this email (username) already exists
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "A user with this email address already exists. Please use a different email or login.")
+            return render(request, self.template_name, {'request': request, 'form_data': form_data})
+
+        try:
+            # Hash the password before creating the User object
+            hashed_password = make_password(password)
+
+            # Create the Django auth.User
             new_user = User.objects.create(
-                username=email,
+                username=email, # Using email as username (must be unique)
                 email=email,
-                password=make_password(password),
+                password=hashed_password, # Store the hashed password
                 first_name=first_name,
                 last_name=last_name,
                 is_active=True,
                 is_staff=False,
+                is_superuser=False
             )
+            # No need to call new_user.save() after create(), it's automatically saved.
 
+            # Create the custom users profile linked to the new_user
             users.objects.create(
                 admin=new_user,
                 Address=address,
                 gender=gender,
                 contact_number=contact_number,
-                profile_pic=profile_pics,
-            )
-            return render(request, "login.html", {"msg": "Addd succsfully!"})
-
-        else:
-            return render(
-                request, "user_register.html", {"msg": "Passwords do not match!"}
+                profile_pic=profile_pics, # This will be None if no file was uploaded
             )
 
-        return render(request, "user_register.html", {"msg": "Something went wrong"})
+            messages.success(request, "Registration successful! You can now log in.")
+            return redirect('login') # Redirect to the login page (adjust 'user_login' to your actual login URL name)
 
+        except Exception as e:
+            # Catch any other potential errors during user or profile creation
+            # This is a generic catch-all. More specific error handling might be better.
+            messages.error(request, f"An unexpected error occurred during registration. Please try again. Error: {e}")
+            
+            # If the auth.User was created but profile failed, try to delete the auth.User
+            # to prevent orphaned records and potential future IntegrityErrors.
+            if 'new_user' in locals() and new_user.pk:
+                new_user.delete()
+            
+            print(f"Error during user registration: {e}") # Log the error for debugging
+            return render(request, self.template_name, {'request': request, 'form_data': form_data})
 
-# HomeServices_app/views.py
 
 # ... your other imports
 from django.contrib.auth import logout
@@ -181,72 +235,122 @@ class DeleteProfileView(LoginRequiredMixin, View):
 # In your views.py file
 
 
+# In HomeServices_app/views.py
+
+from django.contrib import messages
+from django.contrib.auth.models import User
+# No need to import make_password if using create_user
+# from django.contrib.auth.hashers import make_password 
+from django.shortcuts import render, redirect
+from django.views import View
+from .models import ServiceCatogarys, workers # Assuming 'workers' is your custom worker profile model
+
 class Worker_Register(View):
+    template_name = "workers_registration.html"
+
     def get(self, request):
         designations = ServiceCatogarys.objects.all()
         context = {"designations": designations}
-        return render(request, "workers_registration.html", context)
+        return render(request, self.template_name, context)
 
     def post(self, request):
-        firstname = request.POST.get("firstname")
-        lastname = request.POST.get("lastname")
+        # Collect all form data
+        first_name = request.POST.get("firstname")
+        last_name = request.POST.get("lastname")
         email = request.POST.get("email")
-        # ... get other form fields ...
+        contact_number = request.POST.get("contactnumber")
+        dob = request.POST.get("dob")
+        address = request.POST.get("address")
+        city = request.POST.get("city")
+        gender = request.POST.get("gender")
+        designation_id = request.POST.get("designation") # Get the ID of the selected designation
+        profile_pics = request.FILES.get("profile_pic")
         password = request.POST.get("password")
         cpassword = request.POST.get("cpassword")
 
-        # --- THIS IS THE FIX ---
-        # 1. Check if a user with this email already exists
-        if User.objects.filter(username=email).exists():
-            # If the user exists, show an error message and re-render the form
-            messages.error(
-                request, "An account with this email address already exists."
-            )
-            designations = ServiceCatogarys.objects.all()
-            return render(
-                request, "workers_registration.html", {"designations": designations}
-            )
+        # Get all designations again for re-rendering the form on error
+        designations = ServiceCatogarys.objects.all()
 
-        # 2. Check if passwords match
+        # Create a context dictionary to hold form data for re-rendering on error
+        # Exclude passwords and file input for security
+        context = {
+            "designations": designations,
+            "form_data": {
+                "firstname": first_name,
+                "lastname": last_name,
+                "email": email,
+                "contactnumber": contact_number,
+                "dob": dob,
+                "address": address,
+                "city": city,
+                "gender": gender,
+                "designation": designation_id, # Keep the selected designation ID
+            },
+        }
+
+        # --- VALIDATION CHECKS ---
+
+        # 1. Check if passwords match
         if password != cpassword:
             messages.error(request, "Passwords do not match!")
-            designations = ServiceCatogarys.objects.all()
-            return render(
-                request, "workers_registration.html", {"designations": designations}
+            return render(request, self.template_name, context)
+
+        # 2. Basic password strength (optional but recommended)
+        if len(password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
+            return render(request, self.template_name, context)
+
+        # 3. Check if a user with this email (username) already exists
+        if User.objects.filter(username=email).exists():
+            messages.error(request, "An account with this email address already exists. Please use a different email or login.")
+            return render(request, self.template_name, context)
+            
+        # 4. Validate designation exists
+        try:
+            selected_designation = ServiceCatogarys.objects.get(id=designation_id)
+        except ServiceCatogarys.DoesNotExist:
+            messages.error(request, "Invalid service designation selected.")
+            return render(request, self.template_name, context)
+
+        try:
+            # Create the Django auth.User using create_user for proper password hashing
+            # Note: is_staff=True is usually for admin/staff access. Ensure this is intentional for workers.
+            new_user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password, # create_user hashes this automatically
+                first_name=first_name,
+                last_name=last_name,
+                is_active=True,
+                is_staff=True,  # Set to True for workers if they access a staff interface
+                is_superuser=False
             )
 
-        # --- END OF FIX ---
+            # Create the worker profile linked to the new_user
+            workers.objects.create(
+                admin=new_user,
+                contact_number=contact_number,
+                dob=dob,
+                Address=address,
+                city=city,
+                gender=gender,
+                designation=selected_designation, # Pass the actual object, not the ID
+                profile_pic=profile_pics, # This will be None if no file was uploaded
+            )
 
-        # If checks pass, create the user
-        new_user = User.objects.create_user(  # Using create_user is safer
-            username=email,
-            email=email,
-            password=password,
-            first_name=firstname,
-            last_name=lastname,
-            is_active=True,
-            is_staff=True,
-        )
+            messages.success(request, "Worker registration successful! You can now log in.")
+            return redirect("login") # Redirect to the general login page (or worker-specific login)
 
-        # Create the worker profile
-        workers.objects.create(
-            admin=new_user,
-            contact_number=request.POST.get("contactnumber"),
-            dob=request.POST.get("dob"),
-            Address=request.POST.get("address"),
-            city=request.POST.get("city"),
-            gender=request.POST.get("gender"),
-            designation=request.POST.get("designation"),
-            profile_pic=request.FILES.get("profile_pic"),
-        )
-
-        messages.success(request, "Registration successful! Please log in.")
-        return redirect("login")
-
-
-# HomeServices_app/views.py
-
-# ... your other imports
+        except Exception as e:
+            # Catch any other unexpected errors during user or profile creation
+            messages.error(request, f"An unexpected error occurred during registration. Please try again. Error: {e}")
+            
+            # If the auth.User was created but profile failed, try to delete it
+            if 'new_user' in locals() and new_user.pk:
+                new_user.delete()
+            
+            print(f"Error during worker registration: {e}") # Log the error for debugging
+            return render(request, self.template_name, context)
 
 
 class EditWorkerProfileView(LoginRequiredMixin, View):

@@ -17,7 +17,8 @@
         border-radius: 0.75rem;
         padding: 2.5rem;
         width: 100%;
-        max-width: 800px; /* Wider for a two-column form */
+        max-width: 800px;
+        /* Wider for a two-column form */
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
 
@@ -25,24 +26,25 @@
         text-align: center;
         margin-bottom: 2rem;
     }
-    
+
     .register-header h2 {
         color: var(--text-primary);
         font-weight: 700;
     }
-    
+
     .register-header p {
         color: var(--text-secondary);
     }
-    
+
     /* Form element styling */
     .form-label {
         color: var(--text-secondary);
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
     }
-    
-    .form-control, .form-select {
+
+    .form-control,
+    .form-select {
         background-color: var(--dark-bg-primary);
         border: 1px solid var(--border-color);
         color: var(--text-primary);
@@ -50,13 +52,14 @@
         border-radius: 0.5rem;
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
         background-color: var(--dark-bg-primary);
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         color: var(--text-primary);
     }
-    
+
     .form-select {
         /* For dark theme dropdown arrow */
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
@@ -80,7 +83,8 @@
 
     /* Message styling */
     .form-message {
-        color: #22c55e; /* Green for success */
+        color: #22c55e;
+        /* Green for success */
         background-color: rgba(34, 197, 94, 0.1);
         border: 1px solid #22c55e;
         font-weight: 500;
@@ -98,8 +102,14 @@
             <p>Join ServiceHub to book trusted professionals for your home.</p>
         </div>
 
-        {% if msg %}
-            <div class="form-message">{{ msg }}</div>
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <form action="" method="post" enctype="multipart/form-data">
@@ -122,12 +132,14 @@
 
             <div class="mb-3">
                 <label for="contactnumber" class="form-label">Contact Number</label>
-                <input type="tel" class="form-control" id="contactnumber" name="contactnumber" placeholder="+880 1234 567890" required>
+                <input type="tel" class="form-control" id="contactnumber" name="contactnumber"
+                    placeholder="+880 1234 567890" required>
             </div>
 
             <div class="mb-3">
                 <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" name="address" rows="3" placeholder="123 Main St, Dhaka" required></textarea>
+                <textarea class="form-control" id="address" name="address" rows="3" placeholder="123 Main St, Dhaka"
+                    required></textarea>
             </div>
 
             <div class="row">
@@ -149,11 +161,13 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••"
+                        required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="cpassword" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="cpassword" name="cpassword" placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="cpassword" name="cpassword" placeholder="••••••••"
+                        required>
                 </div>
             </div>
 

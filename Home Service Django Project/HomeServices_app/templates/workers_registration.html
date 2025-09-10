@@ -97,8 +97,14 @@
             <p>Join our network of trusted professionals and grow your business with ServiceHub.</p>
         </div>
 
-        {% if msg %}
-        <div class="form-message">{{ msg }}</div>
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <form action="" method="post" enctype="multipart/form-data">
