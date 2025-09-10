@@ -692,10 +692,14 @@ class ManageState(LoginRequiredMixin, View):
     template_name = "adminpages/ManageState.html"
 
     def get(self, request):
-        state_records = State.objects.select_related("country").all()
-        form = stateform()
-        context = {"State_record": state_records, "form": form}
-        return render(request, self.template_name, context)
+        form = stateform() # Create an instance of the form
+        states = State.objects.select_related('country').all().order_by('country__name', 'name')
+        context = {
+            'form': form, # Pass the form to the template
+            'State_record': states,
+            'messages': messages.get_messages(request),
+        }
+        return render(request, "adminpages/ManageState.html", context)
 
     def post(self, request):
         form = stateform(request.POST)

@@ -30,12 +30,17 @@ class workers(models.Model):
 
 
 class Country(models.Model):
-    name = models.CharField(max_length=150)
-
+    name = models.CharField(max_length=150, unique=True)
+    
+    def __str__(self):
+        return self.name 
 
 class State(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
+    
+    def __str__(self):
+        return f"{self.name} ({self.country.name})" 
 
 
 class City(models.Model):
