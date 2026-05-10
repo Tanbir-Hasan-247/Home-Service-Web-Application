@@ -1,0 +1,143 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}Available Jobs{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Available Jobs</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .job-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .job-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .job-card-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .job-card-body {
+        padding: 1.5rem;
+        flex-grow: 1; /* Ensures the body grows to fill space */
+    }
+    .job-card-footer {
+        padding: 1rem 1.5rem;
+        background-color: rgba(0,0,0,0.2);
+        border-top: 1px solid var(--border-color);
+    }
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+    }
+    .info-item i {
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+    }
+    .info-item span {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    .form-control-dark {
+        background-color: var(--dark-bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    .form-control-dark:focus {
+        background-color: var(--dark-bg-secondary);
+        border-color: var(--primary-color);
+        color: var(--text-primary);
+        box-shadow: none;
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Available Job Requests</h1>
+    <div class="col-12 col-md-5 col-lg-4">
+        <div class="input-group">
+            <span class="input-group-text" style="background-color: var(--dark-bg-secondary); border-color: var(--border-color);"><i class="fas fa-search text-secondary"></i></span>
+            <input type="text" id="jobSearch" class="form-control form-control-dark" placeholder="Search by service, city, or description...">
+        </div>
+    </div>
+</div>
+<p class="text-secondary mb-4">These are new service requests matching your skills. Accept a job to add it to your active tasks.</p>
+
+
+<div class="row g-4" id="jobList">
+    {% for record in request_records %}
+        {% if not record.status %}
+        <div class="col-md-6 col-lg-4 job-item" data-search-terms="{{ record.service.Name }} {{ record.city.name }} {{ record.Problem_Description|lower }}">
+            <div class="card job-card h-100">
+                <div class="job-card-header">
+                    <h5 class="mb-0 text-white">{{ record.service.Name }}</h5>
+                    <small class="text-secondary">Posted on {{ record.dateofrequest|date:"F d, Y" }}</small>
+                </div>
+                <div class="job-card-body">
+                    <div class="info-item">
+                        <i class="fas fa-user-circle"></i>
+                        <div>Customer: <span>{{ record.user.admin.first_name }}</span></div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>Location: <span>{{ record.city.name }}</span></div>
+                    </div>
+                    <hr style="border-color: var(--border-color);">
+                    <p class="text-secondary mb-0"><strong>Problem:</strong> {{ record.Problem_Description|truncatechars:120 }}</p>
+                </div>
+                <div class="job-card-footer text-center">
+                    {% if record.status %}
+                        <button class="btn btn-secondary w-100" disabled><i class="fas fa-check-circle me-2"></i>Job Taken</button>
+                    {% else %}
+                        <a href="{% url 'acceptrequest' action='accept' id=record.id %}" class="btn btn-primary w-100"><i class="fas fa-plus-circle me-2"></i>Accept Job</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% empty %}
+        <div class="col-12">
+            <div class="card p-5 text-center">
+                <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+                <h4>No Available Jobs Right Now</h4>
+                <p class="text-secondary">We'll notify you when new service requests matching your profile become available.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('jobSearch');
+    const jobList = document.getElementById('jobList');
+    const jobItems = jobList.querySelectorAll('.job-item');
+
+    searchInput.addEventListener('keyup', function() {
+        const searchTerm = searchInput.value.toLowerCase();
+
+        jobItems.forEach(function(item) {
+            const itemText = item.getAttribute('data-search-terms').toLowerCase();
+            if (itemText.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

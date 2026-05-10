@@ -1,0 +1,120 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}Colleagues{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Colleagues</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .colleague-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        text-align: center;
+        padding-top: 60px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .colleague-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        border-color: var(--primary-color);
+    }
+    .colleague-card .card-banner {
+        height: 90px;
+        background: linear-gradient(to right, var(--primary-color), #06b6d4);
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+    .colleague-card .card-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--dark-bg-secondary);
+        position: relative;
+        z-index: 2;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* CORRECTED: Only one definition for the initials avatar */
+    .avatar-initials {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid var(--dark-bg-secondary);
+        position: relative;
+        z-index: 2;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .avatar-initials span {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Our Professional Network</h1>
+    </div>
+<p class="text-secondary mb-4">View other verified professionals on the ServiceHub platform.</p>
+
+
+<div class="row g-4" id="colleagueList">
+    {% for worker in workers_records %}
+    <div class="col-md-6 col-lg-4 col-xl-3 colleague-item" data-search-terms="{{ worker.admin.get_full_name|lower }} {{ worker.designation|lower }} {{ worker.city|lower }}">
+        <div class="card colleague-card h-100">
+            <div class="card-banner"></div>
+            
+            {% if worker.profile_pic %}
+                <img src="{{ worker.profile_pic.url }}" class="card-avatar" alt="Profile Picture of {{ worker.admin.get_full_name }}">
+            {% else %}
+                <div class="avatar-initials">
+                    <span>{{ worker.admin.first_name|first|upper }}{{ worker.admin.last_name|first|upper }}</span>
+                </div>
+            {% endif %}
+            
+            <div class="card-body">
+                <div>
+                    <h5 class="text-white mt-2 mb-1">{{ worker.admin.get_full_name }}</h5>
+                    <p class="text-primary fw-bold">{{ worker.designation }}</p>
+                    <p class="text-secondary small mb-3"><i class="fas fa-map-marker-alt me-2"></i>{{ worker.city }}</p>
+                    
+                    {% if worker.avalability_status %}
+                        <span class="badge fs-6 bg-success-subtle text-success-emphasis rounded-pill"><i class="fas fa-check-circle me-1"></i>Available</span>
+                    {% else %}
+                        <span class="badge fs-6 bg-secondary-subtle text-secondary-emphasis rounded-pill">Unavailable</span>
+                    {% endif %}
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'colleague_profile' pk=worker.id %}" class="btn btn-sm btn-outline-primary w-100">View Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card p-5 text-center">
+            <i class="fas fa-users-slash fa-3x text-secondary mb-3"></i>
+            <h4>No Colleagues Found</h4>
+            <p class="text-secondary">There are no other workers to display at this time.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* Page-specific styles for the login form container */
+    .login-page-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Adjust padding to account for header/footer */
+        padding: 5rem 0;
+    }
+
+    .login-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .login-header .logo {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .login-header h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .form-control {
+        background-color: var(--dark-bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .form-control:focus {
+        background-color: var(--dark-bg-primary);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .text-link a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .text-link a:hover {
+        text-decoration: underline;
+    }
+
+    .error-message {
+        color: #ef4444; /* danger-color */
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+    }
+</style>
+
+<div class="container login-page-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo"><i class="fa-solid fa-house-chimney-window"></i></div>
+            <h2>Sign In to ServiceHub</h2>
+        </div>
+
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            {% if error_msg %}
+                <div class="error-message">{{ error_msg }}</div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label for="uname" class="form-label">Username</label>
+                <input type="text" class="form-control" placeholder="Enter your username" name="uname" id="uname" required>
+            </div>
+
+            <div class="mb-3">
+                 <div class="d-flex justify-content-between">
+                    <label for="psw" class="form-label">Password</label>
+                    <a href="{% url 'password-reset' %}" class="text-small text-link">Forgot Password?</a>
+                 </div>
+                <input type="password" class="form-control" placeholder="Enter your password" name="psw" id="psw" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3 mb-4">Sign In</button>
+
+            <div class="text-center text-small">
+                <p>
+                    Don't have an account? 
+                    <a href="{% url 'signup_selection' %}" class="text-link">Sign Up</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="registerTypeModal" tabindex="-1" aria-labelledby="registerTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color);">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="registerTypeModalLabel" style="color: var(--text-primary);">Register As</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-around py-4">
+                <a href="{% url 'Worker_Register' %}" class="btn btn-outline-light">Worker</a>
+                <a href="{% url 'user_registration' %}" class="btn btn-outline-light">User</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}{{ data.admin.get_full_name }}'s Profile{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'ViewColleagues' %}">Colleagues</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Profile</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* ... your existing styles are fine ... */
+    .profile-banner { height: 200px; background: linear-gradient(to right, #06b6d4, #3b82f6); border-radius: .75rem; }
+    .profile-content { position: relative; margin-top: -80px; }
+    .profile-card { background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); border-radius: .75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .profile-avatar { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin-top: -75px; border: 5px solid var(--dark-bg-secondary); }
+    
+    /* ADDED: Style for the default avatar with initials */
+    .avatar-initials {
+        width: 150px; height: 150px; border-radius: 50%;
+        margin-top: -75px; border: 5px solid var(--dark-bg-secondary);
+        background-color: var(--primary-color);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-initials span { font-size: 4rem; font-weight: 700; color: var(--text-primary); }
+
+    .info-list-item { display: flex; padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); align-items: flex-start; }
+    .info-list-item:last-child { border-bottom: none; }
+    .info-list-item .icon { color: var(--primary-color); font-size: 1.1rem; width: 40px; text-align: center; margin-top: 4px; }
+    .info-list-item .label { color: var(--text-secondary); font-size: 0.9rem; }
+    .info-list-item .value { color: var(--text-primary); font-weight: 500; font-size: 1rem; }
+</style>
+
+<div class="profile-banner"></div>
+
+<div class="container-fluid profile-content">
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-10">
+            <div class="profile-card p-4">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-3 text-center">
+                        
+                        {% if data.profile_pic %}
+                            <img src="{{ data.profile_pic.url }}" alt="Avatar" class="profile-avatar mx-auto">
+                        {% else %}
+                            <div class="avatar-initials mx-auto">
+                                <span>{{ data.admin.first_name|first|upper }}{{ data.admin.last_name|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                        </div>
+                    <div class="col-md-9">
+                        <h2 class="text-white display-6">{{ data.admin.get_full_name }}</h2>
+                        <p class="text-primary fw-bold fs-5">{{ data.designation }}</p>
+                        <div class="d-flex gap-3 mt-2">
+                             {% if data.acc_activation %}<span class="badge rounded-pill fs-6 bg-success-subtle text-success-emphasis p-2"><i class="fas fa-check-circle me-1"></i>Verified</span>{% endif %}
+                            {% if data.avalability_status %}<span class="badge rounded-pill fs-6 bg-info-subtle text-info-emphasis p-2"><i class="fas fa-clock me-1"></i>Available for Work</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4" style="border-color: var(--border-color) !important;">
+                <div class="info-list">
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-envelope"></i></div><div class="ms-3"><div class="label">Email</div><div class="value">{{ data.admin.email }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-phone-alt"></i></div><div class="ms-3"><div class="label">Phone</div><div class="value">{{ data.contact_number }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-map-marker-alt"></i></div><div class="ms-3"><div class="label">Location</div><div class="value">{{ data.city }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-calendar-check"></i></div><div class="ms-3"><div class="label">Member Since</div><div class="value">{{ data.admin.date_joined|date:"F Y" }}</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

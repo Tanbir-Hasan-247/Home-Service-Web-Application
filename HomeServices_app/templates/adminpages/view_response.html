@@ -1,0 +1,121 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Assigned Jobs{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Assigned Jobs</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .table td, .table th { vertical-align: middle; padding: 0.9rem; }
+    /* Dark theme styles for DataTables controls */
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate { color: var(--text-secondary) !important; }
+    .dataTables_wrapper .dataTables_length select, .dataTables_wrapper .dataTables_filter input { background-color: var(--dark-bg-primary) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-secondary) !important; border: 1px solid var(--border-color) !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: var(--primary-color) !important; color: var(--text-primary) !important; border-color: var(--primary-color) !important; }
+    /* Filter button styling */
+    .filter-btn-group .btn { border-color: var(--border-color); color: var(--text-secondary); background-color: var(--dark-bg-primary); }
+    .filter-btn-group .btn.active { background-color: var(--primary-color); color: var(--text-primary); border-color: var(--primary-color); }
+
+    /* ADDED: Style for default avatar with initials */
+    .avatar-initials {
+        width: 45px; height: 45px; border-radius: 50%;
+        background-color: var(--primary-color); color: var(--text-primary);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 600; font-size: 0.9rem;
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Assigned Job Status</h1>
+    <div class="btn-group filter-btn-group" role="group" id="statusFilter">
+        <button type="button" class="btn btn-sm btn-outline-secondary active" data-status="">All</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-status="In Progress">In Progress</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-status="Completed">Completed</button>
+    </div>
+</div>
+<p class="text-secondary mb-4">Monitor all jobs that have been assigned to a service provider.</p>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="jobsTable" class="table table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Service Request</th>
+                        <th>Customer</th>
+                        <th>Assigned To</th>
+                        <th>Date Assigned</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in Response_records %}
+                    <tr>
+                        <td>
+                            <p class="fw-bold text-white mb-1">{{ record.requests.service.Name }}</p>
+                            <small class="text-secondary d-block" style="max-width: 250px;">{{ record.requests.Problem_Description|truncatechars:50 }}</small>
+                        </td>
+                        <td>
+                             <div class="d-flex align-items-center">
+                                {% if record.requests.user.profile_pic %}
+                                    <img src="{{ record.requests.user.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="">
+                                {% else %}
+                                    <div class="avatar-initials"><span>{{ record.requests.user.admin.first_name|first|upper }}{{ record.requests.user.admin.last_name|first|upper }}</span></div>
+                                {% endif %}
+                                <div class="ms-3">
+                                    <p class="fw-bold mb-1 text-white">{{ record.requests.user.admin.get_full_name }}</p>
+                                    <p class="text-muted mb-0">{{ record.requests.user.admin.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                             <div class="d-flex align-items-center">
+                                {% if record.assigned_worker.profile_pic %}
+                                    <img src="{{ record.assigned_worker.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;" alt="">
+                                {% else %}
+                                     <div class="avatar-initials"><span>{{ record.assigned_worker.admin.first_name|first|upper }}{{ record.assigned_worker.admin.last_name|first|upper }}</span></div>
+                                {% endif %}
+                                <div class="ms-3">
+                                    <p class="fw-bold mb-1 text-white">{{ record.assigned_worker.admin.get_full_name }}</p>
+                                    <p class="text-muted mb-0">{{ record.assigned_worker.designation }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ record.Date|date:"d M, Y" }}</td>
+                        <td>
+                            {% if record.status %}
+                                <span class="badge rounded-pill bg-success-subtle text-success-emphasis p-2">Completed</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-info-subtle text-info-emphasis p-2">In Progress</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var table = $('#jobsTable').DataTable({
+            "order": [[ 3, "desc" ]]
+        });
+
+        $('#statusFilter .btn').on('click', function() {
+            $('#statusFilter .btn').removeClass('active');
+            $(this).addClass('active');
+            var status = $(this).data('status');
+            table.column(4).search(status ? '^' + status + '$' : '', true, false).draw();
+        });
+    });
+</script>
+
+{% endblock %}

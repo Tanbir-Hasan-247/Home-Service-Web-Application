@@ -1,0 +1,84 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Manage Services{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Manage Services</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .service-manage-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .service-manage-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        border-color: var(--primary-color);
+    }
+    .service-manage-card .img-container {
+        height: 200px;
+        overflow: hidden;
+    }
+    .service-manage-card .card-img-top {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    .service-manage-card:hover .card-img-top {
+        transform: scale(1.1);
+    }
+    .service-manage-card .card-body {
+        flex-grow: 1; /* Ensures card bodies are same height in a row */
+    }
+    .service-manage-card .card-footer {
+        background-color: rgba(0,0,0,0.2);
+        border-top: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Manage Service Categories</h1>
+    <a href="{% url 'AddServices' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add New Service</a>
+</div>
+<p class="text-secondary mb-4">Add, edit, or remove the service categories offered on your platform.</p>
+
+
+<div class="row g-4">
+    {% for service in services %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card service-manage-card h-100">
+            <div class="img-container">
+                <img src="{{ service.img.url }}" class="card-img-top" alt="{{ service.Name }}">
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-white">{{ service.Name }}</h5>
+                <p class="card-text text-secondary flex-grow-1">{{ service.Description|truncatechars:120 }}</p>
+            </div>
+            <div class="card-footer d-flex justify-content-end gap-2">
+                <a href="{% url 'EditServices' id=service.id %}" class="btn btn-sm btn-outline-info"><i class="fas fa-edit me-1"></i> Edit</a>
+                <a href="{% url 'DeleteServices' id=service.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this service?');"><i class="fas fa-trash me-1"></i> Delete</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card p-5 text-center">
+            <i class="fas fa-concierge-bell fa-3x text-secondary mb-3"></i>
+            <h4>No Services Found</h4>
+            <p class="text-secondary">Click the button above to add your first service category.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

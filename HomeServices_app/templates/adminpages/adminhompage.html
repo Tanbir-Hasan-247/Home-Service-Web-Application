@@ -1,0 +1,199 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card a {
+        text-decoration: none;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-icon {
+        font-size: 1.75rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Dashboard Overview</h1>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'ViewRequests' %}" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="stat-icon bg-primary bg-opacity-25 text-primary me-4"><i class="fas fa-clipboard-list"></i>
+                </div>
+                <div>
+                    <div class="stat-value">{{ total_requests }}</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'viewresponse' %}" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="stat-icon bg-success bg-opacity-25 text-success me-4"><i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <div class="stat-value">{{ completed_requests }}</div>
+                    <div class="stat-label">Jobs Completed</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'viewresponse' %}" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="stat-icon bg-warning bg-opacity-25 text-warning me-4"><i class="fas fa-clock"></i></div>
+                <div>
+                    <div class="stat-value">{{ pending_requests }}</div>
+                    <div class="stat-label">Jobs Pending</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a href="{% url 'manageusers' %}" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="stat-icon bg-info bg-opacity-25 text-info me-4"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="stat-value">{{ total_users }}</div>
+                    <div class="stat-label">Total Customers</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">Platform Growth (New Users)</h5>
+            </div>
+            <div class="card-body"><canvas id="growthChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0">Service Bookings (Monthly)</h5>
+            </div>
+            <div class="card-body"><canvas id="bookingsChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Service Requests</h5>
+                <a href="{% url 'ViewRequests' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <tbody>
+                            {% for req in latest_requests %}
+                            <tr>
+                                <td class="ps-4">{{ req.service.Name }}</td>
+                                <td>{{ req.user.admin.get_full_name }}</td>
+                                <td class="text-end pe-4"><span class="badge rounded-pill bg-primary bg-opacity-25 text-primary-emphasis">{{ req.dateofrequest|timesince }} ago</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td class="text-center p-4">No recent requests.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // --- THIS IS THE FIX: Changed getContext('d') to getContext('2d') ---
+        const growthCtx = document.getElementById('growthChart').getContext('2d');
+
+        let growthGradient = growthCtx.createLinearGradient(0, 0, 0, 400);
+        growthGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        growthGradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+        new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ chart_labels|safe }}'),
+                datasets: [{
+                    label: 'New Users',
+                    data: JSON.parse('{{ chart_data|safe }}'),
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: growthGradient,
+                    tension: 0.4,
+                    fill: true,
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'var(--text-secondary)', stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: 'var(--text-secondary)' } } }, plugins: { legend: { display: false } } }
+        });
+
+        // --- THIS IS THE FIX: Changed getContext('d') to getContext('2d') ---
+        const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+        new Chart(bookingsCtx, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ bookings_chart_labels|safe }}'),
+                datasets: [{
+                    label: 'Bookings',
+                    data: JSON.parse('{{ bookings_chart_data|safe }}'),
+                    backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'var(--text-secondary)', stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: 'var(--text-secondary)' } } }, plugins: { legend: { display: false } } }
+        });
+    });
+</script>
+{% endblock %}

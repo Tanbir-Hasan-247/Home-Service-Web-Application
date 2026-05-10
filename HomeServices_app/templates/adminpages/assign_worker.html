@@ -1,0 +1,160 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Assign Worker{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'ViewRequests' %}">Service Requests</a></li>
+<li class="breadcrumb-item active" aria-current="page">Assign Worker</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .details-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+    }
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    .detail-item i {
+        color: var(--text-secondary);
+        margin-top: 5px;
+        width: 20px;
+        text-align: center;
+    }
+    .detail-item .label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .detail-item .value {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    .worker-select-label {
+        display: block;
+        position: relative;
+        cursor: pointer;
+    }
+    .worker-select-card {
+        background-color: var(--dark-bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: .75rem;
+        padding: 1rem;
+        transition: all 0.2s ease;
+    }
+    .worker-select-label:hover .worker-select-card {
+        border-color: var(--primary-color);
+    }
+    .worker-select-label input[type="radio"] {
+        display: none;
+    }
+    .worker-select-label input[type="radio"]:checked+.worker-select-card {
+        border-color: var(--primary-color);
+        background-color: rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 2px var(--primary-color);
+    }
+
+    /* --- ADDED THESE MISSING STYLES --- */
+    .card-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 1rem;
+    }
+    .avatar-initials {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 1rem;
+    }
+    /* --- END OF ADDED STYLES --- */
+
+</style>
+
+<div class="mb-4">
+    <h1 class="page-title">Assign Worker to Request</h1>
+    <p class="text-secondary">Review the request details below and assign an available provider from the list.</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="details-card h-100">
+                <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0">Request Details</h5>
+                </div>
+                <div class="card-body px-4">
+                    <div class="detail-item"><i class="fas fa-concierge-bell"></i><div><div class="label">Service Requested</div><div class="value">{{ req.service.Name }}</div></div></div>
+                    <div class="detail-item"><i class="fas fa-user"></i><div><div class="label">Customer</div><div class="value">{{ req.user.admin.get_full_name }}</div></div></div>
+                    <div class="detail-item"><i class="fas fa-phone-alt"></i><div><div class="label">Customer Contact</div><div class="value">{{ req.contact }}</div></div></div>
+                    <div class="detail-item"><i class="fas fa-map-marker-alt"></i><div><div class="label">Address</div><div class="value">{{ req.House_No }}, {{ req.Address }}, {{ req.city.name }} - {{ req.pin }}</div></div></div>
+                    <div class="detail-item"><i class="fas fa-comment-alt"></i><div><div class="label">Problem Description</div><div class="value fst-italic">"{{ req.Problem_Description }}"</div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
+                    <h5 class="mb-0">Select an Available Provider</h5>
+                    <p class="text-secondary small">Only verified workers with the correct designation are shown.</p>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        {% for worker in workers_records %}
+                        <label class="worker-select-label">
+                            <input type="radio" name="assigned_worker" value="{{ worker.id }}" required>
+                            <div class="worker-select-card">
+                                <div class="d-flex align-items-center">
+                                    {% if worker.profile_pic %}
+                                        <img src="{{ worker.profile_pic.url }}" class="card-avatar" alt="Profile Picture of {{ worker.admin.get_full_name }}">
+                                    {% else %}
+                                        <div class="avatar-initials">
+                                            <span>{{ worker.admin.first_name|first|upper }}{{ worker.admin.last_name|first|upper }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="text-white mb-0">{{ worker.admin.get_full_name }}</h6>
+                                        <small class="text-secondary">{{ worker.designation }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        {% empty %}
+                        <div class="alert alert-warning text-dark" role="alert">
+                            <strong>No available workers found!</strong> There are no verified workers with the designation '{{ req.service.Name }}'.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 p-4">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg py-3" {% if not workers_records %}disabled{% endif %}>
+                            <i class="fas fa-check-circle me-2"></i> Confirm & Assign Worker
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

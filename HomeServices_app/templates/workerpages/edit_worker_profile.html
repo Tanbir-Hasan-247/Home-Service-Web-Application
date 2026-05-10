@@ -1,0 +1,47 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'workerprofile' %}">My Profile</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Edit</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .form-control-dark {
+        background-color: var(--dark-bg-primary); color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    .form-control-dark:focus {
+        background-color: var(--dark-bg-primary); color: var(--text-primary);
+        border-color: var(--primary-color); box-shadow: none;
+    }
+</style>
+<div class="card">
+    <div class="card-header bg-transparent border-bottom-0 pt-4 px-4">
+        <h2 class="page-title"><i class="fas fa-edit me-2"></i>Edit Your Profile</h2>
+    </div>
+    <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">First Name</label><input type="text" class="form-control form-control-dark" name="first_name" value="{{ data.admin.first_name }}"></div>
+                <div class="col-md-6"><label class="form-label">Last Name</label><input type="text" class="form-control form-control-dark" name="last_name" value="{{ data.admin.last_name }}"></div>
+                <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control form-control-dark" value="{{ data.admin.email }}" disabled></div>
+                <div class="col-md-6"><label class="form-label">Contact Number</label><input type="tel" class="form-control form-control-dark" name="contact_number" value="{{ data.contact_number }}"></div>
+                <div class="col-md-6"><label class="form-label">Date of Birth</label><input type="date" class="form-control form-control-dark" name="dob" value="{{ data.dob|date:'Y-m-d' }}"></div>
+                <div class="col-md-6"><label class="form-label">Gender</label><input type="text" class="form-control form-control-dark" name="gender" value="{{ data.gender }}"></div>
+                <div class="col-md-6"><label class="form-label">City</label><input type="text" class="form-control form-control-dark" name="city" value="{{ data.city }}"></div>
+                <div class="col-md-6"><label class="form-label">Update Profile Picture</label><input class="form-control form-control-dark" type="file" name="profile_pic"></div>
+                <div class="col-12"><label class="form-label">Address</label><textarea class="form-control form-control-dark" name="Address" rows="3">{{ data.Address }}</textarea></div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{% url 'workerprofile' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

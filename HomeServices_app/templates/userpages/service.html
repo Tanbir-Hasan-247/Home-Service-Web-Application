@@ -1,0 +1,213 @@
+{% extends "userpages/user_header_footer.html" %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    .page-header-services {
+        padding: 8rem 0;
+        background: linear-gradient(rgba(17, 24, 39, 0.85), rgba(17, 24, 39, 0.85)), 
+                    url('https://images.unsplash.com/photo-1542744095-291d1f67b221?auto=format&fit=crop&w=1470&q=80');
+        background-size: cover;
+        background-position: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .page-header-services h1 {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .search-bar-wrapper {
+        max-width: 600px;
+        position: relative;
+    }
+
+    .search-bar-wrapper .form-control {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 1rem 1.5rem;
+        border-radius: 999px;
+        padding-left: 3.5rem;
+    }
+
+    .search-bar-wrapper .search-icon {
+        position: absolute;
+        left: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    .service-card-fancy {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-decoration: none;
+        display: block;
+    }
+
+    .service-card-fancy:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border-color: var(--primary-color);
+    }
+
+    .service-card-fancy .img-container {
+        height: 220px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-card-fancy .card-img-top {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .service-card-fancy:hover .card-img-top {
+        transform: scale(1.1);
+    }
+
+    .service-card-fancy .img-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to top, rgba(17, 24, 39, 1) 0%, rgba(17, 24, 39, 0) 60%);
+        display: flex;
+        align-items: flex-end;
+        padding: 1rem;
+    }
+
+    .service-card-fancy .card-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    .service-card-fancy .card-body {
+        padding: 1.5rem;
+    }
+
+    .service-card-fancy .card-text {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .success-card {
+        background: linear-gradient(90deg, #10B981, #22C55E);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2);
+    }
+</style>
+
+<div class="page-header-services text-center">
+    <div class="container">
+        <h1 class="display-4 text-white mb-3 animated slideInDown">Find The Perfect Service</h1>
+        <p class="lead text-secondary mx-auto animated slideInDown" style="max-width: 600px;">
+            Whatever you need, we've got the right professional for the job. Search for a service below to get started.
+        </p>
+        <div class="search-bar-wrapper mx-auto mt-4 animated fadeInUp">
+            <i class="fas fa-search search-icon"></i>
+            <input type="search" id="serviceSearchInput" class="form-control" placeholder="e.g., 'Plumbing', 'House Cleaning', 'Electrical Repair'">
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+
+    {% if messages %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                    <div class="card success-card shadow-lg">
+                        <div class="card-body p-4 d-flex align-items-center">
+                            <i class="fas fa-check-circle fa-3x me-4"></i>
+                            <div>
+                                <h4 class="card-title text-white mb-1">Request Submitted!</h4>
+                                <p class="card-text mb-0">{{ message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-4" id="serviceGrid">
+        {% for service in services %}
+        <div class="col-md-6 col-lg-4 service-item" data-search-terms="{{ service.Name|lower }} {{ service.Description|lower }}">
+            <a {% if user.is_authenticated %}
+                   href="{% url 'bookservice' service.id %}"
+               {% else %}
+                   href="#" data-bs-toggle="modal" data-bs-target="#loginRequiredModal"
+               {% endif %}
+               class="service-card-fancy h-100">
+                <div class="img-container">
+                    <img src="{{ service.img.url }}" class="card-img-top" alt="{{ service.Name }}">
+                    <div class="img-overlay">
+                        <h5 class="card-title">{{ service.Name }}</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ service.Description|truncatewords:22 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-primary fw-bold">Book Now <i class="fas fa-arrow-right ms-1"></i></span>
+                        <span class="badge bg-primary bg-opacity-25 text-primary-emphasis rounded-pill">Popular</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <h2>No Services Available</h2>
+                <p class="text-secondary">Please check back later for available services.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="modal fade" id="loginRequiredModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--dark-bg-secondary); border-color: var(--border-color);">
+      <div class="modal-header" style="border-color: var(--border-color);">
+        <h5 class="modal-title text-white" id="loginModalLabel"><i class="fas fa-lock me-2 text-primary"></i> Authentication Required</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="fs-5">You need to log in to book a service.</p>
+        <p class="text-secondary">Please log in or create an account to continue.</p>
+      </div>
+      <div class="modal-footer justify-content-center" style="border-top-color: var(--border-color);">
+        <a href="{% url 'signup_selection' %}" class="btn btn-outline-secondary">Sign Up</a>
+        <a href="{% url 'login' %}" class="btn btn-primary px-4">Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('serviceSearchInput');
+    const serviceItems = document.querySelectorAll('#serviceGrid .service-item');
+
+    searchInput.addEventListener('keyup', function (event) {
+        const searchTerm = event.target.value.toLowerCase();
+
+        serviceItems.forEach(function (item) {
+            const itemText = item.getAttribute('data-search-terms');
+            item.style.display = itemText.includes(searchTerm) ? 'block' : 'none';
+        });
+    });
+});
+</script>
+
+{% endblock %}

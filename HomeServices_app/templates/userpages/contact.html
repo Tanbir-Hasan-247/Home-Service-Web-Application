@@ -1,0 +1,122 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    .page-header-contact {
+        padding: 6rem 0;
+        background: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.8)), url('https://images.unsplash.com/photo-1587560699334-cc426240169f?auto=format&fit=crop&w=1470&q=80');
+        background-size: cover;
+        background-position: center;
+    }
+    .contact-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        border-radius: .75rem;
+        text-align: center;
+        height: 100%;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+    }
+    .contact-card .icon-wrapper {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+    .contact-card a {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .contact-card a:hover {
+        color: var(--primary-color);
+    }
+    .form-control-dark {
+        background-color: var(--dark-bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 1rem;
+    }
+    .form-control-dark:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+    .map-container iframe {
+        border-radius: .75rem;
+        filter: invert(90%) grayscale(80%); /* Inverts colors for a dark theme map */
+    }
+</style>
+
+<div class="container-fluid page-header-contact text-center">
+    <div class="container">
+        <h1 class="display-4 text-white mb-3">Get In Touch</h1>
+        <p class="lead text-secondary mx-auto" style="max-width: 600px;">We're here to help and answer any question you might have. We look forward to hearing from you.</p>
+    </div>
+</div>
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="contact-card">
+                <div class="icon-wrapper"><i class="fas fa-map-marker-alt"></i></div>
+                <h4 class="text-white">Our Office</h4>
+                <p class="text-secondary">123 Service Lane, Dhaka, Bangladesh</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="contact-card">
+                <div class="icon-wrapper"><i class="fas fa-envelope"></i></div>
+                <h4 class="text-white">Email Us</h4>
+                <a href="mailto:contact@servicehub.com">contact@servicehub.com</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="contact-card">
+                <div class="icon-wrapper"><i class="fas fa-phone-alt"></i></div>
+                <h4 class="text-white">Call Us</h4>
+                <a href="tel:+1234567890">+880 1234 567890</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5 align-items-center">
+        <div class="col-lg-6">
+            <h2 class="section-title mb-4">Send Us a Message</h2>
+            <form>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control form-control-dark" placeholder="Your Name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="email" class="form-control form-control-dark" placeholder="Your Email" required>
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control form-control-dark" placeholder="Subject" required>
+                    </div>
+                    <div class="col-12">
+                        <textarea class="form-control form-control-dark" rows="6" placeholder="Leave a message here" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-6">
+            <div class="map-container h-100" style="min-height: 400px;">
+                <iframe class="w-100 h-100"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d233668.38319854752!2d90.27923781347656!3d23.780620699999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b087026b81%3A0x8fa563bbdd5904c2!2sDhaka!5e0!3m2!1sen!2sbd!4v1676543210987!5m2!1sen!2sbd"
+                    frameborder="0" allowfullscreen="" aria-hidden="false"
+                    tabindex="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

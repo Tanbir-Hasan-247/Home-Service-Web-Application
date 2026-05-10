@@ -1,0 +1,179 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* Your existing styles are correct */
+    .nav-tabs {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-tabs .nav-link {
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--text-secondary);
+        font-weight: 600;
+        padding: .75rem 1.25rem;
+        margin-bottom: -1px;
+    }
+
+    .nav-tabs .nav-link.active,
+    .nav-tabs .nav-item.show .nav-link {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .appointment-item {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: .75rem;
+        padding: 1.25rem 1.5rem;
+        display: grid;
+        grid-template-columns: auto 1fr 1fr 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .appointment-item:hover {
+        border-color: var(--primary-color);
+        transform: scale(1.02);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .appointment-item .service-icon {
+        font-size: 1.75rem;
+        color: var(--primary-color);
+        background-color: rgba(59, 130, 246, 0.1);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .appointment-item .info-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .appointment-item .info-value {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .appointment-item .status-badge {
+        font-weight: 600;
+        padding: .4rem .8rem;
+    }
+
+    .empty-tab-message {
+        background-color: var(--dark-bg-secondary);
+        border: 1px dashed var(--border-color);
+        padding: 4rem;
+        text-align: center;
+        border-radius: .75rem;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="mb-5">
+        <h1 class="display-5">My Appointments</h1>
+        <p class="lead text-secondary">Track the status of all your service requests right here.</p>
+    </div>
+
+    <ul class="nav nav-tabs" id="appointmentTabs" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab"
+                data-bs-target="#pending-pane" type="button"><i class="fas fa-clock me-2"></i>Pending Approval</button>
+        </li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab"
+                data-bs-target="#active-pane" type="button"><i class="fas fa-check-circle me-2"></i>Active &
+                Completed</button></li>
+    </ul>
+
+    <div class="tab-content py-4" id="appointmentTabsContent">
+        <div class="tab-pane fade show active" id="pending-pane" role="tabpanel">
+            <div class="d-grid gap-3">
+                {% for request_data in requests %}
+                <div class="appointment-item">
+                    <div class="service-icon"><i class="fas fa-tools"></i></div>
+                    <div>
+                        <div class="info-label">Service</div>
+                        <div class="info-value">{{ request_data.service.Name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Requested On</div>
+                        <div class="info-value">{{ request_data.dateofrequest|date:"F d, Y" }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Status</div>
+                        <div class="info-value"><span
+                                class="badge rounded-pill bg-warning text-dark status-badge">Pending Approval</span>
+                        </div>
+                    </div>
+                    <div>
+                        <form action="{% url 'CancelRequest' request_data.id %}" method="post"
+                            onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-tab-message">
+                    <h4 class="text-white">No Pending Requests</h4>
+                    <p class="text-secondary">When you book a new service, it will appear here.</p>
+                    <a href="{% url 'services' %}" class="btn btn-primary mt-2">Book a Service</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="active-pane" role="tabpanel">
+            <div class="d-grid gap-3">
+                {% for response in responses %}
+                <div class="appointment-item">
+                    <div class="service-icon"><i class="fas fa-tools"></i></div>
+                    <div>
+                        <div class="info-label">Service</div>
+                        <div class="info-value">{{ response.requests.service.Name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Provider Assigned</div>
+                        <div class="info-value">{{ response.assigned_worker.admin.get_full_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                            {% if response.status %}
+                            <span class="badge rounded-pill bg-success status-badge">Completed</span>
+                            {% else %}
+                            <span class="badge rounded-pill bg-info text-dark status-badge">In Progress</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        {% if response.status %}
+                        <a href="{% url 'feedback_form_for_worker' worker_id=response.assigned_worker.id %}"
+                            class="btn btn-sm btn-outline-light">Leave Feedback</a>
+                        {% else %}
+                        <span class="text-secondary fst-italic">In Progress</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-tab-message">
+                    <h4 class="text-white">No Active or Completed Jobs</h4>
+                    <p class="text-secondary">Your active and completed service appointments will be shown here.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Manage Cities{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="#">Locations</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Manage Cities</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .form-control-dark, .form-select-dark {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    .form-control-dark:focus, .form-select-dark:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: var(--text-secondary) !important;
+    }
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        background-color: var(--dark-bg-primary) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary-color) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--primary-color) !important;
+    }
+</style>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0"><i class="fas fa-plus-circle text-primary me-2"></i>Add New City</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'AddCity' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="stateSelect" class="form-label">State</label>
+                        <select class="form-select form-select-dark" id="stateSelect" name="state" required>
+                            <option value="" disabled selected>Choose a state...</option>
+                            {% for state in state_recorsd %}
+                                <option value="{{ state.id }}">{{ state.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cityName" class="form-label">City Name</label>
+                        <input type="text" class="form-control form-control-dark" id="cityName" name="name" required placeholder="e.g., Dhaka">
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Add City</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i>Existing Cities</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="citiesTable" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>City Name</th>
+                                <th>State</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in city_records %}
+                            <tr>
+                                <td>{{ record.name }}</td>
+                                <td>{{ record.state }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'DeleteCity' id=record.id %}" class="btn btn-sm btn-outline-danger" title="Delete City" onclick="return confirm('Are you sure you want to delete this city?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#citiesTable').DataTable({
+             "order": [[ 1, "asc" ], [0, "asc"]] // Order by State, then by City
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Manage Service Providers{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">Manage Service Providers</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Your existing dark datatable styles */
+    .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate { color: var(--text-secondary) !important; }
+    .dataTables_wrapper .dataTables_length select, .dataTables_wrapper .dataTables_filter input { background-color: var(--dark-bg-primary) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { color: var(--text-secondary) !important; border: 1px solid var(--border-color) !important; margin: 0 !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--primary-color) !important; color: var(--text-primary) !important; border-color: var(--primary-color) !important; }
+    
+    .avatar-initials {
+        width: 45px; height: 45px; border-radius: 50%;
+        background-color: var(--primary-color); color: var(--text-primary);
+        display: flex; align-items: center; justify-content: center; font-weight: 600;
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <h1 class="page-title mb-0">Manage Service Providers</h1>
+    <a href="{% url 'Worker_Register' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add New Worker</a>
+</div>
+
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="workersTable" class="table table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Designation</th>
+                        <th>Contact</th>
+                        <th>Verification Status</th>
+                        <th>Availability</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for worker in workers_records %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if worker.profile_pic %}<img src="{{ worker.profile_pic.url }}" class="rounded-circle" width="45" height="45" style="object-fit:cover;" alt="">{% else %}<div class="avatar-initials"><span>{{ worker.admin.first_name|first|upper }}{{ worker.admin.last_name|first|upper }}</span></div>{% endif %}
+                                <div class="ms-3">
+                                    <p class="fw-bold mb-1 text-white">{{ worker.admin.get_full_name }}</p>
+                                    <p class="text-muted mb-0">{{ worker.admin.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ worker.designation }}</td>
+                        <td>{{ worker.contact_number }}</td>
+                        <td>
+                            {% if worker.acc_activation %}
+                                <span class="badge bg-success-subtle text-success-emphasis p-2"><i class="fas fa-check-circle me-1"></i>Verified</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis p-2"><i class="fas fa-hourglass-half me-1"></i>Awaiting Verification</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if worker.avalability_status %}<span class="badge bg-light bg-opacity-10 text-light p-2">Available</span>{% else %}<span class="badge bg-secondary-subtle text-secondary-emphasis p-2">Unavailable</span>{% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                {% if not worker.acc_activation %}
+                                    <a href="{% url 'verify_worker' action='active' id=worker.id %}" class="btn btn-sm btn-success" title="Verify Worker"><i class="fas fa-user-check"></i></a>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-btn" title="Delete Worker"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteWorkerModal"
+                                        data-worker-id="{{ worker.id }}"
+                                        data-worker-name="{{ worker.admin.get_full_name|default:worker.admin.username }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteWorkerModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--dark-bg-secondary); border-color: var(--border-color);">
+      <div class="modal-header" style="border-bottom-color: var(--border-color);">
+        <h5 class="modal-title text-white" id="deleteModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirm Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-secondary">
+        <p>Are you sure you want to delete the worker <strong id="workerNameToDelete" class="text-white"></strong>?</p>
+        <p>This action is permanent and cannot be undone.</p>
+      </div>
+      <div class="modal-footer" style="border-top-color: var(--border-color);">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteWorkerForm" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete Worker</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#workersTable').DataTable({
+            "order": [[ 3, "asc" ]] 
+        });
+
+        // This script makes the delete modal dynamic
+        $('.delete-btn').on('click', function() {
+            var workerId = $(this).data('worker-id');
+            var workerName = $(this).data('worker-name');
+            
+            $('#workerNameToDelete').text(workerName);
+            
+            var url = "{% url 'delete_worker' worker_id=0 %}".replace('0', workerId);
+            $('#deleteWorkerForm').attr('action', url);
+        });
+    });
+</script>
+
+{% endblock %}

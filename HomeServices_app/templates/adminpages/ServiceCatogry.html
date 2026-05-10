@@ -1,0 +1,130 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}{% if record %}Edit Service{% else %}Add Service{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{% url 'ManageServices' %}">Manage Services</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if record %}Edit{% else %}Add New{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .form-control-dark, .form-select-dark {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    .form-control-dark:focus, .form-select-dark:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+
+    /* Custom File Uploader */
+    .image-upload-wrapper {
+        border: 2px dashed var(--border-color);
+        border-radius: .75rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        position: relative;
+    }
+    .image-upload-wrapper:hover {
+        border-color: var(--primary-color);
+    }
+    .image-upload-wrapper input[type="file"] {
+        /* This hides the default file input but keeps it functional */
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .image-preview {
+        max-width: 100%;
+        max-height: 250px;
+        border-radius: .5rem;
+        margin-top: 1rem;
+        border: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">
+        {% if record %}
+            <i class="fas fa-edit text-primary me-2"></i>Edit Service: {{ record.Name }}
+        {% else %}
+            <i class="fas fa-plus-circle text-primary me-2"></i>Add New Service Category
+        {% endif %}
+    </h1>
+</div>
+
+<div class="card p-4">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="mb-4">
+                    <label for="Name" class="form-label">Service Name</label>
+                    <input type="text" class="form-control form-control-dark form-control-lg" id="Name" name="Name" value="{{ record.Name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="Description" class="form-label">Description</label>
+                    <textarea class="form-control form-control-dark" id="Description" name="Description" rows="10" placeholder="Describe what this service includes..." required>{{ record.Description }}</textarea>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <label class="form-label">Service Image</label>
+                <div class="image-upload-wrapper" id="imageUploader">
+                    <input type="file" name="img" id="imgInput" accept="image/*" {% if not record %}required{% endif %}>
+                    <div id="uploadPlaceholder">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-secondary"></i>
+                        <p class="mt-2 mb-0">Click to browse or drag & drop</p>
+                        <small class="text-secondary">PNG, JPG, WEBP (Max 2MB)</small>
+                    </div>
+                    <img id="imagePreview" src="{% if record.img %}{{ record.img.url }}{% endif %}" class="image-preview {% if not record.img %}d-none{% endif %}" alt="Image Preview">
+                </div>
+            </div>
+        </div>
+        
+        <hr class="my-4" style="border-color: var(--border-color);">
+
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'ManageServices' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary px-4">
+                {% if record %}
+                    <i class="fas fa-save me-2"></i>Save Changes
+                {% else %}
+                    <i class="fas fa-plus me-2"></i>Add Service
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imgInput = document.getElementById('imgInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+    imgInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('d-none');
+                uploadPlaceholder.classList.add('d-none');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+
+{% endblock %}

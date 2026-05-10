@@ -1,0 +1,381 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* FANCY ANIMATED GRADIENT FOR HEADING */
+    @keyframes gradient-animation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .animated-gradient-text {
+        background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+        background-size: 200% auto;
+        color: #000;
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradient-animation 10s ease infinite;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        padding: 8rem 0;
+    }
+    .hero-section h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .hero-section .lead {
+        color: var(--text-secondary);
+        max-width: 500px;
+    }
+    .hero-section .search-form {
+        background-color: rgba(31, 41, 55, 0.7);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+    }
+    .hero-section .form-control {
+        background-color: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+    .hero-section .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+    .hero-section .form-control:focus {
+        box-shadow: none;
+        background-color: transparent;
+    }
+    .hero-section .info-tags span {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .hero-section .info-tags i {
+        color: #10b981; /* Green checkmark */
+    }
+
+    /* General Section Styling */
+    .section-py {
+        padding: 6rem 0;
+    }
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+    .section-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 4rem auto;
+    }
+
+    /* Service Card */
+    .service-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .service-card .icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1.5rem auto;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+    }
+    .service-card .providers {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+    
+    /* How it Works */
+    .step-item {
+        position: relative;
+    }
+    .step-item .step-number {
+        position: absolute;
+        top: -15px;
+        right: 15px;
+        background-color: #22c55e; /* Green */
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+     .step-item .icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.25rem;
+    }
+
+    /* Provider & Testimonial Cards */
+    .custom-card {
+         background-color: var(--dark-bg-secondary);
+         border: 1px solid var(--border-color);
+         border-radius: 0.75rem;
+         padding: 1.5rem;
+         height: 100%;
+    }
+    .provider-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.25rem;
+    }
+    .star-rating i {
+        color: #f59e0b; /* Amber */
+    }
+    .tag {
+        background-color: var(--border-color);
+        color: var(--text-primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background-color: var(--dark-bg-secondary);
+        border-radius: 1rem;
+        padding: 3rem;
+    }
+
+    @keyframes float-animation {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .fancy-provider-wrapper {
+        position: relative;
+        height: 350px;
+    }
+    .fancy-provider-card {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background-color: rgba(31, 41, 55, 0.6); /* Glassmorphism effect */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: float-animation 6s ease-in-out infinite;
+    }
+    .fancy-provider-card .avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.75rem;
+    }
+    .fancy-provider-card .provider-info {
+        line-height: 1.2;
+    }
+    .fancy-provider-card .provider-info strong {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+     .fancy-provider-card .provider-info small {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+    .card-pos-1 { top: 10%; left: 5%; animation-delay: 0s; }
+    .card-pos-2 { top: 40%; right: 0%; animation-delay: -2s; }
+    .card-pos-3 { bottom: 10%; left: 20%; animation-delay: -4s; }
+</style>
+
+<div class="container hero-section">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-7 text-center text-lg-start">
+            <h1 class="display-3 mb-4 animated-gradient-text">Professional Home Services, On Demand</h1>
+            <p class="lead mb-4">Book trusted professionals for cleaning, plumbing, electrical, and more. Get instant quotes and track your service in real-time.</p>
+            <div class="d-flex flex-column flex-md-row gap-2">
+                 <a href="{% url 'services' %}" class="btn btn-primary btn-lg">Explore Services</a>
+                 <a href="{% url 'signup_selection' %}" class="btn btn-secondary btn-lg">Become a Provider</a>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block">
+            <div class="fancy-provider-wrapper">
+                
+                <div class="fancy-provider-card card-pos-1">
+                    <img src="#" class="avatar" alt="Provider">
+                    <div class="provider-info">
+                        <strong>Dulal kaka</strong><br>
+                        <small>Just booked for Cleaning</small>
+                    </div>
+                </div>
+
+                <div class="fancy-provider-card card-pos-2">
+                    <img src="https://images.unsplash.com/photo-1558256119-e0345b5os83?&w=100&h=100&fit=crop&crop=faces" class="avatar" alt="Provider">
+                    <div class="provider-info">
+                        <strong>Sarah Wilson</strong><br>
+                        <small>Available for Electrical</small>
+                    </div>
+                </div>
+
+                <div class="fancy-provider-card card-pos-3">
+                    <img src="https://images.unsplash.com/photo-1603481588273-2f9ac1a20a96?&w=100&h=100&fit=crop&crop=faces" class="avatar" alt="Provider">
+                    <div class="provider-info">
+                        <strong>David Smith</strong><br>
+                        <small>5-star rated Plumber</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container section-py text-center">
+    <h2 class="section-title">Popular Service Categories</h2>
+    <p class="section-subtitle">Choose from hundreds of services across multiple categories</p>
+    <div class="row g-4">
+        <div class="col-md-4 col-lg-2">
+            <div class="service-card">
+                <div class="icon" style="background-color: #dbeafe; color: #3b82f6;"><i class="fa-solid fa-broom"></i></div>
+                <h5 class="mb-1">Cleaning</h5>
+                <span class="providers">120+ providers</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="service-card">
+                <div class="icon" style="background-color: #d1fae5; color: #10b981;"><i class="fa-solid fa-wrench"></i></div>
+                <h5 class="mb-1">Plumbing</h5>
+                <span class="providers">85+ providers</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="service-card">
+                <div class="icon" style="background-color: #fef3c7; color: #f59e0b;"><i class="fa-solid fa-bolt-lightning"></i></div>
+                <h5 class="mb-1">Electrical</h5>
+                <span class="providers">67+ providers</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="service-card">
+                <div class="icon" style="background-color: #dcfce7; color: #22c55e;"><i class="fa-solid fa-leaf"></i></div>
+                <h5 class="mb-1">Gardening</h5>
+                <span class="providers">92+ providers</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="service-card">
+                <div class="icon" style="background-color: #e9d5ff; color: #9333ea;"><i class="fa-solid fa-paint-roller"></i></div>
+                <h5 class="mb-1">Painting</h5>
+                <span class="providers">54+ providers</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <div class="service-card">
+                <div class="icon" style="background-color: #fee2e2; color: #ef4444;"><i class="fa-solid fa-truck"></i></div>
+                <h5 class="mb-1">Moving</h5>
+                <span class="providers">38+ providers</span>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'services' %}" class="btn btn-secondary mt-5">View All Categories</a>
+</div>
+
+<div class="container section-py text-center" id="how-it-works-section">
+    <h2 class="section-title">How ServiceHub Works</h2>
+    <p class="section-subtitle">Book professional services in three simple steps</p>
+    <div class="row g-4 g-lg-5">
+        <div class="col-md-4">
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <div class="icon mx-auto" style="background-color: #dbeafe; color: #3b82f6;"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <h4>Search & Compare</h4>
+                <p>Browse services by category, compare prices, read reviews, and check availability in your area.</p>
+            </div>
+        </div>
+         <div class="col-md-4">
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <div class="icon mx-auto" style="background-color: #e9d5ff; color: #9333ea;"><i class="fa-solid fa-calendar-check"></i></div>
+                <h4>Book & Schedule</h4>
+                <p>Choose your preferred date and time, provide service details, and secure your booking with instant confirmation.</p>
+            </div>
+        </div>
+         <div class="col-md-4">
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <div class="icon mx-auto" style="background-color: #d1fae5; color: #10b981;"><i class="fa-solid fa-shield-halved"></i></div>
+                <h4>Get Service Done</h4>
+                <p>Track your provider's arrival, get the service completed, make secure payment, and leave a review.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container section-py text-center">
+    <h2 class="section-title">What Our Customers Say</h2>
+    <p class="section-subtitle">Real experiences from satisfied customers across the platform</p>
+    <div class="row g-4">
+        {% for feedback in feedbacks %}
+        <div class="col-lg-4 d-flex align-items-stretch">
+            <div class="custom-card w-100 d-flex flex-column">
+                <div class="star-rating mb-3">
+                    {% for i in "x"|ljust:feedback.Rating %}
+                        <i class="fa-solid fa-star"></i>
+                    {% endfor %}
+                </div>
+                <p class="mb-4 fst-italic flex-grow-1">"{{ feedback.Description }}"</p>
+                <div class="d-flex align-items-center justify-content-center mt-auto">
+                    <div class="provider-avatar me-3" style="background-color: #6d28d9;">
+                        {{ feedback.User.first_name|first|upper }}{{ feedback.User.last_name|first|upper }}
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ feedback.User.get_full_name }}</h5>
+                        <p class="mb-0 text-secondary">Valued Customer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-secondary fs-5">No customer feedback available yet. Be the first to share your experience!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="container section-py">
+    <div class="cta-section text-center">
+        <h2 class="section-title">Ready to get started?</h2>
+        <p class="section-subtitle">Join thousands of satisfied customers who trust ServiceHub for their home service needs.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'signup_selection' %}" class="btn btn-primary">Book a Service</a>
+            <a href="{% url 'signup_selection' %}" class="btn btn-secondary">Become a Provider</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

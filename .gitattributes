@@ -1,0 +1,5 @@
+# HTML ফাইলগুলোকে ভাষা নির্ধারণের হিসাব থেকে বাদ দিতে
+*.html linguist-detectable=false
+
+# অথবা, শুধুমাত্র নির্দিষ্ট টেমপ্লেট ফোল্ডার ইগনোর করতে চাইলে (ঐচ্ছিক)
+templates/* linguist-vendored

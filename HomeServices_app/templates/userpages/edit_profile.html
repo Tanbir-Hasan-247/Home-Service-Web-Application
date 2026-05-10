@@ -1,0 +1,124 @@
+{% extends "userpages/user_header_footer.html" %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* This styling is copied directly from your user_registration.html for a perfect match */
+    .register-page-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 0;
+    }
+    .register-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 800px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .register-header h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+    .register-header p {
+        color: var(--text-secondary);
+    }
+    .form-label {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .form-control, .form-select {
+        background-color: var(--dark-bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: var(--dark-bg-primary);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        color: var(--text-primary);
+    }
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+</style>
+
+<div class="container register-page-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h2>Edit Your Profile</h2>
+            <p>Update your personal information below.</p>
+        </div>
+
+        <!-- Display Success Messages -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: rgba(34, 197, 94, 0.1); border-color: #22c55e; color: #22c55e;">
+                <i class="fas fa-check-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <form action="{% url 'edit_profile' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="firstname" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstname" name="first_name" value="{{ data.admin.first_name }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="last_name" value="{{ data.admin.last_name }}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address (cannot be changed)</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ data.admin.email }}" disabled>
+            </div>
+
+            <div class="mb-3">
+                <label for="contactnumber" class="form-label">Contact Number</label>
+                <input type="tel" class="form-control" id="contactnumber" name="contact_number" value="{{ data.contact_number }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3">{{ data.Address }}</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="Male" {% if data.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if data.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if data.gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="profile_pic" class="form-label">Update Profile Picture</label>
+                    <input type="file" class="form-control" id="profile_pic" name="profile_pic">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a href="{% url 'userprofile' %}" class="btn btn-secondary">Back to Profile</a>
+                <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "workerpages/worker_header_footer.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">My Profile</li>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    /* ... (your existing fancy styles for this page are perfect) ... */
+    .profile-banner { height: 200px; background: linear-gradient(to right, #06b6d4, #3b82f6); border-radius: .75rem; }
+    .profile-content { position: relative; margin-top: -80px; }
+    .profile-card { background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); border-radius: .75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .profile-avatar {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: -80px;
+        border: 5px solid var(--dark-bg-secondary);
+    }
+    .profile-avatar-initials {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        margin-top: -80px;
+        border: 5px solid var(--dark-bg-secondary);
+        background-color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-avatar-initials span {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .info-list-item { display: flex; padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); align-items: flex-start; }
+    .info-list-item:last-child { border-bottom: none; }
+    .info-list-item .icon { color: var(--primary-color); font-size: 1.1rem; width: 40px; text-align: center; margin-top: 4px; }
+    .info-list-item .label { color: var(--text-secondary); font-size: 0.9rem; }
+    .info-list-item .value { color: var(--text-primary); font-weight: 500; font-size: 1rem; }
+</style>
+
+<div class="profile-banner"></div>
+
+<div class="container-fluid profile-content">
+    {% if messages %}
+        <div class="row justify-content-center mb-4"><div class="col-lg-8">
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div></div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="profile-card text-center p-4" style="position: sticky; top: 2rem;">
+                {% if data.profile_pic %}
+                    <img src="{{ data.profile_pic.url }}" alt="Avatar" class="profile-avatar mx-auto mb-3">
+                {% else %}
+                    <div class="profile-avatar-initials mx-auto mb-3">
+                        <span>{{ data.admin.first_name|first|upper }}{{ data.admin.last_name|first|upper }}</span>
+                    </div>
+                {% endif %}
+                <h3 class="text-white">{{ data.admin.get_full_name }}</h3>
+                <p class="text-primary fw-bold">{{ data.designation }}</p>
+
+                <div class="d-flex justify-content-center gap-2 mb-4">
+                    {% if data.acc_activation %}<span class="badge rounded-pill bg-success-subtle text-success-emphasis p-2"><i class="fas fa-check-circle me-1"></i>Verified</span>{% else %}<span class="badge rounded-pill bg-danger-subtle text-danger-emphasis p-2"><i class="fas fa-times-circle me-1"></i>Not Verified</span>{% endif %}
+                    {% if data.avalability_status %}<span class="badge rounded-pill bg-success-subtle text-success-emphasis p-2"><i class="fas fa-toggle-on me-1"></i>Available</span>{% else %}<span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis p-2"><i class="fas fa-toggle-off me-1"></i>Unavailable</span>{% endif %}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'edit_worker_profile' %}" class="btn btn-primary"><i class="fas fa-edit me-2"></i>Edit Profile</a>
+                    
+                    <form action="{% url 'toggle_availability' %}" method="post" class="d-grid">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary">
+                            {% if data.avalability_status %}Set to Unavailable{% else %}Set to Available{% endif %}
+                        </button>
+                    </form>
+                </div>
+
+                 <div class="mt-4 border-top pt-3" style="border-color: var(--border-color) !important;">
+                     <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteProfileModal">
+                        Delete My Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="profile-card p-4">
+                <h4 class="mb-3 text-white">Provider Details</h4>
+                <div class="info-list">
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-envelope"></i></div><div class="ms-3"><div class="label">Email Address</div><div class="value">{{ data.admin.email }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-phone-alt"></i></div><div class="ms-3"><div class="label">Phone Number</div><div class="value">{{ data.contact_number }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-venus-mars"></i></div><div class="ms-3"><div class="label">Gender</div><div class="value">{{ data.gender }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-birthday-cake"></i></div><div class="ms-3"><div class="label">Date of Birth</div><div class="value">{{ data.dob|date:"F d, Y" }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-map-marker-alt"></i></div><div class="ms-3"><div class="label">Address</div><div class="value">{{ data.Address }}, {{ data.city }}</div></div></div>
+                    <div class="info-list-item"><div class="icon"><i class="fas fa-calendar-check"></i></div><div class="ms-3"><div class="label">Member Since</div><div class="value">{{ data.admin.date_joined|date:"F j, Y" }}</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteProfileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background-color: var(--dark-bg-secondary); border-color: var(--border-color);">
+      <div class="modal-header" style="border-bottom-color: var(--border-color);"><h5 class="modal-title text-white"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Confirm Account Deletion</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body text-secondary"><p>Are you sure? This action is permanent and cannot be undone. All your job history and feedback will be removed.</p></div>
+      <div class="modal-footer" style="border-top-color: var(--border-color);">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="{% url 'delete_worker_profile' %}" method="post">{% csrf_token %}<button type="submit" class="btn btn-danger">Yes, Delete My Account</button></form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
