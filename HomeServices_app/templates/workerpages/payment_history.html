@@ -1,0 +1,239 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}My Earnings & Payouts{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'workers_home' %}">Dashboard</a></li>
+<li class="breadcrumb-item active" aria-current="page">Earnings & Payouts</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card-worker {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card-worker:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .stat-icon-worker {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-right: 1.25rem;
+        flex-shrink: 0;
+    }
+    .table-custom th {
+        background-color: rgba(17, 24, 39, 0.95);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.85rem;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+    .table-custom td {
+        padding: 0.95rem 0.85rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+    }
+    .table-custom tr:hover td {
+        background-color: rgba(55, 65, 81, 0.25);
+    }
+</style>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="page-title mb-1">My Earnings & Payouts</h1>
+        <p class="text-secondary mb-0">Track completed jobs, logged hours, your 90% payout share, and customer settlement statuses.</p>
+    </div>
+    <div>
+        <button onclick="window.print()" class="btn btn-outline-secondary">
+            <i class="fas fa-print me-2"></i>Print Statement
+        </button>
+    </div>
+</div>
+
+<!-- Worker Financial Summary Cards -->
+<div class="row g-3 g-lg-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-worker">
+            <div class="stat-icon-worker bg-success bg-opacity-25 text-success">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Net Earnings Received</small>
+                <div class="fs-4 fw-bold text-success">৳{{ stats.total_net_earnings|floatformat:2 }}</div>
+                <small class="text-secondary">{{ stats.paid_jobs_count }} settled jobs (90%)</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-worker">
+            <div class="stat-icon-worker bg-warning bg-opacity-25 text-warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Pending From Customer</small>
+                <div class="fs-4 fw-bold text-warning">৳{{ stats.pending_earnings|floatformat:2 }}</div>
+                <small class="text-secondary">Awaiting customer payment</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-worker">
+            <div class="stat-icon-worker bg-primary bg-opacity-25 text-primary">
+                <i class="fas fa-check-double"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Total Jobs Completed</small>
+                <div class="fs-4 fw-bold text-white">{{ stats.total_jobs }}</div>
+                <small class="text-secondary">All time service tasks</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-worker">
+            <div class="stat-icon-worker bg-info bg-opacity-25 text-info">
+                <i class="fas fa-business-time"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Total Hours Logged</small>
+                <div class="fs-4 fw-bold text-info">{{ stats.total_hours|floatformat:1 }} hrs</div>
+                <small class="text-secondary">Across all completed orders</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card p-3 mb-4 border-secondary border-opacity-50">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" class="form-control bg-dark border-secondary text-white" placeholder="Search Customer, Service, or Trx ID..." value="{{ search_query }}">
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4 col-lg-4">
+            <select name="status" class="form-select bg-dark border-secondary text-white">
+                <option value="">All Payment Statuses</option>
+                <option value="Paid" {% if current_status == "Paid" %}selected{% endif %}>Paid to You</option>
+                <option value="Pending" {% if current_status == "Pending" %}selected{% endif %}>Pending Customer Payment</option>
+            </select>
+        </div>
+        <div class="col-sm-6 col-md-2 col-lg-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-filter me-1"></i>Filter</button>
+            {% if search_query or current_status %}
+            <a href="{% url 'worker_payment_history' %}" class="btn btn-outline-secondary" title="Clear Filters"><i class="fas fa-undo"></i></a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Worker Jobs / Earnings Table -->
+<div class="card border-secondary border-opacity-50 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Customer Details</th>
+                    <th>Service Provided</th>
+                    <th>Work Duration</th>
+                    <th>Total Billed</th>
+                    <th>Platform Fee (10%)</th>
+                    <th>Your Earning (90%)</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td>
+                        <a href="{% url 'invoice_detail' p.id %}" class="text-primary fw-bold text-decoration-none">
+                            #INV-{{ p.id }}{{ p.requests.id }}
+                        </a>
+                        <small class="text-secondary d-block">{{ p.Date|date:"M d, Y" }}</small>
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-white">{{ p.requests.user.admin.get_full_name|default:p.requests.user.admin.username }}</div>
+                        <small class="text-secondary"><i class="fas fa-phone-alt me-1"></i>{{ p.requests.user.contact_number }}</small>
+                    </td>
+                    <td>
+                        <div class="text-white">{{ p.requests.service.Name }}</div>
+                        <small class="text-secondary">৳{{ p.hourly_rate }}/hr</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary bg-opacity-50 text-white">{{ p.hours_worked }} hours</span>
+                    </td>
+                    <td>
+                        <span class="text-white fw-bold">৳{{ p.total_amount }}</span>
+                    </td>
+                    <td>
+                        <span class="text-secondary">-৳{{ p.admin_commission }}</span>
+                    </td>
+                    <td>
+                        <span class="text-success fw-bold fs-6">৳{{ p.worker_earning }}</span>
+                    </td>
+                    <td>
+                        {% if p.payment_status == "Paid" %}
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2 py-1">
+                                <i class="fas fa-check-circle me-1"></i>Settled
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50 px-2 py-1">
+                                <i class="fas fa-clock me-1"></i>Pending
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.payment_method %}
+                            <span class="badge bg-dark border border-secondary text-light">{{ p.payment_method }}</span>
+                            {% if p.transaction_id %}
+                            <small class="text-secondary d-block font-monospace mt-1">{{ p.transaction_id }}</small>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-secondary small fst-italic">Awaiting Payment</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'invoice_detail' p.id %}" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-file-invoice me-1"></i>Invoice
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center py-5 text-secondary">
+                        <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-secondary opacity-50 d-block"></i>
+                        <h5>No completed jobs found</h5>
+                        <p class="small mb-0">When you complete service requests and log hours, your earnings statement will appear here.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

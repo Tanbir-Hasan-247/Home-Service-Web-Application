@@ -1,0 +1,340 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Manage Worker Withdrawals{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+    }
+    .filter-btn {
+        padding: 0.45rem 1rem;
+        border-radius: 50rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        background: var(--dark-bg-secondary);
+        transition: all 0.2s;
+    }
+    .filter-btn:hover {
+        color: #fff;
+        border-color: var(--primary-color);
+    }
+    .filter-btn.active {
+        background: var(--primary-color);
+        color: #fff;
+        border-color: var(--primary-color);
+    }
+    .form-control-dark {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+    .form-control-dark:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+</style>
+
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 text-white mb-1"><i class="fas fa-hand-holding-usd text-warning me-2"></i>Worker Payout & Withdrawal Requests</h1>
+            <p class="text-secondary mb-0">Review, verify, and approve technician payouts. Funds are safely held in escrow until approval or refunded on rejection.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_payment_history' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-receipt me-1"></i> Customer Payments
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Pending Review</span>
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <h3 class="text-white fw-bold mb-0">{{ stats.pending_count }}</h3>
+                <small class="text-warning">Awaiting your approval</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Pending Amount</span>
+                    <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+                <h3 class="text-white fw-bold mb-0">৳{{ stats.pending_amount }}</h3>
+                <small class="text-secondary">Funds currently in escrow</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Disbursed (Approved)</span>
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                </div>
+                <h3 class="text-white fw-bold mb-0">৳{{ stats.approved_amount }}</h3>
+                <small class="text-success">Paid out to technicians</small>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Total Requests</span>
+                    <div class="stat-icon bg-info bg-opacity-10 text-info">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                </div>
+                <h3 class="text-white fw-bold mb-0">{{ stats.total_requests }}</h3>
+                <small class="text-secondary">All-time withdrawal logs</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="d-flex gap-2 mb-3">
+        <a href="{% url 'manage_withdrawals' %}" class="filter-btn {% if not current_status %}active{% endif %}">
+            All ({{ stats.total_requests }})
+        </a>
+        <a href="{% url 'manage_withdrawals' %}?status=Pending" class="filter-btn {% if current_status == 'Pending' %}active{% endif %}">
+            Pending ({{ stats.pending_count }})
+        </a>
+        <a href="{% url 'manage_withdrawals' %}?status=Approved" class="filter-btn {% if current_status == 'Approved' %}active{% endif %}">
+            Approved
+        </a>
+        <a href="{% url 'manage_withdrawals' %}?status=Rejected" class="filter-btn {% if current_status == 'Rejected' %}active{% endif %}">
+            Rejected
+        </a>
+    </div>
+
+    <!-- Withdrawals Table -->
+    <div class="card bg-dark border-secondary">
+        <div class="card-header bg-transparent border-secondary py-3">
+            <h5 class="text-white mb-0"><i class="fas fa-money-check-alt me-2 text-primary"></i>Withdrawal Queue</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th class="ps-3">Req ID</th>
+                            <th>Technician</th>
+                            <th>Wallet Bal.</th>
+                            <th>Requested</th>
+                            <th>Payout Details</th>
+                            <th>Requested At</th>
+                            <th>Status</th>
+                            <th>TrxID / Note</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in withdrawals %}
+                        <tr>
+                            <td class="ps-3 fw-bold text-white">#WDR-{{ w.id }}</td>
+                            <td>
+                                <div class="text-white fw-semibold">{{ w.worker.admin.get_full_name }}</div>
+                                <small class="text-secondary">{{ w.worker.designation }} • {{ w.worker.contact_number }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary">
+                                    ৳{{ w.worker.wallet_balance }}
+                                </span>
+                            </td>
+                            <td class="fw-bold fs-6 text-success">
+                                ৳{{ w.amount }}
+                            </td>
+                            <td>
+                                <span class="badge {% if w.payment_method == 'bKash' %}bg-danger{% elif w.payment_method == 'Nagad' %}bg-warning text-dark{% elif w.payment_method == 'Rocket' %}bg-info text-dark{% else %}bg-primary{% endif %} me-1">
+                                    {{ w.payment_method }}
+                                </span>
+                                <span class="text-white small fw-bold">{{ w.account_number }}</span>
+                                {% if w.bank_name %}
+                                <div class="small text-secondary">{{ w.bank_name }}</div>
+                                {% endif %}
+                                {% if w.notes %}
+                                <div class="small text-secondary fst-italic mt-1">"{{ w.notes }}"</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="text-white small">{{ w.created_at|date:"M d, Y" }}</div>
+                                <small class="text-secondary">{{ w.created_at|time:"h:i A" }}</small>
+                            </td>
+                            <td>
+                                {% if w.status == 'Approved' %}
+                                <span class="badge bg-success-subtle text-success border border-success"><i class="fas fa-check-circle me-1"></i>Approved</span>
+                                {% elif w.status == 'Rejected' %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger"><i class="fas fa-times-circle me-1"></i>Rejected</span>
+                                {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-clock me-1"></i>Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if w.transaction_id %}
+                                <div class="badge bg-black border border-secondary text-info font-monospace">{{ w.transaction_id }}</div>
+                                {% endif %}
+                                {% if w.admin_notes %}
+                                <div class="small text-secondary mt-1">{{ w.admin_notes }}</div>
+                                {% endif %}
+                                {% if not w.transaction_id and not w.admin_notes %}
+                                <span class="text-secondary small">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-3">
+                                {% if w.status == 'Pending' %}
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveModal{{ w.id }}">
+                                        <i class="fas fa-check me-1"></i>Approve
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ w.id }}">
+                                        <i class="fas fa-times me-1"></i>Reject
+                                    </button>
+                                </div>
+                                {% else %}
+                                <small class="text-secondary"><i class="fas fa-check-double me-1"></i>Processed</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-secondary">
+                                <i class="fas fa-inbox fa-3x mb-3 text-secondary opacity-50"></i>
+                                <p class="mb-0">No withdrawal requests found under this filter.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODALS RENDERED SAFELY OUTSIDE TABLE DOM CONTAINER -->
+<!-- ============================================================== -->
+{% for w in withdrawals %}
+{% if w.status == 'Pending' %}
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal{{ w.id }}" tabindex="-1" aria-labelledby="approveModalLabel{{ w.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary shadow-lg">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="approveModalLabel{{ w.id }}"><i class="fas fa-check-circle text-success me-2"></i>Approve Payout #WDR-{{ w.id }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'review_withdrawal' w.id 'approve' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="p-3 mb-3 rounded bg-black bg-opacity-25 border border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-secondary small">Technician:</span>
+                            <span class="text-white fw-bold">{{ w.worker.admin.get_full_name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-secondary small">Channel:</span>
+                            <span class="text-info fw-bold">{{ w.payment_method }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-secondary small">Account:</span>
+                            <span class="font-monospace text-white">{{ w.account_number }}</span>
+                        </div>
+                        {% if w.bank_name %}
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-secondary small">Bank/Branch:</span>
+                            <span class="text-secondary small">{{ w.bank_name }}</span>
+                        </div>
+                        {% endif %}
+                        <hr class="my-2 border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary small fw-bold">Payout Amount:</span>
+                            <span class="fs-5 text-success fw-bold">৳{{ w.amount }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary">Bank / MFS Transaction ID (TrxID)</label>
+                        <input type="text" name="transaction_id" class="form-control form-control-dark" placeholder="e.g. 9JA7B5XX (leave blank to auto-generate)">
+                        <small class="text-secondary">Enter the transaction ID returned by your MFS/Bank transfer.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary">Admin Remarks (Optional)</label>
+                        <input type="text" name="admin_notes" class="form-control form-control-dark" placeholder="e.g. Sent via bKash Merchant Payout">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success fw-bold"><i class="fas fa-check me-1"></i>Confirm Approval</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal{{ w.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ w.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary shadow-lg">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="rejectModalLabel{{ w.id }}"><i class="fas fa-times-circle text-danger me-2"></i>Reject Payout #WDR-{{ w.id }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'review_withdrawal' w.id 'reject' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning small border-warning border-opacity-25 bg-warning bg-opacity-10 text-warning mb-3">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Rejecting this request will immediately <strong>refund ৳{{ w.amount }}</strong> back to {{ w.worker.admin.get_full_name }}'s available wallet balance.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary">Reason for Rejection <span class="text-danger">*</span></label>
+                        <textarea name="admin_notes" rows="3" class="form-control form-control-dark" placeholder="e.g. Invalid account number or details mismatch..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-bold"><i class="fas fa-ban me-1"></i>Confirm Reject & Refund</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

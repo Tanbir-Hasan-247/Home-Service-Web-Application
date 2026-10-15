@@ -97,8 +97,11 @@
         <div class="review-card">
             <div class="review-header">
                 <div class="star-rating">
-                    {% for i in "x"|ljust:record.Rating %}
-                        <i class="fas fa-star"></i>
+                    {% for i in record.star_range %}
+                        <i class="fas fa-star text-warning"></i>
+                    {% endfor %}
+                    {% for i in record.empty_star_range %}
+                        <i class="far fa-star text-secondary"></i>
                     {% endfor %}
                 </div>
                 <span class="text-secondary">{{ record.Date|date:"F d, Y" }}</span>

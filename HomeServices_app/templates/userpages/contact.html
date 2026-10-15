@@ -89,22 +89,25 @@
     <div class="row g-5 align-items-center">
         <div class="col-lg-6">
             <h2 class="section-title mb-4">Send Us a Message</h2>
-            <form>
+            <form method="post">
+                {% csrf_token %}
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <input type="text" class="form-control form-control-dark" placeholder="Your Name" required>
+                        <input type="text" name="name" class="form-control form-control-dark" placeholder="Your Name" value="{{ request.user.get_full_name|default:'' }}" required>
                     </div>
                     <div class="col-md-6">
-                        <input type="email" class="form-control form-control-dark" placeholder="Your Email" required>
+                        <input type="email" name="email" class="form-control form-control-dark" placeholder="Your Email" value="{{ request.user.email|default:'' }}" required>
                     </div>
                     <div class="col-12">
-                        <input type="text" class="form-control form-control-dark" placeholder="Subject" required>
+                        <input type="text" name="subject" class="form-control form-control-dark" placeholder="Subject" required>
                     </div>
                     <div class="col-12">
-                        <textarea class="form-control form-control-dark" rows="6" placeholder="Leave a message here" required></textarea>
+                        <textarea class="form-control form-control-dark" name="message" rows="6" placeholder="Leave a message here" required></textarea>
                     </div>
                     <div class="col-12">
-                        <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
+                        <button class="btn btn-primary w-100 py-3 fw-bold" type="submit">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
                     </div>
                 </div>
             </form>

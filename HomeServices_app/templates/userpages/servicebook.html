@@ -2,6 +2,8 @@
 {% block content %}
 {% load static %}
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <style>
     .booking-form-section {
         background-color: var(--dark-bg-secondary);
@@ -113,13 +115,13 @@
                     </div>
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
-                        <input type="text" class="form-control" name="Address" placeholder="Street Address" required>
+                        <input type="text" class="form-control" name="Address" value="{{ user_profile.Address|default:'' }}" placeholder="Street Address" required>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-city"></i></span>
-                                <select class="form-select" name="city" required>
+                                <select class="form-select" name="city" id="citySelect" required>
                                     <option value="" disabled selected>Select City</option>
                                     {% for c in city %}
                                     <option value="{{ c.id }}">{{ c.name }}</option>
@@ -150,16 +152,83 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Interactive Google Maps Pin-Drop -->
+                    <div class="mt-4 pt-3 border-top" style="border-color: var(--border-color) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label text-white small fw-bold mb-0">
+                                <i class="fab fa-google text-danger me-1"></i>Google Maps Pinpoint Location
+                            </label>
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2" id="locateBtn" style="font-size: 0.75rem;">
+                                    <i class="fas fa-crosshairs me-1"></i>Locate Me (GPS)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Map Quick Area Search Bar -->
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text bg-dark text-primary border-secondary"><i class="fas fa-search-location"></i></span>
+                            <input type="text" id="mapSearchInput" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Type area (e.g. Dhanmondi, Gulshan, Mirpur, Uttara)...">
+                            <button class="btn btn-primary btn-sm px-3" type="button" id="mapSearchBtn">
+                                Find on Map
+                            </button>
+                        </div>
+
+                        <div id="bookingMap" style="height: 250px; width: 100%; border-radius: 0.5rem; border: 1px solid var(--border-color); z-index: 1;"></div>
+                        <input type="hidden" name="latitude" id="latitudeInput">
+                        <input type="hidden" name="longitude" id="longitudeInput">
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small class="text-secondary" id="coordsDisplay">
+                                <i class="fas fa-info-circle me-1"></i>Click anywhere or drag marker to set your address.
+                            </small>
+                            <small class="text-muted" style="font-size: 0.72rem;">Powered by Google Maps Tiles</small>
+                        </div>
+                    </div>
                 </div>
 
+                {% if addons %}
+                <!-- Step 3: Service Packages & Add-on Materials -->
                 <div class="booking-form-section">
                     <div class="section-header">
                         <span class="section-step">3</span>
+                        <div>
+                            <h4 class="mb-0">Service Packages & Extra Materials</h4>
+                            <small class="text-secondary">Select optional materials or deep service extensions to save time.</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        {% for addon in addons %}
+                        <div class="col-md-6">
+                            <label class="card h-100 p-3 bg-dark border border-secondary border-opacity-50 text-white cursor-pointer addon-card" style="cursor: pointer; transition: all 0.2s ease;">
+                                <div class="d-flex align-items-start gap-3">
+                                    <input class="form-check-input addon-checkbox mt-1" type="checkbox" name="addons" value="{{ addon.id }}" data-price="{{ addon.price }}" onchange="updateEstimatedBill()">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold small">{{ addon.name }}</span>
+                                            <span class="badge bg-primary bg-opacity-25 text-primary fw-bold">+৳{{ addon.price }}</span>
+                                        </div>
+                                        {% if addon.description %}
+                                        <small class="text-secondary d-block" style="font-size: 0.78rem;">{{ addon.description }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="booking-form-section">
+                    <div class="section-header">
+                        <span class="section-step">{% if addons %}4{% else %}3{% endif %}</span>
                         <h4>Contact Information</h4>
                     </div>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
-                        <input type="tel" class="form-control" name="contact" placeholder="Your best contact number"
+                        <input type="tel" class="form-control" name="contact" value="{{ user_profile.contact_number|default:'' }}" placeholder="Your best contact number"
                             required>
                     </div>
                 </div>
@@ -174,10 +243,32 @@
 
         <div class="col-lg-5">
             <div class="summary-card">
-                <img src="{{ services.img.url }}" class="summary-card-img" alt="{{ services.Name }}">
+                <img src="{{ services.get_img_url }}" class="summary-card-img" alt="{{ services.Name }}">
                 <div class="p-4">
                     <p class="text-primary fw-bold mb-1">YOU ARE BOOKING</p>
-                    <h2 class="text-white">{{ services.Name }}</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h2 class="text-white mb-0">{{ services.Name }}</h2>
+                        <span class="badge bg-success bg-opacity-25 text-success fs-5 p-2"><i class="fas fa-clock me-1"></i>৳{{ services.hourly_rate }}/hr</span>
+                    </div>
+
+                    <!-- Dynamic Pricing Breakdown -->
+                    <div class="card p-3 my-3 bg-black bg-opacity-30 border border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between mb-2 small text-secondary">
+                            <span>Base Service Rate</span>
+                            <span class="text-white">৳{{ services.hourly_rate }}/hr</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small text-secondary">
+                            <span>Selected Add-ons</span>
+                            <span class="text-success fw-bold" id="summaryAddonsDisplay">+৳0.00</span>
+                        </div>
+                        <hr class="my-2 border-secondary border-opacity-25">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-white fw-bold">Est. Initial Bill</span>
+                            <span class="fs-4 fw-bold text-success" id="summaryTotalDisplay">৳{{ services.hourly_rate }}</span>
+                        </div>
+                        <small class="text-secondary mt-1" style="font-size: 0.72rem;">(Calculated as: 1 hr initial labor + selected add-ons)</small>
+                    </div>
+
                     <p class="text-secondary border-bottom pb-3 mb-3"
                         style="border-color: var(--border-color) !important; white-space: pre-line;">
                         {{ services.Description }}
@@ -198,5 +289,236 @@
         </div>
     </div>
 </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mapElement = document.getElementById('bookingMap');
+    if (!mapElement) return;
+
+    // Default center: Dhaka, Bangladesh
+    let defaultLat = 23.8103;
+    let defaultLng = 90.4125;
+
+    const latInput = document.getElementById('latitudeInput');
+    const lngInput = document.getElementById('longitudeInput');
+    const coordsDisplay = document.getElementById('coordsDisplay');
+    const locateBtn = document.getElementById('locateBtn');
+    const citySelect = document.getElementById('citySelect');
+    const searchInput = document.getElementById('mapSearchInput');
+    const searchBtn = document.getElementById('mapSearchBtn');
+
+    // Google Maps Tile Layers (Roadmap, Satellite Hybrid, Terrain)
+    const googleRoadmap = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+        attribution: '&copy; Google Maps'
+    });
+
+    const googleSatellite = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+        attribution: '&copy; Google Maps Satellite'
+    });
+
+    const googleTerrain = L.tileLayer('https://mt{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+        attribution: '&copy; Google Maps Terrain'
+    });
+
+    // Initialize Map with Google Roadmap
+    const map = L.map('bookingMap', {
+        center: [defaultLat, defaultLng],
+        zoom: 13,
+        layers: [googleRoadmap]
+    });
+
+    // Layer switcher
+    const baseMaps = {
+        "Google Roadmap": googleRoadmap,
+        "Google Satellite": googleSatellite,
+        "Google Terrain": googleTerrain
+    };
+    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
+    // Google Maps style pin icon
+    const googlePin = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36]
+    });
+
+    // Draggable marker
+    let marker = L.marker([defaultLat, defaultLng], {
+        draggable: true,
+        icon: googlePin
+    }).addTo(map);
+
+    function updateCoordinates(lat, lng) {
+        latInput.value = lat.toFixed(6);
+        lngInput.value = lng.toFixed(6);
+        coordsDisplay.innerHTML = `<span class="badge bg-success-subtle text-success border border-success me-1"><i class="fas fa-check-circle me-1"></i>Location Pinned</span> <strong>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}</strong>`;
+    }
+
+    // Set initial coordinates
+    updateCoordinates(defaultLat, defaultLng);
+
+    marker.on('dragend', function(e) {
+        const position = marker.getLatLng();
+        updateCoordinates(position.lat, position.lng);
+    });
+
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        updateCoordinates(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Predefined coordinates for fast pan
+    const bangladeshLocations = {
+        'dhaka': [23.8103, 90.4125],
+        'chattogram': [22.3569, 91.7832],
+        'chittagong': [22.3569, 91.7832],
+        'sylhet': [24.8949, 91.8687],
+        'rajshahi': [24.3745, 88.6042],
+        'khulna': [22.8456, 89.5403],
+        'barishal': [22.7010, 90.3535],
+        'rangpur': [25.7439, 89.2752],
+        'mymensingh': [24.7471, 90.4203],
+        'cumilla': [23.4682, 91.1788],
+        'comilla': [23.4682, 91.1788],
+        'gazipur': [23.9999, 90.4203],
+        'narayanganj': [23.6238, 90.5000],
+        'dhanmondi': [23.7461, 90.3742],
+        'gulshan': [23.7925, 90.4078],
+        'banani': [23.7937, 90.4066],
+        'uttara': [23.8759, 90.3795],
+        'mirpur': [23.8072, 90.3686],
+        'mohammadpur': [23.7661, 90.3587],
+        'motijheel': [23.7330, 90.4172],
+        'badda': [23.7806, 90.4267],
+        'bashundhara': [23.8191, 90.4326],
+        'rampura': [23.7612, 90.4209],
+        'khilgaon': [23.7508, 90.4253],
+        'lalmatia': [23.7547, 90.3689]
+    };
+
+    // Auto pan on city select change
+    if (citySelect) {
+        citySelect.addEventListener('change', function() {
+            const selectedText = citySelect.options[citySelect.selectedIndex].text.toLowerCase().trim();
+            for (const [key, coords] of Object.entries(bangladeshLocations)) {
+                if (selectedText.includes(key)) {
+                    map.flyTo(coords, 14, { duration: 1.2 });
+                    marker.setLatLng(coords);
+                    updateCoordinates(coords[0], coords[1]);
+                    break;
+                }
+            }
+        });
+    }
+
+    // Quick map area search
+    function handleMapSearch() {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) return;
+
+        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        // Check local presets first
+        let found = false;
+        for (const [key, coords] of Object.entries(bangladeshLocations)) {
+            if (query.includes(key) || key.includes(query)) {
+                map.flyTo(coords, 15, { duration: 1.2 });
+                marker.setLatLng(coords);
+                updateCoordinates(coords[0], coords[1]);
+                searchBtn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                setTimeout(() => { searchBtn.innerText = 'Find on Map'; }, 2000);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            // Geocode using public search API fallback
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bangladesh')}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        map.flyTo([lat, lng], 15, { duration: 1.2 });
+                        marker.setLatLng([lat, lng]);
+                        updateCoordinates(lat, lng);
+                        searchBtn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                    } else {
+                        alert('Location not found. You can click directly on the map to set your pin.');
+                        searchBtn.innerText = 'Find on Map';
+                    }
+                    setTimeout(() => { searchBtn.innerText = 'Find on Map'; }, 2000);
+                })
+                .catch(() => {
+                    searchBtn.innerText = 'Find on Map';
+                });
+        }
+    }
+
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', handleMapSearch);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleMapSearch();
+            }
+        });
+    }
+
+    // GPS Locate Me
+    if (locateBtn && navigator.geolocation) {
+        locateBtn.addEventListener('click', function() {
+            locateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Locating...';
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    const userLat = pos.coords.latitude;
+                    const userLng = pos.coords.longitude;
+                    map.flyTo([userLat, userLng], 16, { duration: 1.2 });
+                    marker.setLatLng([userLat, userLng]);
+                    updateCoordinates(userLat, userLng);
+                    locateBtn.innerHTML = '<i class="fas fa-check text-success me-1"></i>Located!';
+                    setTimeout(() => {
+                        locateBtn.innerHTML = '<i class="fas fa-crosshairs me-1"></i>Locate Me (GPS)';
+                    }, 3000);
+                },
+                function(err) {
+                    locateBtn.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-1"></i>GPS Unavailable';
+                    setTimeout(() => {
+                        locateBtn.innerHTML = '<i class="fas fa-crosshairs me-1"></i>Locate Me (GPS)';
+                    }, 3000);
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
+            );
+        });
+    }
+
+    // Dynamic add-ons bill calculation
+    window.updateEstimatedBill = function() {
+        const baseRate = parseFloat("{{ services.hourly_rate|default:'300' }}") || 300.0;
+        let addonsTotal = 0.0;
+        document.querySelectorAll('.addon-checkbox:checked').forEach(function(cb) {
+            addonsTotal += parseFloat(cb.getAttribute('data-price') || 0);
+        });
+        const estTotal = baseRate + addonsTotal;
+        const addonsDisp = document.getElementById('summaryAddonsDisplay');
+        const totalDisp = document.getElementById('summaryTotalDisplay');
+        if (addonsDisp) addonsDisp.textContent = '+৳' + addonsTotal.toFixed(2);
+        if (totalDisp) totalDisp.textContent = '৳' + estTotal.toFixed(2);
+    };
+
+    // Leaflet needs invalidateSize after rendering
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 400);
+});
+</script>
 
 {% endblock %}

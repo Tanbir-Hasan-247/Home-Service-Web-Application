@@ -117,39 +117,39 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="firstname" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="firstname" name="firstname" placeholder="John" required>
+                    <input type="text" class="form-control" id="firstname" name="firstname" value="{{ form_data.firstname|default:'' }}" placeholder="John" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="lastname" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Doe" required>
+                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ form_data.lastname|default:'' }}" placeholder="Doe" required>
                 </div>
             </div>
 
             <div class="mb-3">
                 <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+                <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email|default:'' }}" placeholder="you@example.com" required>
             </div>
 
             <div class="mb-3">
                 <label for="contactnumber" class="form-label">Contact Number</label>
-                <input type="tel" class="form-control" id="contactnumber" name="contactnumber"
+                <input type="tel" class="form-control" id="contactnumber" name="contactnumber" value="{{ form_data.contactnumber|default:'' }}"
                     placeholder="+880 1234 567890" required>
             </div>
 
             <div class="mb-3">
                 <label for="address" class="form-label">Address</label>
                 <textarea class="form-control" id="address" name="address" rows="3" placeholder="123 Main St, Dhaka"
-                    required></textarea>
+                    required>{{ form_data.address|default:'' }}</textarea>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="gender" class="form-label">Gender</label>
                     <select class="form-select" id="gender" name="gender" required>
-                        <option value="" selected disabled>Select...</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
+                        <option value="" {% if not form_data.gender %}selected{% endif %} disabled>Select...</option>
+                        <option value="Male" {% if form_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if form_data.gender == 'Other' %}selected{% endif %}>Other</option>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">

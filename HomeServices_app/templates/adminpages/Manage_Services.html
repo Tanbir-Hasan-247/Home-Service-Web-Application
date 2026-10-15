@@ -58,10 +58,13 @@
     <div class="col-md-6 col-lg-4">
         <div class="card service-manage-card h-100">
             <div class="img-container">
-                <img src="{{ service.img.url }}" class="card-img-top" alt="{{ service.Name }}">
+                <img src="{{ service.get_img_url }}" class="card-img-top" alt="{{ service.Name }}">
             </div>
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title text-white">{{ service.Name }}</h5>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title text-white mb-0">{{ service.Name }}</h5>
+                    <span class="badge bg-primary fs-6">৳{{ service.hourly_rate }}/hr</span>
+                </div>
                 <p class="card-text text-secondary flex-grow-1">{{ service.Description|truncatechars:120 }}</p>
             </div>
             <div class="card-footer d-flex justify-content-end gap-2">

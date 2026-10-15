@@ -88,6 +88,14 @@
         padding: 0.75rem;
         border-radius: 0.5rem;
     }
+    .area-label:hover {
+        border-color: var(--primary-color) !important;
+    }
+    .area-label.active-area,
+    .area-label:has(input:checked) {
+        border-color: var(--primary-color) !important;
+        background-color: rgba(59, 130, 246, 0.15) !important;
+    }
 </style>
 
 <div class="container register-page-container">
@@ -112,52 +120,89 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="firstname" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="firstname" name="firstname" required>
+                    <input type="text" class="form-control" id="firstname" name="firstname" value="{{ form_data.firstname|default:'' }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="lastname" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="lastname" name="lastname" required>
+                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ form_data.lastname|default:'' }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email|default:'' }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="contactnumber" class="form-label">Contact Number</label>
-                    <input type="tel" class="form-control" id="contactnumber" name="contactnumber" required>
+                    <input type="tel" class="form-control" id="contactnumber" name="contactnumber" value="{{ form_data.contactnumber|default:'' }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="dob" class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" id="dob" name="dob" required>
+                    <input type="date" class="form-control" id="dob" name="dob" value="{{ form_data.dob|default:'' }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="gender" class="form-label">Gender</label>
                     <select id="gender" class="form-select" name="gender" required>
-                        <option value="" disabled selected>Select...</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
+                        <option value="" {% if not form_data.gender %}selected{% endif %} disabled>Select...</option>
+                        <option value="Male" {% if form_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if form_data.gender == 'Other' %}selected{% endif %}>Other</option>
                     </select>
                 </div>
-                <div class="col-12 mb-3">
-                    <label for="city" class="form-label">City</label>
-                    <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Dhaka" required>
-                </div>
-                <div class="col-12 mb-3">
-                    <label for="address" class="form-label">Full Address</label>
-                    <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">Base / Residential City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ form_data.city|default:'' }}" placeholder="e.g., Dhaka" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="designation" class="form-label">Primary Service (Designation)</label>
-
                     <select class="form-select" name="designation" id="designation" required>
-                        <option disabled selected value="">Select Your Primary Service</option>
+                        <option disabled {% if not form_data.designation %}selected{% endif %} value="">Select Your Primary Service</option>
                         {% for cc in designations %}
-                        <option value="{{ cc.Name }}">{{ cc.Name }}</option>
+                        <option value="{{ cc.Name }}" {% if form_data.designation == cc.Name %}selected{% endif %}>{{ cc.Name }}</option>
                         {% endfor %}
-                        <option value="Other">Other</option>
+                        <option value="Other" {% if form_data.designation == 'Other' %}selected{% endif %}>Other</option>
                     </select>
                 </div>
+                <div class="col-12 mb-3">
+                    <label for="address" class="form-label">Full Street Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="2" required>{{ form_data.address|default:'' }}</textarea>
+                </div>
+
+                <!-- Service Coverage Areas (Multi-select) -->
+                <div class="col-12 mb-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
+                        <label class="form-label fw-bold mb-0 text-white">
+                            <i class="fas fa-map-marked-alt text-primary me-1"></i> Service Coverage Areas (Cities) <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="areaCounter" class="badge bg-primary text-white small">0 Selected</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="selectAllAreas" style="font-size: 0.75rem;">Select All</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="clearAllAreas" style="font-size: 0.75rem;">Clear</button>
+                        </div>
+                    </div>
+                    <small class="text-secondary d-block mb-2">
+                        Select one or more cities where you want to work. You will only be notified of and allowed to accept jobs in these chosen areas.
+                    </small>
+
+                    <input type="text" class="form-control form-control-sm mb-2" id="areaSearchInput" placeholder="🔍 Quick search cities..." style="background-color: var(--dark-bg-primary); border-color: var(--border-color);">
+
+                    <div class="p-3 rounded" style="background-color: var(--dark-bg-primary); border: 1px solid var(--border-color); max-height: 220px; overflow-y: auto;">
+                        <div class="row g-2" id="areaListGrid">
+                            {% for c in cities %}
+                            <div class="col-sm-6 col-md-4 area-choice-item" data-city="{{ c.name|lower }}">
+                                <label class="form-check area-label p-2 rounded d-flex align-items-center mb-0" for="area_{{ c.id }}" style="cursor: pointer; background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); transition: all 0.2s;">
+                                    <input class="form-check-input me-2 area-checkbox" type="checkbox" name="service_areas" value="{{ c.id }}" id="area_{{ c.id }}" {% if c.id in form_data.selected_service_areas %}checked{% endif %}>
+                                    <span class="text-white small fw-medium">{{ c.name }}</span>
+                                </label>
+                            </div>
+                            {% empty %}
+                            <div class="col-12 text-center text-secondary py-2 small">No cities configured yet.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="areaValidationFeedback" class="text-danger small mt-1 d-none">
+                        <i class="fas fa-exclamation-circle me-1"></i>Please select at least one service coverage area.
+                    </div>
+                </div>
+
                 <div class="col-md-6 mb-3">
                     <label for="profile_pic" class="form-label">Profile Picture</label>
                     <input type="file" class="form-control" id="profile_pic" name="profile_pic">
@@ -182,5 +227,91 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('areaSearchInput');
+    const areaItems = document.querySelectorAll('.area-choice-item');
+    const checkboxes = document.querySelectorAll('.area-checkbox');
+    const counterBadge = document.getElementById('areaCounter');
+    const selectAllBtn = document.getElementById('selectAllAreas');
+    const clearAllBtn = document.getElementById('clearAllAreas');
+    const validationFeedback = document.getElementById('areaValidationFeedback');
+    const form = document.querySelector('form');
+
+    function updateCounterAndStyles() {
+        let count = 0;
+        checkboxes.forEach(cb => {
+            const label = cb.closest('.area-label');
+            if (cb.checked) {
+                count++;
+                if (label) label.classList.add('active-area');
+            } else {
+                if (label) label.classList.remove('active-area');
+            }
+        });
+        if (counterBadge) {
+            counterBadge.textContent = `${count} Selected`;
+        }
+        if (count > 0 && validationFeedback) {
+            validationFeedback.classList.add('d-none');
+        }
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateCounterAndStyles);
+    });
+
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            areaItems.forEach(item => {
+                if (item.style.display !== 'none') {
+                    const cb = item.querySelector('.area-checkbox');
+                    if (cb) cb.checked = true;
+                }
+            });
+            updateCounterAndStyles();
+        });
+    }
+
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', function() {
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+            });
+            updateCounterAndStyles();
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase().trim();
+            areaItems.forEach(item => {
+                const cityName = item.getAttribute('data-city') || '';
+                if (cityName.includes(query)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const checkedCount = document.querySelectorAll('.area-checkbox:checked').length;
+            if (checkedCount === 0) {
+                e.preventDefault();
+                if (validationFeedback) {
+                    validationFeedback.classList.remove('d-none');
+                }
+                const scrollTarget = document.getElementById('areaSearchInput') || validationFeedback;
+                scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+
+    updateCounterAndStyles();
+});
+</script>
 
 {% endblock %}

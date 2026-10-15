@@ -1,0 +1,298 @@
+{% extends "workerpages/worker_header_footer.html" %}
+{% load static %}
+
+{% block title %}Technician Wallet & Earnings{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .wallet-highlight {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    .table-dark-custom {
+        --bs-table-bg: var(--dark-bg-secondary);
+        --bs-table-border-color: var(--border-color);
+        --bs-table-color: var(--text-secondary);
+    }
+    .form-control-dark, .form-select-dark {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+    .form-control-dark:focus, .form-select-dark:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+</style>
+
+<div class="container-fluid px-0">
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 text-white mb-1"><i class="fas fa-wallet text-warning me-2"></i>My Virtual Wallet</h1>
+            <p class="text-secondary mb-0">Track your 90% service earnings, request instant payouts, and view withdrawal history.</p>
+        </div>
+        <div>
+            <button class="btn btn-success px-4 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#withdrawalModal">
+                <i class="fas fa-hand-holding-usd me-2"></i>Request Withdrawal
+            </button>
+        </div>
+    </div>
+
+    <!-- Earnings Overview Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Available Wallet Balance -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card wallet-highlight">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Available Balance</span>
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">৳{{ worker.wallet_balance }}</h2>
+                <small class="text-success"><i class="fas fa-check-circle me-1"></i>Ready for payout</small>
+            </div>
+        </div>
+
+        <!-- Total Earned -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Total Earned (90%)</span>
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">৳{{ total_earned }}</h2>
+                <small class="text-secondary">From paid service jobs</small>
+            </div>
+        </div>
+
+        <!-- Total Withdrawn -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">Total Withdrawn</span>
+                    <div class="stat-icon bg-info bg-opacity-10 text-info">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">৳{{ total_withdrawn }}</h2>
+                <small class="text-secondary">Disbursed to your accounts</small>
+            </div>
+        </div>
+
+        <!-- In Review / Pending -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small fw-bold text-uppercase">In Review</span>
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">৳{{ pending_withdraw }}</h2>
+                <small class="text-warning">Pending admin approval</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payout Notice / Information -->
+    <div class="alert alert-dark border border-secondary border-opacity-25 d-flex align-items-center gap-3 mb-4">
+        <i class="fas fa-info-circle fa-2x text-primary flex-shrink-0"></i>
+        <div>
+            <strong class="text-white">How Payouts Work:</strong>
+            <p class="mb-0 small text-secondary">
+                You receive <strong>90%</strong> of every completed job straight into your virtual wallet. Platform retention is <strong>10%</strong>.
+                Minimum withdrawal request is <strong>৳100</strong>. Supported payout methods include <strong>bKash</strong>, <strong>Nagad</strong>, <strong>Rocket</strong>, and <strong>Bank Transfer</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Withdrawal History -->
+    <div class="card bg-dark border-secondary">
+        <div class="card-header bg-transparent border-secondary py-3 d-flex justify-content-between align-items-center">
+            <h5 class="text-white mb-0"><i class="fas fa-history me-2 text-primary"></i>Withdrawal History</h5>
+            <span class="badge bg-secondary">{{ withdrawals.count }} requests</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0 align-middle">
+                    <thead class="table-light table-dark">
+                        <tr>
+                            <th class="ps-3">Req ID</th>
+                            <th>Date Requested</th>
+                            <th>Method & Account</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Transaction Ref</th>
+                            <th>Admin Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in withdrawals %}
+                        <tr>
+                            <td class="ps-3 fw-bold text-white">#WDR-{{ w.id }}</td>
+                            <td>
+                                <div class="text-white small">{{ w.created_at|date:"M d, Y" }}</div>
+                                <small class="text-secondary">{{ w.created_at|time:"h:i A" }}</small>
+                            </td>
+                            <td>
+                                <span class="badge {% if w.payment_method == 'bKash' %}bg-danger{% elif w.payment_method == 'Nagad' %}bg-warning text-dark{% elif w.payment_method == 'Rocket' %}bg-info text-dark{% else %}bg-primary{% endif %} me-1">
+                                    {{ w.payment_method }}
+                                </span>
+                                <span class="text-white small">{{ w.account_number }}</span>
+                                {% if w.bank_name %}
+                                <small class="d-block text-secondary">{{ w.bank_name }}</small>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold text-success">৳{{ w.amount }}</td>
+                            <td>
+                                {% if w.status == 'Approved' %}
+                                <span class="badge bg-success-subtle text-success border border-success"><i class="fas fa-check-circle me-1"></i>Approved</span>
+                                {% elif w.status == 'Rejected' %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger"><i class="fas fa-times-circle me-1"></i>Rejected</span>
+                                {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning"><i class="fas fa-clock me-1"></i>Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if w.transaction_id %}
+                                <span class="badge bg-black border border-secondary text-info font-monospace">{{ w.transaction_id }}</span>
+                                {% else %}
+                                <span class="text-secondary small">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-secondary">{{ w.admin_notes|default:"—" }}</small>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-secondary">
+                                <i class="fas fa-receipt fa-3x mb-3 text-secondary opacity-50"></i>
+                                <p class="mb-1">No withdrawal requests found.</p>
+                                <small>Once you finish jobs and earn money, you can request payouts anytime.</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Withdrawal Request Modal -->
+<div class="modal fade" id="withdrawalModal" tabindex="-1" aria-labelledby="withdrawalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="withdrawalModalLabel"><i class="fas fa-hand-holding-usd text-success me-2"></i>Request Payout</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'request_withdrawal' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="p-3 mb-3 rounded bg-black bg-opacity-25 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small">Available Balance:</span>
+                        <span class="fw-bold fs-5 text-success">৳{{ worker.wallet_balance }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary">Withdrawal Amount (৳) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-secondary border-secondary">৳</span>
+                            <input type="number" name="amount" class="form-control form-control-dark" min="100" max="{{ worker.wallet_balance }}" step="1" placeholder="e.g. 500" required>
+                        </div>
+                        <small class="text-secondary">Minimum payout amount is ৳100.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary">Payout Channel <span class="text-danger">*</span></label>
+                        <select name="payment_method" id="payoutChannel" class="form-select form-select-dark" required onchange="toggleBankFields()">
+                            <option value="bKash">bKash (Personal/Agent)</option>
+                            <option value="Nagad">Nagad (Personal)</option>
+                            <option value="Rocket">Rocket (DBBL)</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary" id="accountLabel">bKash Mobile Number (11 digits) <span class="text-danger">*</span></label>
+                        <input type="text" name="account_number" id="accountNumberInput" class="form-control form-control-dark font-monospace" placeholder="01XXXXXXXXX" value="{{ worker.contact_number }}" required>
+                        <small class="text-secondary">E.g. 01700000000 (11 digits)</small>
+                    </div>
+
+                    <div class="mb-3" id="bankFields" style="display: none;">
+                        <label class="form-label small text-secondary">Bank & Branch Name <span class="text-danger">*</span></label>
+                        <input type="text" name="bank_name" id="bankNameInput" class="form-control form-control-dark" placeholder="e.g. Dutch-Bangla Bank, Dhanmondi Branch">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-secondary">Personal Note / Remarks (Optional)</label>
+                        <textarea name="notes" rows="2" class="form-control form-control-dark" placeholder="Any special instruction for admin..."></textarea>
+                    </div>
+
+                    {% if worker.wallet_balance < 100 %}
+                    <div class="alert alert-warning small py-2 mb-0">
+                        <i class="fas fa-exclamation-circle me-1"></i> You need at least <strong>৳100.00</strong> available balance to request a payout.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4" {% if worker.wallet_balance < 100 %}disabled{% endif %}>
+                        <i class="fas fa-paper-plane me-1"></i> Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleBankFields() {
+        const channel = document.getElementById('payoutChannel').value;
+        const bankFields = document.getElementById('bankFields');
+        const bankInput = document.getElementById('bankNameInput');
+        const accountLabel = document.getElementById('accountLabel');
+        const accountInput = document.getElementById('accountNumberInput');
+        if (channel === 'Bank Transfer' || channel === 'Bank') {
+            bankFields.style.display = 'block';
+            if (bankInput) bankInput.required = true;
+            accountLabel.innerHTML = 'Bank Account Number <span class="text-danger">*</span>';
+            accountInput.placeholder = 'e.g. 1234567890123';
+        } else {
+            bankFields.style.display = 'none';
+            if (bankInput) bankInput.required = false;
+            accountLabel.innerHTML = `${channel} Mobile Number (11 digits) <span class="text-danger">*</span>`;
+            accountInput.placeholder = '01XXXXXXXXX';
+        }
+    }
+</script>
+{% endblock %}
+

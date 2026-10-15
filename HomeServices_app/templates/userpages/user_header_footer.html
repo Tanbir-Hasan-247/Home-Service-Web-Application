@@ -17,122 +17,281 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         :root {
             --primary-color: #3b82f6;
-            --dark-bg-primary: #111827;
-            --dark-bg-secondary: #1f2937;
-            --border-color: #374151;
-            --text-primary: #f9fafb;
-            --text-secondary: #9ca3af;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            --dark-bg-primary: #0b0f19;
+            --dark-bg-secondary: #111827;
+            --dark-bg-card: #182234;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(59, 130, 246, 0.35);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        /* Custom Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #273549;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
         }
 
         body {
             background-color: var(--dark-bg-primary);
             color: var(--text-secondary);
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            width: 100%;
+            letter-spacing: -0.01em;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
             color: var(--text-primary);
             font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
+        /* Buttons */
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background: var(--primary-gradient);
+            border: none;
+            color: #ffffff;
             font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+            padding: 0.65rem 1.4rem;
+            border-radius: 0.65rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.45);
+            color: #ffffff;
         }
 
         .btn-secondary {
-            background-color: var(--dark-bg-secondary);
-            border-color: var(--border-color);
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border-color);
             color: var(--text-primary);
             font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+            padding: 0.65rem 1.4rem;
+            border-radius: 0.65rem;
+            transition: all 0.25s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #273549;
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transform: translateY(-1px);
         }
 
-        /* Navbar */
+        /* Cards */
+        .card {
+            background-color: var(--dark-bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+
+        /* Ultra-Premium Glassmorphic Navbar */
         .navbar {
-            background-color: var(--dark-bg-primary);
-            padding: 1rem 0;
+            background: rgba(11, 15, 25, 0.82) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 0.85rem 0;
             border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
 
         .navbar-brand {
-            font-size: 1.75rem;
+            font-size: 1.45rem;
             font-weight: 800;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            letter-spacing: -0.03em;
         }
-
-        .navbar-brand i {
-            color: var(--primary-color);
+        .brand-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            margin-right: 0.65rem;
         }
 
         .nav-link {
-            color: var(--text-secondary);
+            color: var(--text-secondary) !important;
             font-weight: 500;
-            margin: 0 0.75rem;
+            font-size: 0.92rem;
+            margin: 0 0.35rem;
+            padding: 0.5rem 0.85rem !important;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        .nav-link:hover {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .nav-link.active {
+            color: #ffffff !important;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid var(--border-highlight);
+            font-weight: 600;
         }
 
-        .nav-link:hover,
-        .nav-link.active {
+        .user-nav-btn {
+            background: rgba(24, 34, 52, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 4px 12px 4px 6px;
             color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        .user-nav-btn:hover, .user-nav-btn:focus {
+            background: #1f2b40;
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        /* Language Switcher Pill */
+        .lang-toggle-pill {
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 2px;
+        }
+        .lang-toggle-pill .btn {
+            border-radius: 16px !important;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background-color: var(--dark-bg-secondary);
+                padding: 1.25rem;
+                margin-top: 0.85rem;
+                border-radius: 1rem;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            }
+            .navbar-nav .nav-link {
+                padding: 0.65rem 0.85rem !important;
+                margin: 0.2rem 0;
+            }
+            .navbar-collapse .d-flex {
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--border-color);
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+            .navbar-collapse .d-flex .btn,
+            .navbar-collapse .user-nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         /* Footer */
         .footer {
-            background-color: var(--dark-bg-primary);
-            padding-top: 5rem;
+            background-color: #070a11;
+            padding-top: 4.5rem;
             font-size: 0.9rem;
             border-top: 1px solid var(--border-color);
         }
-
         .footer .footer-heading {
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-
         .footer .footer-link {
             display: block;
             color: var(--text-secondary);
             text-decoration: none;
             margin-bottom: 0.75rem;
+            transition: color 0.2s, transform 0.2s;
         }
-
+        .footer .footer-link:hover {
+            color: #3b82f6;
+            transform: translateX(3px);
+        }
         .footer .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
             color: var(--text-secondary);
-            font-size: 1.25rem;
-            margin-right: 1.5rem;
+            font-size: 0.95rem;
+            margin-right: 0.5rem;
+            transition: all 0.2s ease;
         }
-
+        .footer .social-icon:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
         .footer .copyright-bar {
             border-top: 1px solid var(--border-color);
             padding-top: 1.5rem;
-            padding-bottom: 1rem;
+            padding-bottom: 1.5rem;
             margin-top: 3rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
-            <a href="{% url 'index' %}" class="navbar-brand">
-                <i class="fa-solid fa-house-chimney-window me-2"></i>ServiceHub
+            <a href="{% url 'index' %}" class="navbar-brand d-flex align-items-center">
+                <span class="brand-badge me-2"><i class="fa-solid fa-house-chimney-window"></i></span>
+                <span class="fw-bold tracking-tight">Service<span class="text-primary">Hub</span></span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,30 +299,100 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav mx-auto">
-                    <a href="{% url 'index' %}" class="nav-item nav-link">Home</a>
-                    <a href="{% url 'services' %}" class="nav-item nav-link">Services</a>
+                    <a href="{% url 'index' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
+                    <a href="{% url 'services' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}">Services</a>
                     <a href="{% url 'index' %}#how-it-works-section" class="nav-item nav-link">How it Works</a>
                     {% if user.is_authenticated and not user.is_staff %}
-                    <a href="{% url 'feedback_form' %}" class="nav-item nav-link">Give Feedback</a>
+                    <a href="{% url 'feedback_form' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'feedback_form' %}active{% endif %}">Give Feedback</a>
                     {% endif %}
-                    <a href="{% url 'about' %}" class="nav-item nav-link">About</a>
+                    {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+                    <a href="{% url 'customer_payment_history' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'customer_payment_history' %}active{% endif %}">Payments</a>
+                    {% endif %}
+                    <a href="{% url 'about' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+                    <a href="{% url 'contact' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
                 </div>
                 <div class="d-flex align-items-center">
+                    <!-- Language Selector Pill [EN | বাংলা] -->
+                    <div class="me-3 d-flex align-items-center">
+                        <div class="btn-group btn-group-sm lang-toggle-pill" role="group" aria-label="Language" style="border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.3);">
+                            <button type="button" class="btn btn-sm py-1 px-2 fw-semibold lang-btn-en btn-primary text-white" onclick="setSiteLanguage('en')" style="font-size: 0.75rem;">EN</button>
+                            <button type="button" class="btn btn-sm py-1 px-2 fw-semibold lang-btn-bn btn-dark text-secondary" onclick="setSiteLanguage('bn')" style="font-size: 0.75rem;">বাংলা</button>
+                        </div>
+                    </div>
+
                     {% if user.is_authenticated %}
+                    <!-- Notification Bell Dropdown -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-secondary position-relative p-2" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-bell text-warning"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                {{ unread_notifications_count }}
+                            </span>
+                            {% endif %}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-0 shadow" style="min-width: 320px; max-width: 380px; border: 1px solid var(--border-color); background-color: var(--dark-bg-secondary);">
+                            <div class="d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                <h6 class="mb-0 text-white fw-bold"><i class="fas fa-bell me-1 text-primary"></i> Notifications</h6>
+                                {% if unread_notifications_count > 0 %}
+                                <a href="{% url 'mark_all_notifications_read' %}" class="small text-decoration-none text-primary">Mark all read</a>
+                                {% endif %}
+                            </div>
+                            <div class="notification-list" style="max-height: 320px; overflow-y: auto;">
+                                {% for notif in user_notifications %}
+                                <a href="{% url 'mark_notification_read' notif.id %}" class="d-block p-3 border-bottom text-decoration-none {% if not notif.is_read %}bg-primary bg-opacity-10{% endif %}" style="border-color: var(--border-color) !important;">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="text-white small">{{ notif.title }}</strong>
+                                        <small class="text-secondary" style="font-size: 0.7rem;">{{ notif.created_at|timesince }} ago</small>
+                                    </div>
+                                    <p class="mb-0 text-secondary small text-truncate">{{ notif.message }}</p>
+                                </a>
+                                {% empty %}
+                                <div class="p-4 text-center text-secondary small">
+                                    <i class="fas fa-bell-slash fa-2x mb-2 d-block"></i>
+                                    No notifications yet.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle d-flex align-items-center" type="button"
                             id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-user me-2"></i> {{ user.get_full_name|default:user.username }}
+                            {% if current_profile_pic_url %}
+                            <img src="{{ current_profile_pic_url }}" alt="Avatar" class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover; border: 1.5px solid var(--primary-color);">
+                            {% else %}
+                            <i class="fa fa-user me-2"></i>
+                            {% endif %}
+                            <span>{{ user.get_full_name|default:user.username }}</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li class="px-3 py-2 border-bottom border-secondary border-opacity-25 mb-1 d-flex align-items-center gap-2">
+                                {% if current_profile_pic_url %}
+                                <img src="{{ current_profile_pic_url }}" alt="Avatar" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover; border: 1.5px solid var(--primary-color);">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                    <i class="fa fa-user text-light"></i>
+                                </div>
+                                {% endif %}
+                                <div style="line-height: 1.2;">
+                                    <div class="fw-bold text-white small">{{ user.get_full_name|default:user.username }}</div>
+                                    <div class="text-secondary" style="font-size: 0.72rem;">{{ user.email|default:user.username }}</div>
+                                </div>
+                            </li>
 
                             {% if user.is_superuser %}
                             <li><a class="dropdown-item" href="{% url 'admmin_home' %}"><i
                                         class="fas fa-shield-halved fa-fw me-2"></i>Admin Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin_payment_history' %}"><i
+                                        class="fas fa-file-invoice-dollar fa-fw me-2"></i>Payment History</a></li>
 
                             {% elif user.is_staff %}
                             <li><a class="dropdown-item" href="{% url 'workers_home' %}"><i
                                         class="fas fa-briefcase fa-fw me-2"></i>Worker Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'worker_payment_history' %}"><i
+                                        class="fas fa-wallet fa-fw me-2"></i>My Earnings</a></li>
                             <li><a class="dropdown-item" href="{% url 'workerprofile' %}"><i
                                         class="fas fa-user-cog fa-fw me-2"></i>My Profile</a></li>
 
@@ -172,6 +401,8 @@
                                         class="fas fa-user-circle fa-fw me-2"></i>My Profile</a></li>
                             <li><a class="dropdown-item" href="{% url 'Viewappointment_history' %}"><i
                                         class="fas fa-list-alt fa-fw me-2"></i>My Appointments</a></li>
+                            <li><a class="dropdown-item" href="{% url 'customer_payment_history' %}"><i
+                                        class="fas fa-file-invoice-dollar fa-fw me-2"></i>Payment History</a></li>
                             {% endif %}
                             <li>
                                 <hr class="dropdown-divider">
@@ -189,6 +420,18 @@
         </div>
     </nav>
 
+    {% if messages %}
+    <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% block content %}
     {% endblock %}
 
@@ -196,8 +439,9 @@
         <div class="container">
             <div class="row g-5">
                 <div class="col-lg-4 col-md-6">
-                    <a href="{% url 'index' %}" class="navbar-brand d-inline-block mb-3">
-                        <i class="fa-solid fa-house-chimney-window me-2"></i>ServiceHub
+                    <a href="{% url 'index' %}" class="navbar-brand d-inline-flex align-items-center mb-3">
+                        <span class="brand-badge me-2"><i class="fa-solid fa-house-chimney-window"></i></span>
+                        <span class="fw-bold fs-4 tracking-tight">Service<span class="text-primary">Hub</span></span>
                     </a>
                     <p class="mb-4">Connecting customers with trusted service professionals for all home service needs.
                     </p>
@@ -234,7 +478,8 @@
             </div>
         </div>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/bilingual.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

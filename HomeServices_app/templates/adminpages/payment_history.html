@@ -1,0 +1,279 @@
+{% extends "adminpages/admin_header_footer.html" %}
+{% load static %}
+
+{% block title %}Financial Transactions & Payment History{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'admmin_home' %}">Dashboard</a></li>
+<li class="breadcrumb-item active" aria-current="page">Payment History</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card-finance {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card-finance:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .stat-icon-finance {
+        width: 52px;
+        height: 52px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1.25rem;
+        flex-shrink: 0;
+    }
+    .filter-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-bottom: 1.75rem;
+    }
+    .table-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    .table-custom th {
+        background-color: rgba(17, 24, 39, 0.95);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.85rem;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+    .table-custom td {
+        padding: 0.95rem 0.85rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+    }
+    .table-custom tr:hover td {
+        background-color: rgba(55, 65, 81, 0.25);
+    }
+</style>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="page-title mb-1">Financial Transactions & Payments</h1>
+        <p class="text-secondary mb-0">Overview of all customer payments, 10% platform revenue commissions, and technician payouts.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="?export=csv{% if current_status %}&status={{ current_status }}{% endif %}{% if current_method %}&method={{ current_method }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-outline-success">
+            <i class="fas fa-file-csv me-2"></i>Export CSV
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-secondary">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+    </div>
+</div>
+
+<!-- Financial Summary Cards -->
+<div class="row g-3 g-lg-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-finance">
+            <div class="stat-icon-finance bg-success bg-opacity-25 text-success">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Platform Net Revenue</small>
+                <div class="fs-4 fw-bold text-success">৳{{ stats.total_commission|floatformat:2 }}</div>
+                <small class="text-secondary">10% commission fee</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-finance">
+            <div class="stat-icon-finance bg-primary bg-opacity-25 text-primary">
+                <i class="fas fa-money-bill-trend-up"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Total Paid Volume</small>
+                <div class="fs-4 fw-bold text-white">৳{{ stats.total_volume|floatformat:2 }}</div>
+                <small class="text-secondary">{{ stats.paid_count }} paid transactions</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-finance">
+            <div class="stat-icon-finance bg-info bg-opacity-25 text-info">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Worker Payouts</small>
+                <div class="fs-4 fw-bold text-info">৳{{ stats.total_payouts|floatformat:2 }}</div>
+                <small class="text-secondary">90% net technician share</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-finance">
+            <div class="stat-icon-finance bg-warning bg-opacity-25 text-warning">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div>
+                <small class="text-secondary text-uppercase fw-semibold d-block">Pending Collections</small>
+                <div class="fs-4 fw-bold text-warning">৳{{ stats.pending_volume|floatformat:2 }}</div>
+                <small class="text-secondary">{{ stats.pending_count }} orders pending payment</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-card">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-4 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" class="form-control bg-dark border-secondary text-white" placeholder="Search Trx ID, Customer, Worker, Service..." value="{{ search_query }}">
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3">
+            <select name="status" class="form-select bg-dark border-secondary text-white">
+                <option value="">All Payment Statuses</option>
+                <option value="Paid" {% if current_status == "Paid" %}selected{% endif %}>Paid Only</option>
+                <option value="Pending" {% if current_status == "Pending" %}selected{% endif %}>Pending Only</option>
+            </select>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3">
+            <select name="method" class="form-select bg-dark border-secondary text-white">
+                <option value="">All Payment Methods</option>
+                <option value="bKash" {% if current_method == "bKash" %}selected{% endif %}>bKash</option>
+                <option value="Nagad" {% if current_method == "Nagad" %}selected{% endif %}>Nagad</option>
+                <option value="Credit / Debit Card" {% if current_method == "Credit / Debit Card" %}selected{% endif %}>Card</option>
+                <option value="Cash on Delivery" {% if current_method == "Cash on Delivery" %}selected{% endif %}>Cash on Delivery</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-lg-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-filter me-1"></i>Filter</button>
+            {% if search_query or current_status or current_method %}
+            <a href="{% url 'admin_payment_history' %}" class="btn btn-outline-secondary" title="Clear Filters"><i class="fas fa-undo"></i></a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Transactions Table -->
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice / Trx ID</th>
+                    <th>Customer</th>
+                    <th>Technician</th>
+                    <th>Service & Rate</th>
+                    <th>Hours Worked</th>
+                    <th>Total Bill</th>
+                    <th>Admin (10%)</th>
+                    <th>Worker (90%)</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td>
+                        <a href="{% url 'invoice_detail' p.id %}" class="text-primary fw-bold text-decoration-none">
+                            #INV-{{ p.id }}{{ p.requests.id }}
+                        </a>
+                        {% if p.transaction_id %}
+                        <small class="text-secondary d-block font-monospace">{{ p.transaction_id }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-white">{{ p.requests.user.admin.get_full_name|default:p.requests.user.admin.username }}</div>
+                        <small class="text-secondary"><i class="fas fa-phone-alt me-1"></i>{{ p.requests.user.contact_number }}</small>
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-white">{{ p.assigned_worker.admin.get_full_name|default:p.assigned_worker.admin.username }}</div>
+                        <small class="text-secondary">{{ p.assigned_worker.designation }}</small>
+                    </td>
+                    <td>
+                        <div class="text-white">{{ p.requests.service.Name }}</div>
+                        <small class="text-secondary">৳{{ p.hourly_rate }}/hr</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary bg-opacity-50 text-white fs-7">{{ p.hours_worked }} hrs</span>
+                    </td>
+                    <td>
+                        <span class="fw-bold text-white fs-6">৳{{ p.total_amount }}</span>
+                    </td>
+                    <td>
+                        <span class="text-success fw-bold">৳{{ p.admin_commission }}</span>
+                    </td>
+                    <td>
+                        <span class="text-info fw-semibold">৳{{ p.worker_earning }}</span>
+                    </td>
+                    <td>
+                        {% if p.payment_method %}
+                            {% if 'bkash' in p.payment_method|lower %}
+                                <span class="badge" style="background-color: #d12053; color: white;">bKash</span>
+                            {% elif 'nagad' in p.payment_method|lower %}
+                                <span class="badge" style="background-color: #f7941d; color: white;">Nagad</span>
+                            {% elif 'card' in p.payment_method|lower %}
+                                <span class="badge bg-primary text-white"><i class="fas fa-credit-card me-1"></i>Card</span>
+                            {% else %}
+                                <span class="badge bg-secondary text-white">{{ p.payment_method }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-secondary small fst-italic">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.payment_status == "Paid" %}
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2 py-1">
+                                <i class="fas fa-check-circle me-1"></i>Paid
+                            </span>
+                            {% if p.paid_at %}
+                            <small class="text-secondary d-block mt-1" style="font-size: 0.75rem;">{{ p.paid_at|date:"M d, H:i" }}</small>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50 px-2 py-1">
+                                <i class="fas fa-clock me-1"></i>Pending
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'invoice_detail' p.id %}" class="btn btn-sm btn-outline-info" title="View Official Invoice">
+                            <i class="fas fa-file-invoice"></i> Invoice
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="text-center py-5 text-secondary">
+                        <i class="fas fa-receipt fa-3x mb-3 text-secondary opacity-50 d-block"></i>
+                        <h5>No transactions found</h5>
+                        <p class="small mb-0">No payment records match your selected criteria or search term.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

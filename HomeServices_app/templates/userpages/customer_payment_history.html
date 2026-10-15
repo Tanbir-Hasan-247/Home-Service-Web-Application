@@ -1,0 +1,210 @@
+{% extends "userpages/user_header_footer.html" %}
+{% load static %}
+
+{% block title %}My Payment History | ServiceHub{% endblock %}
+
+{% block content %}
+<style>
+    .payment-history-container {
+        padding-top: 3rem;
+        padding-bottom: 5rem;
+    }
+    .summary-stat-box {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.85rem;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .summary-stat-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .summary-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1.25rem;
+        flex-shrink: 0;
+    }
+    .invoice-card-user {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.85rem;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        transition: border-color 0.2s, transform 0.2s;
+    }
+    .invoice-card-user:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+    @media (max-width: 767.98px) {
+        .invoice-card-user {
+            padding: 1.25rem 1rem;
+        }
+    }
+</style>
+
+<div class="container payment-history-container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="display-6 text-white mb-1">My Payment History</h1>
+            <p class="text-secondary mb-0">Track all your completed service bills, transactions, and download official receipts.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'Viewappointment_history' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-calendar-check me-2"></i>My Appointments
+            </a>
+            <a href="{% url 'services' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Book New Service
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-3 g-md-4 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="summary-stat-box">
+                <div class="summary-stat-icon bg-success bg-opacity-25 text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <small class="text-secondary text-uppercase fw-semibold d-block">Total Paid</small>
+                    <div class="fs-4 fw-bold text-success">৳{{ stats.total_spent|floatformat:2 }}</div>
+                    <small class="text-secondary">{{ stats.paid_orders_count }} paid invoices</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="summary-stat-box">
+                <div class="summary-stat-icon bg-warning bg-opacity-25 text-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <small class="text-secondary text-uppercase fw-semibold d-block">Pending Due</small>
+                    <div class="fs-4 fw-bold text-warning">৳{{ stats.total_due|floatformat:2 }}</div>
+                    <small class="text-secondary">{{ stats.pending_orders_count }} bills awaiting payment</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="summary-stat-box">
+                <div class="summary-stat-icon bg-primary bg-opacity-25 text-primary">
+                    <i class="fas fa-concierge-bell"></i>
+                </div>
+                <div>
+                    <small class="text-secondary text-uppercase fw-semibold d-block">Total Services Received</small>
+                    <div class="fs-4 fw-bold text-white">{{ stats.total_orders }}</div>
+                    <small class="text-secondary">Completed tasks</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="card p-3 mb-4 bg-dark border-secondary border-opacity-50">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fas fa-search"></i></span>
+                    <input type="text" name="q" class="form-control bg-dark border-secondary text-white" placeholder="Search Service, Technician, or Trx ID..." value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-4">
+                <select name="status" class="form-select bg-dark border-secondary text-white">
+                    <option value="">All Payment Statuses</option>
+                    <option value="Paid" {% if current_status == "Paid" %}selected{% endif %}>Paid Invoices Only</option>
+                    <option value="Pending" {% if current_status == "Pending" %}selected{% endif %}>Pending Bills Only</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-filter me-1"></i>Filter</button>
+                {% if search_query or current_status %}
+                <a href="{% url 'customer_payment_history' %}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Payment Cards / List -->
+    {% for p in payments %}
+    <div class="invoice-card-user">
+        <div class="row align-items-center g-3">
+            <div class="col-md-4">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="p-2 rounded bg-primary bg-opacity-25 text-primary me-3 fs-5">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white mb-0">{{ p.requests.service.Name }}</h5>
+                        <small class="text-secondary">Ref: <span class="text-primary font-monospace">#INV-{{ p.id }}{{ p.requests.id }}</span></small>
+                    </div>
+                </div>
+                <div class="small text-secondary">
+                    <i class="fas fa-user-circle me-1"></i>Technician: <strong class="text-white">{{ p.assigned_worker.admin.get_full_name|default:p.assigned_worker.admin.username }}</strong>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2 text-start text-md-center">
+                <small class="text-secondary text-uppercase fw-semibold d-block">Work Duration</small>
+                <div class="text-white fw-bold">{{ p.hours_worked }} hrs</div>
+                <small class="text-secondary">@ ৳{{ p.hourly_rate }}/hr</small>
+            </div>
+
+            <div class="col-6 col-md-2 text-start text-md-center">
+                <small class="text-secondary text-uppercase fw-semibold d-block">Total Bill</small>
+                <div class="fs-5 fw-bold text-white">৳{{ p.total_amount }}</div>
+                <small class="text-secondary">{{ p.Date|date:"M d, Y" }}</small>
+            </div>
+
+            <div class="col-6 col-md-2 text-start text-md-center">
+                <small class="text-secondary text-uppercase fw-semibold d-block">Status</small>
+                {% if p.payment_status == "Paid" %}
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2 py-1">
+                        <i class="fas fa-check-circle me-1"></i>Paid
+                    </span>
+                    {% if p.payment_method %}
+                    <small class="text-secondary d-block mt-1 font-monospace">{{ p.payment_method }}</small>
+                    {% endif %}
+                {% else %}
+                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50 px-2 py-1">
+                        <i class="fas fa-clock me-1"></i>Pending
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-md-2 text-end">
+                {% if p.payment_status == "Paid" %}
+                    <a href="{% url 'invoice_detail' p.id %}" class="btn btn-outline-info w-100">
+                        <i class="fas fa-file-invoice me-1"></i>View Invoice
+                    </a>
+                {% else %}
+                    <a href="{% url 'process_payment' p.id %}" class="btn btn-success w-100 fw-bold">
+                        <i class="fas fa-credit-card me-1"></i>Pay Now
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card p-5 text-center bg-dark border-secondary border-opacity-50">
+        <i class="fas fa-receipt fa-4x text-secondary opacity-50 mb-3"></i>
+        <h4 class="text-white">No payment records found</h4>
+        <p class="text-secondary mb-4">You have not completed or paid for any service requests yet.</p>
+        <div>
+            <a href="{% url 'services' %}" class="btn btn-primary px-4"><i class="fas fa-compass me-2"></i>Explore Services</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

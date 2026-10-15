@@ -131,10 +131,20 @@
                                             <span>{{ worker.admin.first_name|first|upper }}{{ worker.admin.last_name|first|upper }}</span>
                                         </div>
                                     {% endif %}
-                                    <div>
-                                        <h6 class="text-white mb-0">{{ worker.admin.get_full_name }}</h6>
-                                        <small class="text-secondary">{{ worker.designation }}</small>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="text-white mb-0">{{ worker.admin.get_full_name }}</h6>
+                                            {% if req.city in worker.service_areas.all or worker.city == req.city.name %}
+                                                <span class="badge bg-success text-white small"><i class="fas fa-check-circle me-1"></i>Covers {{ req.city.name }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark small"><i class="fas fa-exclamation-triangle me-1"></i>Outside Area</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-secondary d-block">{{ worker.designation }}</small>
                                     </div>
+                                </div>
+                                <div class="mt-2 pt-2 border-top" style="border-color: var(--border-color) !important;">
+                                    <small class="text-secondary"><i class="fas fa-map-marked-alt text-primary me-1"></i><strong>Coverage Areas:</strong> {{ worker.get_service_areas_display }}</small>
                                 </div>
                             </div>
                         </label>

@@ -1,0 +1,233 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Invoice #INV-{{ response.id }}{{ response.requests.id }} | ServiceHub{% endblock %}
+
+{% block content %}
+<style>
+    .invoice-wrapper {
+        padding-top: 3rem;
+        padding-bottom: 5rem;
+    }
+    .invoice-sheet {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: clamp(1.75rem, 4vw, 3.5rem);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    .invoice-stamp {
+        position: absolute;
+        top: 30px;
+        right: 40px;
+        transform: rotate(-10deg);
+        padding: 0.5rem 1.5rem;
+        border: 3px solid;
+        border-radius: 0.5rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        opacity: 0.85;
+    }
+    .stamp-paid {
+        color: #22c55e;
+        border-color: #22c55e;
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+    .stamp-pending {
+        color: #f59e0b;
+        border-color: #f59e0b;
+        background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    /* Print Specific Styles */
+    @media print {
+        body {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+        .navbar, .footer, .d-print-none {
+            display: none !important;
+        }
+        .invoice-sheet {
+            background-color: #ffffff !important;
+            color: #111827 !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: none !important;
+            padding: 1.5rem !important;
+        }
+        .text-white {
+            color: #111827 !important;
+        }
+        .text-secondary {
+            color: #4b5563 !important;
+        }
+        .table {
+            --bs-table-bg: transparent !important;
+            --bs-table-color: #111827 !important;
+            border-color: #e5e7eb !important;
+        }
+    }
+</style>
+
+<div class="container invoice-wrapper">
+    <!-- Top Action Bar -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 d-print-none">
+        <div>
+            {% if is_admin %}
+                <a href="{% url 'admin_payment_history' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Admin Payments
+                </a>
+            {% elif is_worker %}
+                <a href="{% url 'worker_payment_history' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to My Earnings
+                </a>
+            {% else %}
+                <a href="{% url 'customer_payment_history' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Payment History
+                </a>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-2">
+            {% if response.payment_status != "Paid" and is_owner %}
+                <a href="{% url 'process_payment' response.id %}" class="btn btn-success fw-bold px-4">
+                    <i class="fas fa-credit-card me-2"></i>Pay Now (৳{{ response.total_amount }})
+                </a>
+            {% endif %}
+            <button onclick="window.print()" class="btn btn-primary px-4">
+                <i class="fas fa-print me-2"></i>Print / Download PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Official Printable Invoice Sheet -->
+    <div class="invoice-sheet">
+        <!-- Stamp Indicator -->
+        {% if response.payment_status == "Paid" %}
+            <div class="invoice-stamp stamp-paid">PAID</div>
+        {% else %}
+            <div class="invoice-stamp stamp-pending">PENDING</div>
+        {% endif %}
+
+        <!-- Invoice Header -->
+        <div class="row align-items-center mb-5 pb-4 border-bottom border-secondary border-opacity-25">
+            <div class="col-md-7">
+                <h2 class="text-white fw-bold mb-1">
+                    <i class="fa-solid fa-house-chimney-window text-primary me-2"></i>ServiceHub Inc.
+                </h2>
+                <p class="text-secondary mb-1">Certified Home Services & Facility Management Platform</p>
+                <small class="text-secondary d-block">Dhaka, Bangladesh &bull; support@servicehub.com &bull; +880 1700-000000</small>
+            </div>
+            <div class="col-md-5 text-md-end mt-4 mt-md-0">
+                <h4 class="text-white mb-1">TAX INVOICE / RECEIPT</h4>
+                <div class="text-primary font-monospace fw-bold fs-5">#INV-{{ response.id }}{{ response.requests.id }}</div>
+                <small class="text-secondary d-block">Issued Date: {{ response.Date|date:"F d, Y" }}</small>
+                {% if response.paid_at %}
+                <small class="text-success d-block"><i class="fas fa-check-circle me-1"></i>Settled: {{ response.paid_at|date:"F d, Y - H:i" }}</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Billing Parties -->
+        <div class="row g-4 mb-5">
+            <div class="col-sm-6">
+                <div class="p-3 rounded bg-black bg-opacity-25 border border-secondary border-opacity-25 h-100">
+                    <small class="text-secondary text-uppercase fw-bold d-block mb-2">Billed To (Customer)</small>
+                    <h5 class="text-white mb-1">{{ response.requests.user.admin.get_full_name|default:response.requests.user.admin.username }}</h5>
+                    <div class="small text-secondary mb-1"><i class="fas fa-phone-alt me-1"></i>{{ response.requests.user.contact_number }}</div>
+                    <div class="small text-secondary mb-1"><i class="fas fa-envelope me-1"></i>{{ response.requests.user.admin.email }}</div>
+                    <div class="small text-secondary"><i class="fas fa-map-marker-alt me-1"></i>{{ response.requests.House_No }}, {{ response.requests.Address }}, {{ response.requests.city.name }} - {{ response.requests.pin }}</div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="p-3 rounded bg-black bg-opacity-25 border border-secondary border-opacity-25 h-100">
+                    <small class="text-secondary text-uppercase fw-bold d-block mb-2">Service Rendered By (Technician)</small>
+                    <h5 class="text-white mb-1">{{ response.assigned_worker.admin.get_full_name|default:response.assigned_worker.admin.username }}</h5>
+                    <div class="small text-primary fw-semibold mb-1"><i class="fas fa-id-badge me-1"></i>{{ response.assigned_worker.designation }}</div>
+                    <div class="small text-secondary mb-1"><i class="fas fa-phone-alt me-1"></i>{{ response.assigned_worker.contact_number }}</div>
+                    <div class="small text-secondary"><i class="fas fa-map-pin me-1"></i>{{ response.assigned_worker.Address }}, {{ response.assigned_worker.city }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Item Breakdown -->
+        <div class="table-responsive mb-4">
+            <table class="table border-secondary border-opacity-25 mb-0">
+                <thead>
+                    <tr class="text-secondary border-bottom border-secondary border-opacity-50">
+                        <th class="py-3">Service Description</th>
+                        <th class="py-3 text-center">Hourly Rate</th>
+                        <th class="py-3 text-center">Duration Logged</th>
+                        <th class="py-3 text-end">Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="py-3">
+                            <h6 class="text-white mb-1">{{ response.requests.service.Name }}</h6>
+                            <small class="text-secondary">{{ response.requests.Problem_Description|truncatewords:20 }}</small>
+                        </td>
+                        <td class="py-3 text-center align-middle text-white">৳{{ response.hourly_rate }}/hr</td>
+                        <td class="py-3 text-center align-middle text-white">{{ response.hours_worked }} hrs</td>
+                        <td class="py-3 text-end align-middle fw-bold text-white fs-6">৳{{ response.total_amount }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals & Commission Breakdown -->
+        <div class="row justify-content-end mb-5">
+            <div class="col-md-6 col-lg-5">
+                <div class="p-3 rounded bg-black bg-opacity-25 border border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Technician Base Earnings (90%)</span>
+                        <span class="text-white">৳{{ response.worker_earning }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Platform Handling Fee (10%)</span>
+                        <span class="text-white">৳{{ response.admin_commission }}</span>
+                    </div>
+                    <hr class="my-2 border-secondary border-opacity-50">
+                    <div class="d-flex justify-content-between align-items-center pt-1">
+                        <span class="fw-bold text-white fs-5">Grand Total</span>
+                        <span class="fw-bold text-success fs-4">৳{{ response.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Channel / Transaction Summary -->
+        <div class="p-3 rounded border border-secondary border-opacity-25 bg-black bg-opacity-25 mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-sm-4">
+                    <small class="text-secondary text-uppercase fw-bold d-block">Payment Method</small>
+                    <span class="text-white fw-semibold">{{ response.payment_method|default:"Not Yet Paid" }}</span>
+                </div>
+                <div class="col-sm-4">
+                    <small class="text-secondary text-uppercase fw-bold d-block">Transaction ID</small>
+                    <span class="text-primary font-monospace fw-bold">{{ response.transaction_id|default:"Pending" }}</span>
+                </div>
+                <div class="col-sm-4 text-sm-end">
+                    <small class="text-secondary text-uppercase fw-bold d-block">Settlement Status</small>
+                    {% if response.payment_status == "Paid" %}
+                        <span class="badge bg-success text-white px-3 py-1"><i class="fas fa-check-circle me-1"></i>Settled</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark px-3 py-1"><i class="fas fa-clock me-1"></i>Unpaid</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Signature -->
+        <div class="pt-4 border-top border-secondary border-opacity-25 text-center text-secondary small">
+            <p class="mb-1">This is a system-generated electronic invoice valid without signature.</p>
+            <p class="mb-0">&copy; {% now "Y" %} ServiceHub Inc. All rights reserved. For billing disputes, contact billing@servicehub.com.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

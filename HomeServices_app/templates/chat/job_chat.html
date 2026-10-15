@@ -1,0 +1,376 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Chat - {{ response.requests.service.Name }} | ServiceHub{% endblock %}
+
+{% block content %}
+<style>
+    .chat-container {
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+    }
+    .chat-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: calc(85vh - 70px);
+        min-height: 550px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .chat-header {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(15, 23, 42, 0.6));
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.25rem;
+    }
+    .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        background-color: rgba(15, 23, 42, 0.4);
+    }
+    .chat-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 1rem 1.25rem;
+        background-color: var(--dark-bg-secondary);
+    }
+    .message-bubble {
+        max-width: 75%;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        position: relative;
+        word-wrap: break-word;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    .message-outgoing {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        border-bottom-right-radius: 0.2rem;
+    }
+    .message-incoming {
+        align-self: flex-start;
+        background-color: #1e293b;
+        color: #f1f5f9;
+        border: 1px solid var(--border-color);
+        border-bottom-left-radius: 0.2rem;
+    }
+    .message-meta {
+        font-size: 0.72rem;
+        margin-top: 0.35rem;
+        opacity: 0.8;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.35rem;
+        align-items: center;
+    }
+    .quick-chip {
+        display: inline-block;
+        padding: 0.3rem 0.75rem;
+        border-radius: 50rem;
+        font-size: 0.78rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .quick-chip:hover {
+        background: var(--primary-color);
+        color: #ffffff;
+        border-color: var(--primary-color);
+    }
+    .chat-chips-scroll {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+    }
+    .chat-chips-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    .avatar-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: #fff;
+    }
+    .live-pulse {
+        width: 10px;
+        height: 10px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+        animation: pulse-ring 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+    @keyframes pulse-ring {
+        to {
+            box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+        }
+    }
+</style>
+
+<div class="container chat-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+
+            <div class="chat-card">
+                <!-- Chat Header -->
+                <div class="chat-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-circle">
+                            {{ partner.first_name|first|default:partner.username|first|upper }}
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="text-white mb-0 fw-bold">{{ partner.get_full_name|default:partner.username }}</h5>
+                                <span class="live-pulse" title="Connected"></span>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1 small text-secondary">
+                                <span>
+                                    <i class="fas fa-tools text-primary me-1"></i>{{ response.requests.service.Name }}
+                                </span>
+                                <span>•</span>
+                                <span class="badge {% if response.job_status == 'Completed' %}bg-success{% elif response.job_status == 'In Progress' %}bg-warning text-dark{% elif response.job_status == 'On the Way' %}bg-info text-dark{% else %}bg-primary{% endif %}">
+                                    {{ response.job_status }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        {% if partner_phone %}
+                        <a href="tel:{{ partner_phone }}" class="btn btn-outline-success btn-sm px-3">
+                            <i class="fas fa-phone-alt me-1"></i> Call Now
+                        </a>
+                        {% endif %}
+                        {% if is_worker %}
+                        <a href="{% url 'WorkerpendingTask' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                        {% elif is_admin %}
+                        <a href="{% url 'viewresponse' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                        {% else %}
+                        <a href="{% url 'Viewappointment_history' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Chat Body (Messages) -->
+                <div class="chat-body" id="chatMessagesContainer">
+                    <div class="text-center my-2">
+                        <small class="badge bg-secondary bg-opacity-25 text-secondary px-3 py-1 border border-secondary border-opacity-25 rounded-pill">
+                            <i class="fas fa-lock me-1"></i> Direct encrypted message thread for Job #{{ response.id }}
+                        </small>
+                    </div>
+
+                    {% for msg in chat_messages %}
+                    <div class="message-bubble {% if msg.sender == request.user %}message-outgoing{% else %}message-incoming{% endif %}" data-id="{{ msg.id }}">
+                        {% if msg.sender != request.user %}
+                        <small class="d-block fw-bold text-info mb-1" style="font-size: 0.75rem;">
+                            {{ msg.sender.get_full_name|default:msg.sender.username }}
+                        </small>
+                        {% endif %}
+                        <div class="message-text">{{ msg.message }}</div>
+                        <div class="message-meta">
+                            <span>{{ msg.timestamp|time:"h:i A" }}</span>
+                            {% if msg.sender == request.user %}
+                            <i class="fas fa-check-double text-light" style="font-size: 0.65rem;"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 text-secondary" id="emptyPlaceholder">
+                        <i class="fas fa-comments fa-3x mb-3 text-secondary opacity-50"></i>
+                        <p class="mb-0">No messages yet. Send a message to start the conversation!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Chat Footer (Input) -->
+                <div class="chat-footer">
+                    <!-- Quick response chips -->
+                    <div class="chat-chips-scroll mb-2">
+                        {% if is_worker %}
+                        <span class="quick-chip" onclick="fillInput('I am on my way to your location.')">🚗 On my way</span>
+                        <span class="quick-chip" onclick="fillInput('I have arrived outside your house.')">📍 I have arrived</span>
+                        <span class="quick-chip" onclick="fillInput('Could you please clarify your exact apartment/flat number?')">🏢 House/Flat info?</span>
+                        <span class="quick-chip" onclick="fillInput('Service work completed! Please check and confirm.')">✅ Work completed</span>
+                        {% else %}
+                        <span class="quick-chip" onclick="fillInput('Hello, when can I expect your arrival?')">⏱️ When will you arrive?</span>
+                        <span class="quick-chip" onclick="fillInput('The bell is at the left gate.')">🔔 Gate instructions</span>
+                        <span class="quick-chip" onclick="fillInput('Please call me when you reach the lane.')">📞 Call when nearby</span>
+                        <span class="quick-chip" onclick="fillInput('Thank you for the great service!')">⭐ Thank you!</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Input form -->
+                    <form id="chatForm" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" id="chatInput" class="form-control bg-dark text-white border-secondary" placeholder="Type a message..." autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2" id="sendBtn">
+                            <span class="d-none d-sm-inline">Send</span>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('chatMessagesContainer');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const emptyPlaceholder = document.getElementById('emptyPlaceholder');
+    const sendUrl = "{% url 'send_chat_message' response.id %}";
+    const pollUrl = "{% url 'get_chat_messages' response.id %}";
+    const csrfToken = "{{ csrf_token }}";
+
+    function scrollToBottom() {
+        container.scrollTop = container.scrollHeight;
+    }
+    scrollToBottom();
+
+    function fillInput(text) {
+        input.value = text;
+        input.focus();
+    }
+
+    // Submit message via AJAX
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        sendBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('message', text);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        fetch(sendUrl, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            sendBtn.disabled = false;
+            if (data.success) {
+                input.value = '';
+                if (emptyPlaceholder) emptyPlaceholder.style.display = 'none';
+
+                const m = data.message;
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble message-outgoing';
+                bubble.setAttribute('data-id', m.id);
+                bubble.innerHTML = `
+                    <div class="message-text">${escapeHtml(m.message)}</div>
+                    <div class="message-meta">
+                        <span>${m.time}</span>
+                        <i class="fas fa-check-double text-light" style="font-size: 0.65rem;"></i>
+                    </div>
+                `;
+                container.appendChild(bubble);
+                scrollToBottom();
+            } else {
+                alert(data.error || 'Failed to send message.');
+            }
+        })
+        .catch(err => {
+            sendBtn.disabled = false;
+            console.error(err);
+        });
+    });
+
+    // Polling for real-time messages
+    let lastSeenId = 0;
+    document.querySelectorAll('.message-bubble').forEach(b => {
+        const id = parseInt(b.getAttribute('data-id'));
+        if (id && id > lastSeenId) lastSeenId = id;
+    });
+
+    setInterval(function() {
+        fetch(pollUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.messages && data.messages.length > 0) {
+                let hasNew = false;
+                data.messages.forEach(m => {
+                    if (m.id > lastSeenId) {
+                        hasNew = true;
+                        lastSeenId = m.id;
+                        if (emptyPlaceholder) emptyPlaceholder.style.display = 'none';
+
+                        // Only append if it's from partner (to avoid duplicate from our own optimistic append)
+                        const exists = document.querySelector(`.message-bubble[data-id="${m.id}"]`);
+                        if (!exists) {
+                            const bubble = document.createElement('div');
+                            bubble.className = m.is_me ? 'message-bubble message-outgoing' : 'message-bubble message-incoming';
+                            bubble.setAttribute('data-id', m.id);
+                            
+                            let partnerHeader = '';
+                            if (!m.is_me) {
+                                partnerHeader = `<small class="d-block fw-bold text-info mb-1" style="font-size: 0.75rem;">${escapeHtml(m.sender_name)}</small>`;
+                            }
+
+                            bubble.innerHTML = `
+                                ${partnerHeader}
+                                <div class="message-text">${escapeHtml(m.message)}</div>
+                                <div class="message-meta">
+                                    <span>${m.time}</span>
+                                    ${m.is_me ? '<i class="fas fa-check-double text-light" style="font-size: 0.65rem;"></i>' : ''}
+                                </div>
+                            `;
+                            container.appendChild(bubble);
+                        }
+                    }
+                });
+                if (hasNew) {
+                    scrollToBottom();
+                }
+            }
+        })
+        .catch(err => console.error('Poll error', err));
+    }, 3000);
+
+    function escapeHtml(string) {
+        const entityMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return String(string).replace(/[&<>"']/g, s => entityMap[s]);
+    }
+</script>
+{% endblock %}
+

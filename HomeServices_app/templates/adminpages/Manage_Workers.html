@@ -46,6 +46,7 @@
                     <tr>
                         <th>Provider</th>
                         <th>Designation</th>
+                        <th>Coverage Areas</th>
                         <th>Contact</th>
                         <th>Verification Status</th>
                         <th>Availability</th>
@@ -64,7 +65,10 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ worker.designation }}</td>
+                        <td><span class="badge bg-primary-subtle text-primary border border-primary">{{ worker.designation }}</span></td>
+                        <td>
+                            <small class="text-white fw-medium"><i class="fas fa-map-marked-alt text-primary me-1"></i>{{ worker.get_service_areas_display }}</small>
+                        </td>
                         <td>{{ worker.contact_number }}</td>
                         <td>
                             {% if worker.acc_activation %}

@@ -58,7 +58,7 @@
                         <select class="form-select form-select-dark" id="stateSelect" name="state" required>
                             <option value="" disabled selected>Choose a state...</option>
                             {% for state in state_recorsd %}
-                                <option value="{{ state.id }}">{{ state.name }}</option>
+                                <option value="{{ state.name }}">{{ state.name }}</option>
                             {% endfor %}
                         </select>
                     </div>

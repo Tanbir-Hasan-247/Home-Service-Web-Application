@@ -38,8 +38,21 @@
 
     .appointment-item:hover {
         border-color: var(--primary-color);
-        transform: scale(1.02);
+        transform: translateY(-2px);
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 991.98px) {
+        .appointment-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 1rem !important;
+            padding: 1.25rem 1rem !important;
+        }
+        .appointment-item:hover {
+            transform: none !important;
+        }
     }
 
     .appointment-item .service-icon {
@@ -105,6 +118,7 @@
                     <div>
                         <div class="info-label">Service</div>
                         <div class="info-value">{{ request_data.service.Name }}</div>
+                        <small class="text-secondary d-block">{{ request_data.Problem_Description|truncatechars:45 }}</small>
                     </div>
                     <div>
                         <div class="info-label">Requested On</div>
@@ -135,37 +149,208 @@
         </div>
 
         <div class="tab-pane fade" id="active-pane" role="tabpanel">
-            <div class="d-grid gap-3">
+            <div class="d-grid gap-4">
                 {% for response in responses %}
-                <div class="appointment-item">
-                    <div class="service-icon"><i class="fas fa-tools"></i></div>
-                    <div>
-                        <div class="info-label">Service</div>
-                        <div class="info-value">{{ response.requests.service.Name }}</div>
+                <div class="card p-3 p-md-4 rounded-3" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color);">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 border-bottom mb-3" style="border-color: var(--border-color) !important;">
+                        <div class="d-flex align-items-center">
+                            <div class="service-icon me-3"><i class="fas fa-tools"></i></div>
+                            <div>
+                                <h4 class="text-white mb-0">{{ response.requests.service.Name }}</h4>
+                                <small class="text-secondary"><i class="fas fa-calendar-alt me-1"></i>Booked on {{ response.requests.dateofrequest|date:"M d, Y" }} | ID: #SR-{{ response.id }}</small>
+                            </div>
+                        </div>
+                        <div class="mt-2 mt-md-0 d-flex gap-2">
+                            <a href="{% url 'job_chat' response.id %}" class="btn btn-sm btn-primary px-3">
+                                <i class="fas fa-comment-dots me-1"></i>Live Chat
+                            </a>
+                            <a href="tel:{{ response.assigned_worker.contact_number }}" class="btn btn-sm btn-outline-success px-3">
+                                <i class="fas fa-phone-alt me-1"></i>Call Provider
+                            </a>
+                        </div>
                     </div>
-                    <div>
-                        <div class="info-label">Provider Assigned</div>
-                        <div class="info-value">{{ response.assigned_worker.admin.get_full_name }}</div>
+
+                    <!-- Live Order Tracking Stepper -->
+                    <div class="tracking-stepper my-2 p-3 rounded" style="background-color: var(--dark-bg-primary); border: 1px solid var(--border-color);">
+                        <div class="d-flex justify-content-between align-items-center position-relative">
+                            <!-- Background Progress Line -->
+                            <div style="position: absolute; top: 14px; left: 6%; right: 6%; height: 3px; background-color: var(--border-color); z-index: 0;">
+                                <div style="width: {{ response.get_progress_percentage }}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); transition: width 0.4s ease;"></div>
+                            </div>
+
+                            <!-- 1: Requested -->
+                            <div class="text-center position-relative" style="z-index: 1;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 bg-success text-white" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <small class="d-block text-white fw-medium" style="font-size: 0.72rem;">Requested</small>
+                            </div>
+
+                            <!-- 2: Accepted -->
+                            <div class="text-center position-relative" style="z-index: 1;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if response.job_status in 'Accepted,On the Way,In Progress,Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <small class="d-block {% if response.job_status in 'Accepted,On the Way,In Progress,Completed' %}text-white fw-medium{% else %}text-secondary{% endif %}" style="font-size: 0.72rem;">Accepted</small>
+                            </div>
+
+                            <!-- 3: On The Way -->
+                            <div class="text-center position-relative" style="z-index: 1;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if response.job_status in 'On the Way,In Progress,Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fas fa-car-side"></i>
+                                </div>
+                                <small class="d-block {% if response.job_status in 'On the Way,In Progress,Completed' %}text-white fw-medium{% else %}text-secondary{% endif %}" style="font-size: 0.72rem;">On the Way</small>
+                            </div>
+
+                            <!-- 4: In Progress -->
+                            <div class="text-center position-relative" style="z-index: 1;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if response.job_status in 'In Progress,Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <small class="d-block {% if response.job_status in 'In Progress,Completed' %}text-white fw-medium{% else %}text-secondary{% endif %}" style="font-size: 0.72rem;">In Progress</small>
+                            </div>
+
+                            <!-- 5: Completed -->
+                            <div class="text-center position-relative" style="z-index: 1;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if response.status or response.job_status == 'Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fas fa-flag-checkered"></i>
+                                </div>
+                                <small class="d-block {% if response.status or response.job_status == 'Completed' %}text-white fw-medium{% else %}text-secondary{% endif %}" style="font-size: 0.72rem;">Completed</small>
+                            </div>
+
+                            <!-- 6: Paid -->
+                            <div class="text-center position-relative" style="z-index: 1;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if response.payment_status == 'Paid' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <small class="d-block {% if response.payment_status == 'Paid' %}text-success fw-bold{% else %}text-secondary{% endif %}" style="font-size: 0.72rem;">Paid</small>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="info-label">Status</div>
-                        <div class="info-value">
-                            {% if response.status %}
-                            <span class="badge rounded-pill bg-success status-badge">Completed</span>
+
+                    <div class="row g-3 align-items-center mt-2">
+                        <div class="col-md-3">
+                            <span class="text-secondary small d-block">Technician</span>
+                            <span class="text-white fw-semibold">{{ response.assigned_worker.admin.get_full_name }}</span>
+                            <small class="text-secondary d-block"><i class="fas fa-phone-alt me-1"></i>{{ response.assigned_worker.contact_number }}</small>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-secondary small d-block">Location</span>
+                            <span class="text-white small">{{ response.requests.House_No }}, {{ response.requests.Address }}, {{ response.requests.city.name }}</span>
+                            {% if response.requests.latitude and response.requests.longitude %}
+                            <small class="text-info d-block"><i class="fas fa-map-pin me-1"></i>GPS Location Saved</small>
+                            {% endif %}
+                            {% if response.requests.selected_addons.all %}
+                            <div class="mt-2 pt-1 border-top border-secondary border-opacity-25">
+                                <small class="text-secondary d-block" style="font-size: 0.72rem;"><i class="fas fa-box-open text-primary me-1"></i>Add-on Packages:</small>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    {% for a in response.requests.selected_addons.all %}
+                                    <span class="badge bg-secondary bg-opacity-25 text-info border border-secondary border-opacity-50" style="font-size: 0.7rem;">{{ a.name }} (+৳{{ a.price }})</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <span class="text-secondary small d-block">Billing Status</span>
+                            {% if response.payment_status == 'Paid' %}
+                                <span class="badge bg-success-subtle text-success border border-success"><i class="fas fa-check-circle me-1"></i>Paid via {{ response.payment_method }}</span>
+                                <span class="text-success fw-bold fs-6 d-block mt-1">৳{{ response.total_amount }}</span>
+                                <small class="text-secondary d-block">{{ response.hours_worked }} hrs @ ৳{{ response.hourly_rate }}/hr</small>
                             {% else %}
-                            <span class="badge rounded-pill bg-info text-dark status-badge">In Progress</span>
+                                <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Payment Due</span>
+                                <small class="text-secondary d-block mt-1">
+                                    {% if response.total_amount > 0 %}
+                                        Est. ৳{{ response.total_amount }} ({{ response.hours_worked }} hrs)
+                                    {% else %}
+                                        Rate: ৳{{ response.requests.service.hourly_rate }}/hr
+                                    {% endif %}
+                                </small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2 text-md-end">
+                            {% if response.job_status == 'On the Way' or response.job_status == 'In Progress' %}
+                                <button type="button" class="btn btn-sm btn-info text-dark fw-bold w-100 mb-2 py-2 shadow-sm" onclick="openLiveTrackingModal({{ response.id }})">
+                                    <i class="fas fa-motorcycle me-1"></i>Live Track (ETA)
+                                </button>
+                            {% endif %}
+                            {% if response.payment_status == 'Paid' %}
+                                <a href="{% url 'invoice_detail' response.id %}" class="btn btn-sm btn-outline-info w-100 mb-1">
+                                    <i class="fas fa-file-invoice me-1"></i>Invoice
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-1" data-bs-toggle="modal" data-bs-target="#receiptModal{{ response.id }}">
+                                    <i class="fas fa-receipt me-1"></i>Receipt
+                                </button>
+                                <a href="{% url 'feedback_form_for_worker' worker_id=response.assigned_worker.id %}" class="btn btn-sm btn-outline-light w-100">
+                                    <i class="fas fa-star me-1"></i>Feedback
+                                </a>
+                            {% else %}
+                                <a href="{% url 'process_payment' response.id %}" class="btn btn-sm btn-success fw-bold w-100 py-2 shadow-sm">
+                                    <i class="fas fa-credit-card me-1"></i>Pay Now (৳{% if response.total_amount > 0 %}{{ response.total_amount }}{% else %}{{ response.requests.service.hourly_rate }}{% endif %})
+                                </a>
                             {% endif %}
                         </div>
                     </div>
-                    <div>
-                        {% if response.status %}
-                        <a href="{% url 'feedback_form_for_worker' worker_id=response.assigned_worker.id %}"
-                            class="btn btn-sm btn-outline-light">Leave Feedback</a>
-                        {% else %}
-                        <span class="text-secondary fst-italic">In Progress</span>
-                        {% endif %}
+                </div>
+
+                <!-- Receipt Modal for Paid Jobs -->
+                {% if response.payment_status == 'Paid' %}
+                <div class="modal fade" id="receiptModal{{ response.id }}" tabindex="-1" aria-labelledby="receiptModalLabel{{ response.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            <div class="modal-header border-bottom" style="border-color: var(--border-color) !important;">
+                                <h5 class="modal-title text-white" id="receiptModalLabel{{ response.id }}">
+                                    <i class="fas fa-file-invoice text-success me-2"></i>Official Payment Receipt
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="text-center mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                    <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                                    <h4 class="text-white mb-0">Payment Successful</h4>
+                                    <p class="text-secondary small">TrxID: <span class="text-white fw-bold">{{ response.transaction_id }}</span></p>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Service:</span>
+                                    <span class="text-white fw-semibold">{{ response.requests.service.Name }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Provider:</span>
+                                    <span class="text-white fw-semibold">{{ response.assigned_worker.admin.get_full_name }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Duration Worked:</span>
+                                    <span class="text-white">{{ response.hours_worked }} Hours</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Rate:</span>
+                                    <span class="text-white">৳{{ response.hourly_rate }} / hr</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Payment Method:</span>
+                                    <span class="text-white fw-bold">{{ response.payment_method }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Date Paid:</span>
+                                    <span class="text-white">{{ response.paid_at|date:"F d, Y, h:i A" }}</span>
+                                </div>
+                                <hr style="border-color: var(--border-color);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-5 fw-bold text-white">Total Amount Paid</span>
+                                    <span class="fs-4 fw-bold text-success">৳{{ response.total_amount }}</span>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top" style="border-color: var(--border-color) !important;">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="window.print();">
+                                    <i class="fas fa-print me-1"></i>Print Receipt
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {% endif %}
+
                 {% empty %}
                 <div class="empty-tab-message">
                     <h4 class="text-white">No Active or Completed Jobs</h4>
@@ -176,4 +361,183 @@
         </div>
     </div>
 </div>
+
+<!-- ============================================================== -->
+<!-- REAL-TIME TECHNICIAN GPS TRACKING MODAL (Pathao / Uber style) -->
+<!-- ============================================================== -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="modal fade" id="liveTrackingModal" tabindex="-1" aria-labelledby="liveTrackingModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 1rem; overflow: hidden;">
+            <div class="modal-header border-bottom border-secondary border-opacity-25" style="background-color: rgba(0,0,0,0.3);">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success p-2 rounded-circle"><i class="fas fa-motorcycle text-white fa-lg"></i></span>
+                    <div>
+                        <h5 class="modal-title text-white mb-0" id="liveTrackingModalLabel">Live Technician Tracking</h5>
+                        <small class="text-success" id="trackingStatusText"><i class="fas fa-satellite-dish me-1"></i>Active GPS Feed</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="stopLiveTracking()"></button>
+            </div>
+            <div class="modal-body p-0 position-relative">
+                <!-- Floating Info Header -->
+                <div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-primary bg-opacity-25 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fas fa-user-gear fa-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-white fw-bold d-block" id="trackWorkerName">Technician</span>
+                            <small class="text-secondary" id="trackWorkerDesignation">Service Professional</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end">
+                            <small class="text-secondary d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">ESTIMATED ARRIVAL</small>
+                            <span class="fs-5 fw-bold text-success" id="trackEtaDisplay">~ Calculating...</span>
+                            <small class="text-info d-block" id="trackDistanceDisplay">Distance: ~ km</small>
+                        </div>
+                        <a href="#" id="trackWorkerCallBtn" class="btn btn-sm btn-outline-success px-3 py-2 fw-semibold">
+                            <i class="fas fa-phone-alt me-1"></i>Call
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Google Maps Live View -->
+                <div id="liveTrackingMap" style="height: 400px; width: 100%;"></div>
+            </div>
+            <div class="modal-footer border-top border-secondary border-opacity-25 d-flex justify-content-between">
+                <small class="text-secondary" id="trackLastUpdate"><i class="fas fa-sync-alt fa-spin text-primary me-1"></i>Auto-refreshing GPS location...</small>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="stopLiveTracking()">Close Tracking</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let trackMap = null;
+    let workerMarker = null;
+    let customerMarker = null;
+    let routeLine = null;
+    let trackingInterval = null;
+    let currentTrackingJobId = null;
+
+    // Custom SVG-style Icons
+    const customerPinIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36]
+    });
+
+    const bikeIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        iconSize: [38, 38],
+        iconAnchor: [19, 38],
+        popupAnchor: [0, -38]
+    });
+
+    function openLiveTrackingModal(jobId) {
+        currentTrackingJobId = jobId;
+        const modalEl = document.getElementById('liveTrackingModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        modalEl.addEventListener('shown.bs.modal', function onShown() {
+            modalEl.removeEventListener('shown.bs.modal', onShown);
+            initTrackingMap();
+            fetchTrackingLocation();
+            if (trackingInterval) clearInterval(trackingInterval);
+            trackingInterval = setInterval(fetchTrackingLocation, 3500);
+        });
+    }
+
+    function stopLiveTracking() {
+        if (trackingInterval) {
+            clearInterval(trackingInterval);
+            trackingInterval = null;
+        }
+    }
+
+    function initTrackingMap() {
+        const mapContainer = document.getElementById('liveTrackingMap');
+        if (!mapContainer) return;
+
+        if (!trackMap) {
+            trackMap = L.map('liveTrackingMap', { zoomControl: true });
+
+            // Google Maps Roadmap
+            L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['0', '1', '2', '3'],
+                attribution: '&copy; Google Maps'
+            }).addTo(trackMap);
+        }
+
+        setTimeout(() => {
+            trackMap.invalidateSize();
+        }, 300);
+    }
+
+    function fetchTrackingLocation() {
+        if (!currentTrackingJobId) return;
+
+        fetch(`/job_status/${currentTrackingJobId}/live_location/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status !== 'success') return;
+
+                document.getElementById('trackWorkerName').textContent = data.worker_name;
+                document.getElementById('trackWorkerDesignation').textContent = data.worker_designation;
+                document.getElementById('trackEtaDisplay').textContent = `~ ${data.eta_minutes} Mins`;
+                document.getElementById('trackDistanceDisplay').textContent = `${data.distance_km} km away`;
+                document.getElementById('trackLastUpdate').innerHTML = `<i class="fas fa-check-circle text-success me-1"></i>Updated: ${data.last_update}`;
+                
+                if (data.worker_phone) {
+                    document.getElementById('trackWorkerCallBtn').href = `tel:${data.worker_phone}`;
+                }
+
+                const custCoords = [data.customer_lat, data.customer_lng];
+                const workerCoords = [data.worker_lat, data.worker_lng];
+
+                // Customer Pin
+                if (!customerMarker) {
+                    customerMarker = L.marker(custCoords, { icon: customerPinIcon }).addTo(trackMap)
+                        .bindPopup(`<strong>Your Destination</strong><br>${data.customer_address}`);
+                } else {
+                    customerMarker.setLatLng(custCoords);
+                }
+
+                // Moving Technician Pin
+                if (!workerMarker) {
+                    workerMarker = L.marker(workerCoords, { icon: bikeIcon }).addTo(trackMap)
+                        .bindPopup(`<strong>${data.worker_name}</strong><br>Speed: ~22 km/h`);
+                } else {
+                    workerMarker.setLatLng(workerCoords);
+                }
+
+                // Route Line
+                if (!routeLine) {
+                    routeLine = L.polyline([workerCoords, custCoords], {
+                        color: '#3b82f6',
+                        weight: 4,
+                        opacity: 0.8,
+                        dashArray: '8, 8'
+                    }).addTo(trackMap);
+                } else {
+                    routeLine.setLatLngs([workerCoords, custCoords]);
+                }
+
+                // Fit bounds
+                const bounds = L.latLngBounds([custCoords, workerCoords]);
+                trackMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+            })
+            .catch(err => {
+                console.warn('Tracking fetch error:', err);
+            });
+    }
+</script>
+
 {% endblock %}

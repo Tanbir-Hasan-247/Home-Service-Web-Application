@@ -46,9 +46,11 @@
                     <tr>
                         <th>Service Request</th>
                         <th>Customer</th>
-                        <th>Assigned To</th>
-                        <th>Date Assigned</th>
-                        <th>Status</th>
+                        <th>Assigned Provider</th>
+                        <th>Duration & Bill</th>
+                        <th>Split (10% / 90%)</th>
+                        <th>Job Status</th>
+                        <th>Payment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,12 +86,39 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ record.Date|date:"d M, Y" }}</td>
+                        <td>
+                            {% if record.status %}
+                                <span class="fw-bold text-white fs-6">৳{{ record.total_amount }}</span>
+                                <small class="text-secondary d-block">{{ record.hours_worked }} hrs @ ৳{{ record.hourly_rate }}/hr</small>
+                            {% else %}
+                                <span class="text-secondary small fst-italic">Rate: ৳{{ record.requests.service.hourly_rate }}/hr</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.status %}
+                                <small class="d-block text-success">Admin (10%): <strong>৳{{ record.admin_commission }}</strong></small>
+                                <small class="d-block text-info">Worker (90%): <strong>৳{{ record.worker_earning }}</strong></small>
+                            {% else %}
+                                <span class="text-secondary small">-</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if record.status %}
                                 <span class="badge rounded-pill bg-success-subtle text-success-emphasis p-2">Completed</span>
                             {% else %}
                                 <span class="badge rounded-pill bg-info-subtle text-info-emphasis p-2">In Progress</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if record.status %}
+                                {% if record.payment_status == 'Paid' %}
+                                    <span class="badge bg-success p-2"><i class="fas fa-check-circle me-1"></i>Paid ({{ record.payment_method }})</span>
+                                    <small class="text-secondary d-block mt-1">{{ record.transaction_id }}</small>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark p-2"><i class="fas fa-clock me-1"></i>Pending</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-secondary small fst-italic">Pending Completion</span>
                             {% endif %}
                         </td>
                     </tr>

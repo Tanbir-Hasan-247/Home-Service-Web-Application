@@ -1,0 +1,25 @@
+{% extends "auth_base.html" %}
+
+{% block title %}500 - Server Error | ServiceHub{% endblock %}
+
+{% block card_content %}
+<div class="py-3">
+    <div class="text-danger mb-3">
+        <i class="fas fa-server fa-4x text-danger"></i>
+    </div>
+    <h1 class="display-4 text-white fw-bold mb-2">500</h1>
+    <h3 class="text-white mb-3">Internal Server Error</h3>
+    <p class="text-secondary mb-4">
+        Oops! Something went wrong on our end. Our technical team has been notified and is looking into the problem.
+    </p>
+    <div class="d-grid gap-2">
+        <a href="{% url 'index' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-home me-2"></i>Return to Homepage
+        </a>
+        <a href="{% url 'contact' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-headset me-2"></i>Contact Support
+        </a>
+    </div>
+</div>
+{% endblock %}
+

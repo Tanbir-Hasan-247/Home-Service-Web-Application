@@ -1,0 +1,903 @@
+{% extends "userpages/user_header_footer.html" %}
+{% load static %}
+
+{% block title %}Secure Checkout & Payment | ServiceHub{% endblock %}
+
+{% block content %}
+<style>
+    .payment-container {
+        padding-top: 2rem;
+        padding-bottom: 5rem;
+    }
+    .invoice-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: clamp(1.25rem, 3vw, 2rem);
+        position: sticky;
+        top: 90px;
+    }
+    .payment-options-card {
+        background-color: var(--dark-bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: clamp(1.25rem, 3vw, 2rem);
+    }
+    .nav-pills .nav-link {
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        background-color: var(--dark-bg-primary);
+        font-weight: 600;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+    .nav-pills .nav-link.active {
+        background-color: var(--primary-color);
+        color: #ffffff;
+        border-color: var(--primary-color);
+    }
+    .nav-pills .nav-link.bkash-pill.active {
+        background-color: #d12053 !important;
+        border-color: #d12053 !important;
+    }
+    .nav-pills .nav-link.nagad-pill.active {
+        background-color: #f7941d !important;
+        border-color: #f7941d !important;
+    }
+    .nav-pills .nav-link.rocket-pill.active {
+        background-color: #8c1d82 !important;
+        border-color: #8c1d82 !important;
+    }
+    @media (max-width: 575.98px) {
+        .nav-pills {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem !important;
+        }
+        .invoice-card {
+            position: static;
+        }
+    }
+    .form-control-dark {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+    }
+    .form-control-dark:focus {
+        background-color: var(--dark-bg-primary);
+        color: var(--text-primary);
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+    .price-big {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #22c55e;
+    }
+    
+    /* Authentic Gateway Themes */
+    .gateway-frame {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        background-color: #161b22;
+    }
+    .gateway-header-bkash {
+        background: linear-gradient(135deg, #d12053, #9e143c);
+        color: #ffffff;
+    }
+    .gateway-header-nagad {
+        background: linear-gradient(135deg, #f7941d, #d16f00);
+        color: #ffffff;
+    }
+    .gateway-header-rocket {
+        background: linear-gradient(135deg, #8c1d82, #5a0e53);
+        color: #ffffff;
+    }
+    .gateway-header-card {
+        background: linear-gradient(135deg, #1d4ed8, #0f172a);
+        color: #ffffff;
+    }
+    .gateway-header-cod {
+        background: linear-gradient(135deg, #15803d, #064e3b);
+        color: #ffffff;
+    }
+
+    /* Step Indicators */
+    .step-track {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1.25rem;
+        background-color: rgba(0, 0, 0, 0.35);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .step-node {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+    .step-node.active {
+        color: #ffffff;
+    }
+    .step-node.active .step-num {
+        background-color: #22c55e;
+        color: #000;
+        font-weight: bold;
+    }
+    .step-node.passed {
+        color: #22c55e;
+    }
+    .step-node.passed .step-num {
+        background-color: #22c55e;
+        color: #000;
+    }
+    .step-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.15);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+    }
+
+    /* OTP Inputs */
+    .otp-input-box {
+        width: 44px;
+        height: 50px;
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 700;
+        border-radius: 8px;
+        border: 2px solid var(--border-color);
+        background: var(--dark-bg-primary);
+        color: #ffffff;
+    }
+    .otp-input-box:focus {
+        border-color: #3b82f6;
+        outline: none;
+    }
+    
+    /* Interactive Card Preview */
+    .credit-card-preview {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        color: white;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .credit-card-chip {
+        width: 40px;
+        height: 30px;
+        background: #fbbf24;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="container payment-container">
+    <div class="mb-4">
+        <a href="{% url 'Viewappointment_history' %}" class="btn btn-sm btn-outline-secondary mb-3">
+            <i class="fas fa-arrow-left me-2"></i>Back to My Appointments
+        </a>
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h1 class="display-6 text-white mb-1">Service Checkout & Payment</h1>
+                <p class="text-secondary mb-0">Select your preferred payment channel to settle the bill. All payments are verified with instant receipt.</p>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success p-2 mt-2 mt-md-0">
+                <i class="fas fa-shield-alt me-1"></i>Official Sandbox Gateway Active
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Order / Invoice Summary -->
+        <div class="col-lg-5">
+            <div class="invoice-card">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary border border-primary mb-1">Service Order</span>
+                        <h4 class="text-white mb-0">{{ response.requests.service.Name }}</h4>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-secondary d-block">Invoice Ref</small>
+                        <span class="text-primary fw-bold">#INV-{{ response.id }}{{ response.requests.id }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-secondary text-uppercase fw-bold">Assigned Technician</small>
+                    <p class="text-white mb-0 fw-semibold">{{ response.assigned_worker.admin.get_full_name }} ({{ response.assigned_worker.designation }})</p>
+                    <small class="text-secondary"><i class="fas fa-phone-alt me-1"></i>{{ response.assigned_worker.contact_number }}</small>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-secondary text-uppercase fw-bold">Service Location</small>
+                    <p class="text-white mb-0 small">{{ response.requests.House_No }}, {{ response.requests.Address }}, {{ response.requests.city.name }}</p>
+                </div>
+
+                <div class="card p-3 my-3 bg-black bg-opacity-25 border border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Hourly Service Rate</span>
+                        <span class="text-white">৳{{ response.hourly_rate }} / hr</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Hours Worked</span>
+                        <span class="text-white">{{ response.hours_worked }} hrs</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Technician Share (90%)</span>
+                        <span class="text-success fw-semibold">৳{{ response.worker_earning }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Platform Commission (10%)</span>
+                        <span class="text-info fw-semibold">৳{{ response.admin_commission }}</span>
+                    </div>
+                    <hr class="my-2 border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between align-items-center pt-1">
+                        <span class="fw-bold text-white fs-5">Total Payable</span>
+                        <span class="price-big">৳{{ response.total_amount }}</span>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 text-secondary small">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="fas fa-shield-alt text-success me-2"></i>
+                        <span class="text-white fw-bold">100% Secure Checkout</span>
+                    </div>
+                    <span>No actual card or mobile balance is deducted. 10% platform fee is automatically audited and 90% is credited directly to the worker's wallet balance.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Channels & Step-By-Step Gateway -->
+        <div class="col-lg-7">
+            <div class="payment-options-card">
+                <h4 class="text-white mb-2">Choose Payment Channel</h4>
+                <p class="text-secondary small mb-4">Click any option below to load the authentic step-by-step checkout portal.</p>
+
+                <!-- Navigation Tabs for Payment Channels -->
+                <ul class="nav nav-pills gap-2 mb-4" id="paymentTab" role="tablist">
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100 bkash-pill active" id="bkash-tab" data-bs-toggle="pill" data-bs-target="#bkash-pane" type="button" role="tab">
+                            <span><i class="fas fa-mobile-alt me-1"></i> bKash</span>
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100 nagad-pill" id="nagad-tab" data-bs-toggle="pill" data-bs-target="#nagad-pane" type="button" role="tab">
+                            <span><i class="fas fa-wallet me-1"></i> Nagad</span>
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100 rocket-pill" id="rocket-tab" data-bs-toggle="pill" data-bs-target="#rocket-pane" type="button" role="tab">
+                            <span><i class="fas fa-paper-plane me-1"></i> Rocket</span>
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100" id="card-tab" data-bs-toggle="pill" data-bs-target="#card-pane" type="button" role="tab">
+                            <span><i class="fas fa-credit-card me-1"></i> Card</span>
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill" role="presentation">
+                        <button class="nav-link w-100" id="cod-tab" data-bs-toggle="pill" data-bs-target="#cod-pane" type="button" role="tab">
+                            <span><i class="fas fa-money-bill-wave me-1"></i> Cash</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="paymentTabContent">
+                    <!-- ============================================== -->
+                    <!-- 1. bKash Step-by-Step Gateway -->
+                    <!-- ============================================== -->
+                    <div class="tab-pane fade show active" id="bkash-pane" role="tabpanel">
+                        <div class="gateway-frame">
+                            <!-- bKash Banner -->
+                            <div class="p-3 gateway-header-bkash d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-4 fw-bold font-monospace">bKash</span>
+                                    <span class="badge bg-white text-dark small fw-semibold">Payment Gateway</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block opacity-75">Payable Amount</small>
+                                    <span class="fs-5 fw-bold">৳{{ response.total_amount }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Stepper Track -->
+                            <div class="step-track" id="bkash-track">
+                                <div class="step-node active" id="bkash-node-1"><span class="step-num">1</span> Account</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="bkash-node-2"><span class="step-num">2</span> OTP</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="bkash-node-3"><span class="step-num">3</span> PIN</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="bkash-node-4"><span class="step-num">4</span> Confirm</div>
+                            </div>
+
+                            <!-- bKash Step 1: Account Number -->
+                            <div class="p-4" id="bkash-step-1">
+                                <div class="mb-3">
+                                    <label class="form-label text-white small fw-bold">Your bKash Account Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-secondary fw-bold">+880</span>
+                                        <input type="text" id="bkash-phone" class="form-control form-control-dark font-monospace fs-5" placeholder="1700000000" value="{{ request.user.users_set.first.contact_number|default:'1712345678' }}">
+                                    </div>
+                                    <small class="text-secondary mt-1 d-block">We will send a 6-digit verification code to this mobile number.</small>
+                                </div>
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="bkash-terms" checked>
+                                    <label class="form-check-label text-secondary small" for="bkash-terms">
+                                        I agree to the <a href="#" class="text-primary text-decoration-none">Terms and Conditions</a> of bKash PGW
+                                    </label>
+                                </div>
+                                <button type="button" class="btn text-white w-100 py-3 fw-bold fs-6" style="background-color: #d12053;" onclick="nextMfsStep('bkash', 2)">
+                                    PROCEED TO VERIFICATION <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- bKash Step 2: OTP Verification -->
+                            <div class="p-4" id="bkash-step-2" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-comment-dots fa-3x text-primary mb-2"></i>
+                                    <h5 class="text-white mb-1">Enter Verification Code</h5>
+                                    <p class="text-secondary small mb-2">
+                                        A 6-digit code has been sent to <strong class="text-white" id="bkash-phone-display">+880 1712345678</strong>
+                                    </p>
+                                    <span class="badge bg-secondary bg-opacity-25 text-info border border-secondary border-opacity-50">
+                                        <i class="fas fa-info-circle me-1"></i> Sandbox Test Code: <strong>123456</strong>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-center gap-2 mb-3">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="bkash-otp-1" value="1" oninput="stepOtpFocus(this, 'bkash-otp-2')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="bkash-otp-2" value="2" oninput="stepOtpFocus(this, 'bkash-otp-3')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="bkash-otp-3" value="3" oninput="stepOtpFocus(this, 'bkash-otp-4')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="bkash-otp-4" value="4" oninput="stepOtpFocus(this, 'bkash-otp-5')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="bkash-otp-5" value="5" oninput="stepOtpFocus(this, 'bkash-otp-6')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="bkash-otp-6" value="6">
+                                </div>
+
+                                <div class="text-center mb-4">
+                                    <small class="text-secondary">Didn't receive code? <a href="javascript:void(0)" class="text-primary text-decoration-none">Resend in 28s</a></small>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="nextMfsStep('bkash', 1)">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn text-white flex-fill py-3 fw-bold" style="background-color: #d12053;" onclick="nextMfsStep('bkash', 3)">
+                                        VERIFY OTP <i class="fas fa-check ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- bKash Step 3: PIN Entry -->
+                            <div class="p-4" id="bkash-step-3" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-shield-alt fa-3x text-warning mb-2"></i>
+                                    <h5 class="text-white mb-1">Enter Secret PIN</h5>
+                                    <p class="text-secondary small mb-2">Enter your 5-digit secret bKash PIN to authorize payment</p>
+                                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50">
+                                        Test Mode: Any 5 digits accepted (e.g. 12345)
+                                    </span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <input type="password" id="bkash-pin" class="form-control form-control-dark text-center fs-3 font-monospace" maxlength="5" placeholder="•••••" value="12345" required>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="nextMfsStep('bkash', 2)">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn btn-success flex-fill py-3 fw-bold fs-6" onclick="executeChannelPayment('bKash', 'bkash-phone', 'bkash-pin')">
+                                        CONFIRM & PAY ৳{{ response.total_amount }} <i class="fas fa-check-circle ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- bKash Step 4: Clearing Animation -->
+                            <div class="p-5 text-center" id="bkash-step-4" style="display: none;">
+                                <div class="spinner-border text-danger mb-3" style="width: 3.5rem; height: 3.5rem;" role="status" id="bkash-spinner">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="bkash-success-icon" style="display: none;" class="text-success mb-3">
+                                    <i class="fas fa-check-circle fa-4x"></i>
+                                </div>
+                                <h5 class="text-white" id="bkash-process-title">Connecting to bKash Gateway...</h5>
+                                <p class="text-secondary small mb-0" id="bkash-process-desc">Transacting with Bangladesh Bank NPSB switch...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- 2. Nagad Step-by-Step Gateway -->
+                    <!-- ============================================== -->
+                    <div class="tab-pane fade" id="nagad-pane" role="tabpanel">
+                        <div class="gateway-frame">
+                            <!-- Nagad Banner -->
+                            <div class="p-3 gateway-header-nagad d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-4 fw-bold font-monospace">Nagad</span>
+                                    <span class="badge bg-white text-dark small fw-semibold">Direct Pay</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block opacity-75">Payable Amount</small>
+                                    <span class="fs-5 fw-bold">৳{{ response.total_amount }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Stepper Track -->
+                            <div class="step-track" id="nagad-track">
+                                <div class="step-node active" id="nagad-node-1"><span class="step-num">1</span> Account</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="nagad-node-2"><span class="step-num">2</span> OTP</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="nagad-node-3"><span class="step-num">3</span> PIN</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="nagad-node-4"><span class="step-num">4</span> Confirm</div>
+                            </div>
+
+                            <!-- Nagad Step 1 -->
+                            <div class="p-4" id="nagad-step-1">
+                                <div class="mb-3">
+                                    <label class="form-label text-white small fw-bold">Your Nagad Mobile Account</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-secondary fw-bold">+880</span>
+                                        <input type="text" id="nagad-phone" class="form-control form-control-dark font-monospace fs-5" placeholder="1800000000" value="{{ request.user.users_set.first.contact_number|default:'1812345678' }}">
+                                    </div>
+                                    <small class="text-secondary mt-1 d-block">Bangladesh Post Office Digital Banking Gateway</small>
+                                </div>
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="nagad-terms" checked>
+                                    <label class="form-check-label text-secondary small" for="nagad-terms">
+                                        I agree to the Nagad Checkout Terms of Service
+                                    </label>
+                                </div>
+                                <button type="button" class="btn text-white w-100 py-3 fw-bold fs-6" style="background-color: #f7941d;" onclick="nextMfsStep('nagad', 2)">
+                                    PROCEED TO VERIFICATION <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- Nagad Step 2: OTP -->
+                            <div class="p-4" id="nagad-step-2" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-comment-dots fa-3x text-warning mb-2"></i>
+                                    <h5 class="text-white mb-1">Enter Nagad OTP</h5>
+                                    <p class="text-secondary small mb-2">
+                                        OTP sent to <strong class="text-white" id="nagad-phone-display">+880 1812345678</strong>
+                                    </p>
+                                    <span class="badge bg-secondary bg-opacity-25 text-info border border-secondary border-opacity-50">
+                                        Demo OTP: <strong>123456</strong>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-center gap-2 mb-3">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="nagad-otp-1" value="1" oninput="stepOtpFocus(this, 'nagad-otp-2')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="nagad-otp-2" value="2" oninput="stepOtpFocus(this, 'nagad-otp-3')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="nagad-otp-3" value="3" oninput="stepOtpFocus(this, 'nagad-otp-4')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="nagad-otp-4" value="4" oninput="stepOtpFocus(this, 'nagad-otp-5')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="nagad-otp-5" value="5" oninput="stepOtpFocus(this, 'nagad-otp-6')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="nagad-otp-6" value="6">
+                                </div>
+
+                                <div class="d-flex gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="nextMfsStep('nagad', 1)">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn text-white flex-fill py-3 fw-bold" style="background-color: #f7941d;" onclick="nextMfsStep('nagad', 3)">
+                                        VERIFY OTP <i class="fas fa-check ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Nagad Step 3: PIN -->
+                            <div class="p-4" id="nagad-step-3" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-shield-alt fa-3x text-warning mb-2"></i>
+                                    <h5 class="text-white mb-1">Enter 4-Digit Nagad PIN</h5>
+                                    <p class="text-secondary small mb-2">Authorize payment of ৳{{ response.total_amount }}</p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <input type="password" id="nagad-pin" class="form-control form-control-dark text-center fs-3 font-monospace" maxlength="4" placeholder="••••" value="1234" required>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="nextMfsStep('nagad', 2)">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn btn-success flex-fill py-3 fw-bold fs-6" onclick="executeChannelPayment('Nagad', 'nagad-phone', 'nagad-pin')">
+                                        CONFIRM & PAY ৳{{ response.total_amount }} <i class="fas fa-check-circle ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Nagad Step 4: Clearing -->
+                            <div class="p-5 text-center" id="nagad-step-4" style="display: none;">
+                                <div class="spinner-border text-warning mb-3" style="width: 3.5rem; height: 3.5rem;" role="status" id="nagad-spinner">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="nagad-success-icon" style="display: none;" class="text-success mb-3">
+                                    <i class="fas fa-check-circle fa-4x"></i>
+                                </div>
+                                <h5 class="text-white" id="nagad-process-title">Connecting to Nagad Server...</h5>
+                                <p class="text-secondary small mb-0" id="nagad-process-desc">Validating cryptographic key with Postal Switch...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- 3. Rocket Step-by-Step Gateway -->
+                    <!-- ============================================== -->
+                    <div class="tab-pane fade" id="rocket-pane" role="tabpanel">
+                        <div class="gateway-frame">
+                            <!-- Rocket Banner -->
+                            <div class="p-3 gateway-header-rocket d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-4 fw-bold font-monospace">Rocket</span>
+                                    <span class="badge bg-white text-dark small fw-semibold">DBBL MFS</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block opacity-75">Payable Amount</small>
+                                    <span class="fs-5 fw-bold">৳{{ response.total_amount }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Stepper Track -->
+                            <div class="step-track" id="rocket-track">
+                                <div class="step-node active" id="rocket-node-1"><span class="step-num">1</span> Account</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="rocket-node-2"><span class="step-num">2</span> OTP</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="rocket-node-3"><span class="step-num">3</span> PIN</div>
+                                <i class="fas fa-chevron-right text-secondary small"></i>
+                                <div class="step-node" id="rocket-node-4"><span class="step-num">4</span> Confirm</div>
+                            </div>
+
+                            <!-- Rocket Step 1 -->
+                            <div class="p-4" id="rocket-step-1">
+                                <div class="mb-3">
+                                    <label class="form-label text-white small fw-bold">12-Digit Rocket Account Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-secondary fw-bold">+880</span>
+                                        <input type="text" id="rocket-phone" class="form-control form-control-dark font-monospace fs-5" placeholder="19123456789" value="{{ request.user.users_set.first.contact_number|default:'1912345678' }}5">
+                                    </div>
+                                    <small class="text-secondary mt-1 d-block">Dutch-Bangla Bank Mobile Banking Gateway</small>
+                                </div>
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="rocket-terms" checked>
+                                    <label class="form-check-label text-secondary small" for="rocket-terms">
+                                        I agree to DBBL Rocket terms
+                                    </label>
+                                </div>
+                                <button type="button" class="btn text-white w-100 py-3 fw-bold fs-6" style="background-color: #8c1d82;" onclick="nextMfsStep('rocket', 2)">
+                                    PROCEED TO VERIFICATION <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- Rocket Step 2: OTP -->
+                            <div class="p-4" id="rocket-step-2" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-comment-dots fa-3x text-info mb-2"></i>
+                                    <h5 class="text-white mb-1">Enter Rocket OTP</h5>
+                                    <p class="text-secondary small mb-2">
+                                        Security OTP sent to <strong class="text-white" id="rocket-phone-display">+880 19123456785</strong>
+                                    </p>
+                                </div>
+
+                                <div class="d-flex justify-content-center gap-2 mb-3">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="rocket-otp-1" value="1" oninput="stepOtpFocus(this, 'rocket-otp-2')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="rocket-otp-2" value="2" oninput="stepOtpFocus(this, 'rocket-otp-3')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="rocket-otp-3" value="3" oninput="stepOtpFocus(this, 'rocket-otp-4')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="rocket-otp-4" value="4" oninput="stepOtpFocus(this, 'rocket-otp-5')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="rocket-otp-5" value="5" oninput="stepOtpFocus(this, 'rocket-otp-6')">
+                                    <input type="text" class="otp-input-box" maxlength="1" id="rocket-otp-6" value="6">
+                                </div>
+
+                                <div class="d-flex gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="nextMfsStep('rocket', 1)">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn text-white flex-fill py-3 fw-bold" style="background-color: #8c1d82;" onclick="nextMfsStep('rocket', 3)">
+                                        VERIFY OTP <i class="fas fa-check ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Rocket Step 3: PIN -->
+                            <div class="p-4" id="rocket-step-3" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-shield-alt fa-3x text-warning mb-2"></i>
+                                    <h5 class="text-white mb-1">Enter 4-Digit Rocket PIN</h5>
+                                    <p class="text-secondary small mb-2">Authorize payment of ৳{{ response.total_amount }}</p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <input type="password" id="rocket-pin" class="form-control form-control-dark text-center fs-3 font-monospace" maxlength="4" placeholder="••••" value="1234" required>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="nextMfsStep('rocket', 2)">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn btn-success flex-fill py-3 fw-bold fs-6" onclick="executeChannelPayment('Rocket', 'rocket-phone', 'rocket-pin')">
+                                        CONFIRM & PAY ৳{{ response.total_amount }} <i class="fas fa-check-circle ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Rocket Step 4: Clearing -->
+                            <div class="p-5 text-center" id="rocket-step-4" style="display: none;">
+                                <div class="spinner-border text-info mb-3" style="width: 3.5rem; height: 3.5rem;" role="status" id="rocket-spinner">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="rocket-success-icon" style="display: none;" class="text-success mb-3">
+                                    <i class="fas fa-check-circle fa-4x"></i>
+                                </div>
+                                <h5 class="text-white" id="rocket-process-title">Connecting to DBBL Gateway...</h5>
+                                <p class="text-secondary small mb-0" id="rocket-process-desc">Validating account balance and credentials...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- 4. Debit / Credit Card Gateway -->
+                    <!-- ============================================== -->
+                    <div class="tab-pane fade" id="card-pane" role="tabpanel">
+                        <div class="gateway-frame">
+                            <div class="p-3 gateway-header-card d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-credit-card fs-4"></i>
+                                    <span class="fs-5 fw-bold">Visa / Mastercard / Amex</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block opacity-75">Payable Amount</small>
+                                    <span class="fs-5 fw-bold">৳{{ response.total_amount }}</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4" id="card-step-1">
+                                <!-- Card Preview -->
+                                <div class="credit-card-preview">
+                                    <div class="credit-card-chip"></div>
+                                    <div class="fs-5 font-monospace mb-3" id="previewNumber">•••• •••• •••• 4242</div>
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <div>
+                                            <small class="text-light opacity-75 d-block text-uppercase" style="font-size: 0.65rem;">Cardholder</small>
+                                            <span class="fw-bold" id="previewName">{{ request.user.get_full_name|default:request.user.username }}</span>
+                                        </div>
+                                        <div>
+                                            <small class="text-light opacity-75 d-block text-uppercase" style="font-size: 0.65rem;">Expires</small>
+                                            <span class="fw-bold" id="previewExpiry">12/28</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label text-white small">Cardholder Name</label>
+                                    <input type="text" id="cardName" class="form-control form-control-dark" value="{{ request.user.get_full_name|default:request.user.username }}" oninput="document.getElementById('previewName').innerText = this.value || 'YOUR NAME'">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-white small">Card Number</label>
+                                    <input type="text" id="cardNumber" class="form-control form-control-dark font-monospace" placeholder="4242 •••• •••• 4242" value="4242 5678 9012 4242" oninput="document.getElementById('previewNumber').innerText = this.value || '•••• •••• •••• ••••'">
+                                </div>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <label class="form-label text-white small">Expiry (MM/YY)</label>
+                                        <input type="text" id="cardExpiry" class="form-control form-control-dark" placeholder="12/28" value="12/28" oninput="document.getElementById('previewExpiry').innerText = this.value || 'MM/YY'">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label text-white small">CVV / CVC</label>
+                                        <input type="password" maxlength="4" class="form-control form-control-dark" placeholder="•••" value="123">
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-primary w-100 py-3 fw-bold fs-6" onclick="goToCardOtp()">
+                                    PROCEED TO 3D SECURE OTP <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- Card Step 2: 3D Secure OTP -->
+                            <div class="p-4" id="card-step-2" style="display: none;">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-shield-alt fa-3x text-primary mb-2"></i>
+                                    <h5 class="text-white mb-1">Visa / Mastercard 3D Secure</h5>
+                                    <p class="text-secondary small mb-2">
+                                        Enter the One-Time Passcode sent to your issuing bank mobile app.
+                                    </p>
+                                    <span class="badge bg-secondary bg-opacity-25 text-info border border-secondary border-opacity-50">
+                                        Sandbox OTP: <strong>123456</strong>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-center gap-2 mb-4">
+                                    <input type="text" class="otp-input-box" maxlength="1" value="1">
+                                    <input type="text" class="otp-input-box" maxlength="1" value="2">
+                                    <input type="text" class="otp-input-box" maxlength="1" value="3">
+                                    <input type="text" class="otp-input-box" maxlength="1" value="4">
+                                    <input type="text" class="otp-input-box" maxlength="1" value="5">
+                                    <input type="text" class="otp-input-box" maxlength="1" value="6">
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary px-4" onclick="document.getElementById('card-step-2').style.display='none'; document.getElementById('card-step-1').style.display='block';">
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn btn-success flex-fill py-3 fw-bold fs-6" onclick="executeChannelPayment('Card', 'cardNumber', 'cardExpiry')">
+                                        AUTHORIZE & PAY ৳{{ response.total_amount }} <i class="fas fa-check-circle ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Card Step 3: Clearing -->
+                            <div class="p-5 text-center" id="card-step-3" style="display: none;">
+                                <div class="spinner-border text-primary mb-3" style="width: 3.5rem; height: 3.5rem;" role="status" id="card-spinner">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div id="card-success-icon" style="display: none;" class="text-success mb-3">
+                                    <i class="fas fa-check-circle fa-4x"></i>
+                                </div>
+                                <h5 class="text-white" id="card-process-title">Contacting Card Processing Network...</h5>
+                                <p class="text-secondary small mb-0" id="card-process-desc">Clearing payment with card issuing bank...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- 5. Cash on Delivery (COD) -->
+                    <!-- ============================================== -->
+                    <div class="tab-pane fade" id="cod-pane" role="tabpanel">
+                        <div class="gateway-frame">
+                            <div class="p-3 gateway-header-cod d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-hand-holding-usd fs-4"></i>
+                                    <span class="fs-5 fw-bold">Cash on Delivery (COD)</span>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block opacity-75">Payable in Cash</small>
+                                    <span class="fs-5 fw-bold">৳{{ response.total_amount }}</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 text-center">
+                                <div class="py-3 text-success">
+                                    <i class="fas fa-money-bill-wave fa-4x"></i>
+                                </div>
+                                <h5 class="text-white">Pay Direct Cash to Worker</h5>
+                                <p class="text-secondary small mb-4">
+                                    Hand over exact cash of <strong>৳{{ response.total_amount }}</strong> directly to the service technician upon completion.
+                                    The 10% platform commission will be audited and the order marked as completed immediately.
+                                </p>
+
+                                <form method="post" id="cashSubmitForm">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="payment_method" value="Cash on Delivery">
+                                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-6">
+                                        CONFIRM CASH PAYMENT (৳{{ response.total_amount }}) <i class="fas fa-check-circle ms-2"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Real Form for Final Submission -->
+<form method="post" id="realPaymentSubmitForm" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="payment_method" id="finalPaymentMethod" value="bKash">
+    <input type="hidden" name="account_number" id="finalAccountNumber" value="">
+</form>
+
+<script>
+    // Step-by-Step transition helper
+    function nextMfsStep(channel, step) {
+        // Validation for Step 1
+        if (step === 2) {
+            const phone = document.getElementById(`${channel}-phone`).value.trim();
+            if (!phone) {
+                alert('Please enter your account number.');
+                return;
+            }
+            const phoneDisplay = document.getElementById(`${channel}-phone-display`);
+            if (phoneDisplay) {
+                phoneDisplay.textContent = '+880 ' + phone;
+            }
+        }
+
+        // Hide all steps for this channel
+        document.getElementById(`${channel}-step-1`).style.display = 'none';
+        document.getElementById(`${channel}-step-2`).style.display = 'none';
+        document.getElementById(`${channel}-step-3`).style.display = 'none';
+        const step4 = document.getElementById(`${channel}-step-4`);
+        if (step4) step4.style.display = 'none';
+
+        // Show requested step
+        const targetStep = document.getElementById(`${channel}-step-${step}`);
+        if (targetStep) targetStep.style.display = 'block';
+
+        // Update step tracker nodes
+        for (let i = 1; i <= 4; i++) {
+            const node = document.getElementById(`${channel}-node-${i}`);
+            if (node) {
+                node.className = 'step-node';
+                if (i < step) {
+                    node.classList.add('passed');
+                } else if (i === step) {
+                    node.classList.add('active');
+                }
+            }
+        }
+    }
+
+    function stepOtpFocus(current, nextId) {
+        if (current.value.length === 1) {
+            const next = document.getElementById(nextId);
+            if (next) next.focus();
+        }
+    }
+
+    function goToCardOtp() {
+        document.getElementById('card-step-1').style.display = 'none';
+        document.getElementById('card-step-2').style.display = 'block';
+    }
+
+    // Final Payment Execution & Simulation Animation
+    function executeChannelPayment(method, accountInputId, pinInputId) {
+        let channelPrefix = method.toLowerCase();
+        if (method === 'bKash') channelPrefix = 'bkash';
+        else if (method === 'Nagad') channelPrefix = 'nagad';
+        else if (method === 'Rocket') channelPrefix = 'rocket';
+        else if (method === 'Card') channelPrefix = 'card';
+
+        // Hide step 3, show step 4 (Clearing animation)
+        const step3 = document.getElementById(`${channelPrefix}-step-3`) || document.getElementById('card-step-2');
+        const step4 = document.getElementById(`${channelPrefix}-step-4`) || document.getElementById('card-step-3');
+
+        if (step3) step3.style.display = 'none';
+        if (step4) step4.style.display = 'block';
+
+        const title = document.getElementById(`${channelPrefix}-process-title`);
+        const desc = document.getElementById(`${channelPrefix}-process-desc`);
+        const spinner = document.getElementById(`${channelPrefix}-spinner`);
+        const successIcon = document.getElementById(`${channelPrefix}-success-icon`);
+
+        if (title) title.textContent = `Authorizing with ${method} Gateway...`;
+        if (desc) desc.textContent = 'Verifying cryptographic security token with Bangladesh Bank NPSB...';
+
+        setTimeout(() => {
+            if (title) title.textContent = 'Transaction Approved!';
+            if (desc) desc.textContent = 'Platform fee audited & worker wallet balance updated. Generating official receipt...';
+            if (spinner) spinner.style.display = 'none';
+            if (successIcon) successIcon.style.display = 'block';
+
+            setTimeout(() => {
+                const accountField = document.getElementById(accountInputId);
+                const accountValue = accountField ? accountField.value : '01700000000';
+
+                document.getElementById('finalPaymentMethod').value = method;
+                document.getElementById('finalAccountNumber').value = accountValue;
+                document.getElementById('realPaymentSubmitForm').submit();
+            }, 1200);
+        }, 1800);
+    }
+</script>
+{% endblock %}

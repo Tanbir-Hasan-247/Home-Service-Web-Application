@@ -67,9 +67,18 @@
         {% csrf_token %}
         <div class="row g-4">
             <div class="col-lg-7">
-                <div class="mb-4">
-                    <label for="Name" class="form-label">Service Name</label>
-                    <input type="text" class="form-control form-control-dark form-control-lg" id="Name" name="Name" value="{{ record.Name }}" required>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-7">
+                        <label for="Name" class="form-label">Service Name</label>
+                        <input type="text" class="form-control form-control-dark form-control-lg" id="Name" name="Name" value="{{ record.Name }}" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="hourly_rate" class="form-label">Hourly Rate (BDT / hr)</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text form-control-dark">৳</span>
+                            <input type="number" step="1" min="0" class="form-control form-control-dark" id="hourly_rate" name="hourly_rate" value="{{ record.hourly_rate|default:'300' }}" placeholder="300" required>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="Description" class="form-label">Description</label>

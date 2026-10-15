@@ -25,7 +25,7 @@ SECRET_KEY = '-p@o12h+fw!7=k6#l8o@6raux@y!g1u024bej^dd0%w!2$b@pn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -63,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'HomeServices_app.context_processors.notification_context',
             ],
         },
     },
@@ -143,3 +144,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'home30801@gmail.com'
 EMAIL_HOST_PASSWORD = 'niuttorjgugzjued'
+DEFAULT_FROM_EMAIL = 'ServiceHub <home30801@gmail.com>'

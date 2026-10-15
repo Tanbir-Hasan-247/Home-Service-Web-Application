@@ -93,6 +93,31 @@
     </div>
 </div>
 
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <a href="{% url 'worker_payment_history' %}?status=Paid" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="stat-icon bg-success bg-opacity-25 text-success me-4"><i class="fas fa-coins"></i></div>
+                <div>
+                    <div class="stat-value text-success">৳{{ total_earnings|floatformat:2 }}</div>
+                    <div class="stat-label">Total Earned (Your 90% Net Payout) &rarr;</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'worker_payment_history' %}?status=Pending" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="stat-icon bg-warning bg-opacity-25 text-warning me-4"><i class="fas fa-hourglass-half"></i></div>
+                <div>
+                    <div class="stat-value text-warning">৳{{ pending_earnings|floatformat:2 }}</div>
+                    <div class="stat-label">Pending Customer Payments &rarr;</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
 <div class="row g-4 mt-2">
     <div class="col-lg-7">
         <div class="card h-100">
@@ -157,69 +182,88 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // --- Chart 1: Ratings Breakdown (Bar Chart) ---
-    const ratingsCtx = document.getElementById('ratingsChart').getContext('2d');
-    new Chart(ratingsCtx, {
-        type: 'bar',
-        data: {
-            labels: JSON.parse('{{ ratings_chart_labels|safe }}').reverse(),
-            datasets: [{
-                label: 'Number of Reviews',
-                data: JSON.parse('{{ ratings_chart_data|safe }}').reverse(),
-                backgroundColor: [
-                    'rgba(34, 197, 94, 0.6)',   // 5 Stars
-                    'rgba(132, 204, 22, 0.6)',  // 4 Stars
-                    'rgba(59, 130, 246, 0.6)',  // 3 Stars
-                    'rgba(249, 115, 22, 0.6)',  // 2 Stars
-                    'rgba(239, 68, 68, 0.6)'    // 1 Star
-                ],
-                borderColor: [
-                    'rgba(34, 197, 94, 1)', 'rgba(132, 204, 22, 1)', 'rgba(59, 130, 246, 1)',
-                    'rgba(249, 115, 22, 1)', 'rgba(239, 68, 68, 1)'
-                ],
-                borderWidth: 1, borderRadius: 4
-            }]
-        },
-        options: {
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-            scales: {
-                y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'var(--text-secondary)' } },
-                x: { grid: { display: false }, ticks: { color: 'var(--text-secondary)', stepSize: 1 } }
-            },
-            plugins: { legend: { display: false } }
+    try {
+        const ratingsEl = document.getElementById('ratingsChart');
+        if (ratingsEl) {
+            const rawLabels = {{ ratings_chart_labels|safe }} || [];
+            const rawData = {{ ratings_chart_data|safe }} || [];
+            const ratingsCtx = ratingsEl.getContext('2d');
+            new Chart(ratingsCtx, {
+                type: 'bar',
+                data: {
+                    labels: rawLabels.slice().reverse(),
+                    datasets: [{
+                        label: 'Number of Reviews',
+                        data: rawData.slice().reverse(),
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.6)',   // 5 Stars
+                            'rgba(132, 204, 22, 0.6)',  // 4 Stars
+                            'rgba(59, 130, 246, 0.6)',  // 3 Stars
+                            'rgba(249, 115, 22, 0.6)',  // 2 Stars
+                            'rgba(239, 68, 68, 0.6)'    // 1 Star
+                        ],
+                        borderColor: [
+                            'rgba(34, 197, 94, 1)', 'rgba(132, 204, 22, 1)', 'rgba(59, 130, 246, 1)',
+                            'rgba(249, 115, 22, 1)', 'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1, borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'var(--text-secondary)' } },
+                        x: { grid: { display: false }, ticks: { color: 'var(--text-secondary)', stepSize: 1 } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
-    });
+    } catch (e) {
+        console.warn("Ratings chart init failed:", e);
+    }
 
     // --- Chart 2: Average Rating Trend (Line Chart) ---
-    const trendCtx = document.getElementById('ratingTrendChart').getContext('2d');
-    let trendGradient = trendCtx.createLinearGradient(0, 0, 0, 300);
-    trendGradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)'); // Amber color
-    trendGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
-    
-    new Chart(trendCtx, {
-        type: 'line',
-        data: {
-            labels: JSON.parse('{{ rating_trend_labels|safe }}'),
-            datasets: [{
-                label: 'Average Rating',
-                data: JSON.parse('{{ rating_trend_data|safe }}'),
-                borderColor: 'rgba(245, 158, 11, 1)',
-                backgroundColor: trendGradient,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: 'rgba(245, 158, 11, 1)',
-                pointBorderColor: '#fff',
-                pointHoverRadius: 6,
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: false, min: 1, max: 5, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'var(--text-secondary)' } },
-                x: { grid: { display: false }, ticks: { color: 'var(--text-secondary)' } }
-            },
-            plugins: { legend: { display: false } }
+    try {
+        const trendEl = document.getElementById('ratingTrendChart');
+        if (trendEl) {
+            const trendCtx = trendEl.getContext('2d');
+            let trendGradient = trendCtx.createLinearGradient(0, 0, 0, 300);
+            trendGradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)'); // Amber color
+            trendGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+            
+            const trendLabels = {{ rating_trend_labels|safe }} || [];
+            const trendData = {{ rating_trend_data|safe }} || [];
+
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Average Rating',
+                        data: trendData,
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        backgroundColor: trendGradient,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: false, min: 1, max: 5, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'var(--text-secondary)' } },
+                        x: { grid: { display: false }, ticks: { color: 'var(--text-secondary)' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
-    });
+    } catch (e) {
+        console.warn("Trend chart init failed:", e);
+    }
 });
 </script>
 

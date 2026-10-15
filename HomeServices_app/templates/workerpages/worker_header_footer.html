@@ -122,6 +122,16 @@
                         <i class="fas fa-users"></i> Colleagues
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{% url 'worker_wallet' %}" class="nav-link {% if request.resolver_match.url_name == 'worker_wallet' %}active{% endif %}">
+                        <i class="fas fa-coins text-warning"></i> My Wallet & Payouts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'worker_payment_history' %}" class="nav-link {% if request.resolver_match.url_name == 'worker_payment_history' %}active{% endif %}">
+                        <i class="fas fa-wallet text-success"></i> Earnings & Payouts
+                    </a>
+                </li>
             </ul>
         </aside>
         <div class="main-content flex-grow-1">
@@ -137,13 +147,62 @@
                     </nav>
                 </div>
                 <div class="d-flex align-items-center">
+                    <!-- Language Selector Pill [EN | বাংলা] -->
+                    <div class="me-3 d-flex align-items-center">
+                        <div class="btn-group btn-group-sm lang-toggle-pill" role="group" aria-label="Language" style="border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.3);">
+                            <button type="button" class="btn btn-sm py-1 px-2 fw-semibold lang-btn-en btn-primary text-white" onclick="setSiteLanguage('en')" style="font-size: 0.75rem;">EN</button>
+                            <button type="button" class="btn btn-sm py-1 px-2 fw-semibold lang-btn-bn btn-dark text-secondary" onclick="setSiteLanguage('bn')" style="font-size: 0.75rem;">বাংলা</button>
+                        </div>
+                    </div>
+
+                    <!-- Worker Notification Bell -->
+                    <div class="dropdown me-3">
+                        <button class="btn btn-dark position-relative p-2" type="button" id="workerNotifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
+                            <i class="fas fa-bell text-warning"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                {{ unread_notifications_count }}
+                            </span>
+                            {% endif %}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-0 shadow" style="min-width: 320px; max-width: 380px; border: 1px solid var(--border-color); background-color: var(--dark-bg-secondary);">
+                            <div class="d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--border-color) !important;">
+                                <h6 class="mb-0 text-white fw-bold"><i class="fas fa-bell me-1 text-primary"></i> Notifications</h6>
+                                {% if unread_notifications_count > 0 %}
+                                <a href="{% url 'mark_all_notifications_read' %}" class="small text-decoration-none text-primary">Mark all read</a>
+                                {% endif %}
+                            </div>
+                            <div class="notification-list" style="max-height: 320px; overflow-y: auto;">
+                                {% for notif in user_notifications %}
+                                <a href="{% url 'mark_notification_read' notif.id %}" class="d-block p-3 border-bottom text-decoration-none {% if not notif.is_read %}bg-primary bg-opacity-10{% endif %}" style="border-color: var(--border-color) !important;">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="text-white small">{{ notif.title }}</strong>
+                                        <small class="text-secondary" style="font-size: 0.7rem;">{{ notif.created_at|timesince }} ago</small>
+                                    </div>
+                                    <p class="mb-0 text-secondary small text-truncate">{{ notif.message }}</p>
+                                </a>
+                                {% empty %}
+                                <div class="p-4 text-center text-secondary small">
+                                    <i class="fas fa-bell-slash fa-2x mb-2 d-block"></i>
+                                    No notifications yet.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if current_profile_pic_url %}
+                            <img src="{{ current_profile_pic_url }}" alt="Profile" class="rounded-circle me-2" style="width: 28px; height: 28px; object-fit: cover; border: 1.5px solid var(--primary-color);">
+                            {% else %}
                             <i class="fas fa-user-circle fa-lg me-2 text-secondary"></i>
+                            {% endif %}
                             <span>{{ user.get_full_name|default:user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow">
                             <li><a class="dropdown-item" href="{% url 'workerprofile' %}"><i class="fas fa-user-cog me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'worker_wallet' %}"><i class="fas fa-coins text-warning me-2"></i>My Wallet</a></li>
                             <li><a class="dropdown-item" href="{% url 'index' %}"><i class="fas fa-globe me-2"></i>View Main Site</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Sign out</a></li>
@@ -152,6 +211,18 @@
                 </div>
             </header>
             
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             {% block content %}
             {% endblock %}
 
@@ -172,5 +243,6 @@
             });
         }
     </script>
+    <script src="{% static 'js/bilingual.js' %}"></script>
 </body>
 </html>

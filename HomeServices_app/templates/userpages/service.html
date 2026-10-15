@@ -5,8 +5,8 @@
 
 <style>
     .page-header-services {
-        padding: 8rem 0;
-        background: linear-gradient(rgba(17, 24, 39, 0.85), rgba(17, 24, 39, 0.85)), 
+        padding: clamp(3rem, 5vw + 1rem, 6rem) 0;
+        background: linear-gradient(rgba(17, 24, 39, 0.88), rgba(17, 24, 39, 0.88)), 
                     url('https://images.unsplash.com/photo-1542744095-291d1f67b221?auto=format&fit=crop&w=1470&q=80');
         background-size: cover;
         background-position: center;
@@ -15,6 +15,8 @@
 
     .page-header-services h1 {
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        font-size: clamp(1.85rem, 1.2rem + 2.5vw, 2.75rem);
+        font-weight: 800;
     }
 
     .search-bar-wrapper {
@@ -144,7 +146,7 @@
 
     <div class="row g-4" id="serviceGrid">
         {% for service in services %}
-        <div class="col-md-6 col-lg-4 service-item" data-search-terms="{{ service.Name|lower }} {{ service.Description|lower }}">
+        <div class="col-12 col-md-6 col-lg-4 service-item" data-search-terms="{{ service.Name|lower }} {{ service.Description|lower }}">
             <a {% if user.is_authenticated %}
                    href="{% url 'bookservice' service.id %}"
                {% else %}
@@ -152,7 +154,7 @@
                {% endif %}
                class="service-card-fancy h-100">
                 <div class="img-container">
-                    <img src="{{ service.img.url }}" class="card-img-top" alt="{{ service.Name }}">
+                    <img src="{{ service.get_img_url }}" class="card-img-top" alt="{{ service.Name }}">
                     <div class="img-overlay">
                         <h5 class="card-title">{{ service.Name }}</h5>
                     </div>
@@ -160,8 +162,8 @@
                 <div class="card-body">
                     <p class="card-text">{{ service.Description|truncatewords:22 }}</p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="badge bg-success bg-opacity-25 text-success fs-6"><i class="fas fa-clock me-1"></i>৳{{ service.hourly_rate }}/hr</span>
                         <span class="text-primary fw-bold">Book Now <i class="fas fa-arrow-right ms-1"></i></span>
-                        <span class="badge bg-primary bg-opacity-25 text-primary-emphasis rounded-pill">Popular</span>
                     </div>
                 </div>
             </a>

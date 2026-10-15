@@ -65,7 +65,7 @@
     }
 </style>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
     <h1 class="page-title mb-0">Available Job Requests</h1>
     <div class="col-12 col-md-5 col-lg-4">
         <div class="input-group">
@@ -74,12 +74,27 @@
         </div>
     </div>
 </div>
-<p class="text-secondary mb-4">These are new service requests matching your skills. Accept a job to add it to your active tasks.</p>
 
+<div class="mb-4 d-flex flex-wrap align-items-center justify-content-between p-3 rounded" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color);">
+    <div>
+        <span class="text-secondary small d-block"><i class="fas fa-map-marked-alt text-primary me-1"></i>Your Active Service Coverage Areas:</span>
+        <div class="d-flex flex-wrap gap-1 mt-1">
+            {% for area in worker.service_areas.all %}
+                <span class="badge bg-primary text-white"><i class="fas fa-map-marker-alt me-1"></i>{{ area.name }}</span>
+            {% empty %}
+                <span class="badge bg-secondary">{{ worker.city|default:"All Areas" }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="mt-2 mt-md-0">
+        <a href="{% url 'edit_worker_profile' %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-sliders-h me-1"></i>Update Areas</a>
+    </div>
+</div>
+
+<p class="text-secondary mb-4">Showing new customer service requests in your selected areas. Accept a job to add it to your active tasks.</p>
 
 <div class="row g-4" id="jobList">
     {% for record in request_records %}
-        {% if not record.status %}
         <div class="col-md-6 col-lg-4 job-item" data-search-terms="{{ record.service.Name }} {{ record.city.name }} {{ record.Problem_Description|lower }}">
             <div class="card job-card h-100">
                 <div class="job-card-header">
@@ -89,31 +104,29 @@
                 <div class="job-card-body">
                     <div class="info-item">
                         <i class="fas fa-user-circle"></i>
-                        <div>Customer: <span>{{ record.user.admin.first_name }}</span></div>
+                        <div>Customer: <span>{{ record.user.admin.get_full_name|default:record.user.admin.username }}</span></div>
                     </div>
                     <div class="info-item">
                         <i class="fas fa-map-marker-alt"></i>
-                        <div>Location: <span>{{ record.city.name }}</span></div>
+                        <div>Location: <span class="badge bg-info-subtle text-info border border-info px-2">{{ record.city.name }}</span></div>
                     </div>
                     <hr style="border-color: var(--border-color);">
                     <p class="text-secondary mb-0"><strong>Problem:</strong> {{ record.Problem_Description|truncatechars:120 }}</p>
                 </div>
                 <div class="job-card-footer text-center">
-                    {% if record.status %}
-                        <button class="btn btn-secondary w-100" disabled><i class="fas fa-check-circle me-2"></i>Job Taken</button>
-                    {% else %}
-                        <a href="{% url 'acceptrequest' action='accept' id=record.id %}" class="btn btn-primary w-100"><i class="fas fa-plus-circle me-2"></i>Accept Job</a>
-                    {% endif %}
+                    <a href="{% url 'acceptrequest' action='accept' id=record.id %}" class="btn btn-primary w-100"><i class="fas fa-plus-circle me-2"></i>Accept Job</a>
                 </div>
             </div>
         </div>
-        {% endif %}
     {% empty %}
         <div class="col-12">
-            <div class="card p-5 text-center">
+            <div class="card p-5 text-center" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color);">
                 <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
-                <h4>No Available Jobs Right Now</h4>
-                <p class="text-secondary">We'll notify you when new service requests matching your profile become available.</p>
+                <h4 class="text-white">No Available Jobs in Your Coverage Areas</h4>
+                <p class="text-secondary">There are currently no pending requests for <strong>{{ worker.designation }}</strong> in your coverage areas ({{ worker.get_service_areas_display }}).</p>
+                <div class="mt-2">
+                    <a href="{% url 'edit_worker_profile' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-map-marked-alt me-1"></i>Manage Coverage Areas</a>
+                </div>
             </div>
         </div>
     {% endfor %}

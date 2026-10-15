@@ -89,49 +89,239 @@
     <div class="col-lg-6 task-item" data-status="{% if record.status %}completed{% else %}active{% endif %}">
         <div class="card task-card h-100 status-{% if record.status %}completed{% else %}active{% endif %}">
             <div class="task-card-header d-flex justify-content-between align-items-center">
-                <h5 class="text-white mb-0">{{ record.requests.service.Name }}</h5>
-                <small class="text-secondary">Accepted: {{ record.Date|date:"F d, Y" }}</small>
+                <div>
+                    <h5 class="text-white mb-0">{{ record.requests.service.Name }}</h5>
+                    <small class="text-secondary">Booked: {{ record.requests.dateofrequest|date:"M d, Y" }} | ID: #SR-{{ record.id }}</small>
+                </div>
+                <div>
+                    <span class="badge {% if record.status %}bg-success{% elif record.job_status == 'In Progress' %}bg-warning text-dark{% elif record.job_status == 'On the Way' %}bg-info text-dark{% else %}bg-primary{% endif %}">
+                        {{ record.job_status }}
+                    </span>
+                </div>
             </div>
             <div class="task-card-body">
+                <!-- Stepper Progress Bar -->
+                <div class="tracking-stepper mb-3 p-2 rounded" style="background-color: var(--dark-bg-primary); border: 1px solid var(--border-color);">
+                    <div class="d-flex justify-content-between align-items-center position-relative">
+                        <div style="position: absolute; top: 11px; left: 6%; right: 6%; height: 3px; background-color: var(--border-color); z-index: 0;">
+                            <div style="width: {{ record.get_progress_percentage }}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); transition: width 0.4s ease;"></div>
+                        </div>
+                        <div class="text-center position-relative" style="z-index: 1;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 bg-success text-white" style="width: 22px; height: 22px; font-size: 0.65rem;"><i class="fas fa-check"></i></div>
+                            <small class="d-block text-white" style="font-size: 0.65rem;">Accepted</small>
+                        </div>
+                        <div class="text-center position-relative" style="z-index: 1;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if record.job_status in 'On the Way,In Progress,Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 22px; height: 22px; font-size: 0.65rem;"><i class="fas fa-car-side"></i></div>
+                            <small class="d-block {% if record.job_status in 'On the Way,In Progress,Completed' %}text-white{% else %}text-secondary{% endif %}" style="font-size: 0.65rem;">On the Way</small>
+                        </div>
+                        <div class="text-center position-relative" style="z-index: 1;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if record.job_status in 'In Progress,Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 22px; height: 22px; font-size: 0.65rem;"><i class="fas fa-tools"></i></div>
+                            <small class="d-block {% if record.job_status in 'In Progress,Completed' %}text-white{% else %}text-secondary{% endif %}" style="font-size: 0.65rem;">In Progress</small>
+                        </div>
+                        <div class="text-center position-relative" style="z-index: 1;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if record.status or record.job_status == 'Completed' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 22px; height: 22px; font-size: 0.65rem;"><i class="fas fa-flag-checkered"></i></div>
+                            <small class="d-block {% if record.status or record.job_status == 'Completed' %}text-white{% else %}text-secondary{% endif %}" style="font-size: 0.65rem;">Completed</small>
+                        </div>
+                        <div class="text-center position-relative" style="z-index: 1;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 {% if record.payment_status == 'Paid' %}bg-success text-white{% else %}bg-secondary text-light{% endif %}" style="width: 22px; height: 22px; font-size: 0.65rem;"><i class="fas fa-coins"></i></div>
+                            <small class="d-block {% if record.payment_status == 'Paid' %}text-success fw-bold{% else %}text-secondary{% endif %}" style="font-size: 0.65rem;">Paid</small>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="info-item">
                     <i class="fas fa-user-circle"></i>
-                    <div>
-                        <div class="info-label">Customer</div>
-                        <div class="info-value">{{ record.requests.user.admin.get_full_name }}</div>
+                    <div class="w-100 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="info-label">Customer</div>
+                            <div class="info-value">{{ record.requests.user.admin.get_full_name|default:record.requests.user.admin.username }}</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'job_chat' record.id %}" class="btn btn-sm btn-outline-primary py-1 px-2" title="Chat with Customer">
+                                <i class="fas fa-comment-dots me-1"></i>Chat
+                            </a>
+                            <a href="tel:{{ record.requests.contact }}" class="btn btn-sm btn-outline-success py-1 px-2" title="Call Customer">
+                                <i class="fas fa-phone-alt me-1"></i>Call
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="info-item">
-                    <i class="fas fa-phone-alt"></i>
-                    <div>
-                        <div class="info-label">Contact</div>
-                        <div class="info-value">{{ record.requests.contact }}</div>
-                    </div>
-                </div>
+
                 <div class="info-item">
                     <i class="fas fa-map-marker-alt"></i>
-                    <div>
-                        <div class="info-label">Address</div>
-                        <div class="info-value">{{ record.requests.House_No }}, {{ record.requests.Address }}, {{ record.requests.city.name }} - {{ record.requests.pin }}</div>
+                    <div class="w-100">
+                        <div class="info-label">Customer Address</div>
+                        <div class="info-value mb-1">{{ record.requests.House_No }}, {{ record.requests.Address }}, {{ record.requests.city.name }} - {{ record.requests.pin }}</div>
+                        
+                        <!-- 1-Click Google Maps Direction Button -->
+                        {% if record.requests.latitude and record.requests.longitude %}
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ record.requests.latitude }},{{ record.requests.longitude }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2 mt-1" style="font-size: 0.78rem;">
+                            <i class="fas fa-location-arrow me-1"></i>Open GPS in Google Maps
+                        </a>
+                        {% else %}
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ record.requests.House_No }}+{{ record.requests.Address }}+{{ record.requests.city.name }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2 mt-1" style="font-size: 0.78rem;">
+                            <i class="fas fa-location-arrow me-1"></i>Open Address in Google Maps
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
-                 <hr style="border-color: var(--border-color);">
+
+                <hr style="border-color: var(--border-color);">
                 <div class="info-item">
                     <i class="fas fa-comment-alt"></i>
-                     <div>
+                    <div>
                         <div class="info-label">Problem Description</div>
                         <div class="info-value">{{ record.requests.Problem_Description }}</div>
                     </div>
                 </div>
-            </div>
-            <div class="task-card-footer d-flex justify-content-end gap-2">
+
+                {% if record.job_status == 'On the Way' or record.job_status == 'In Progress' %}
+                <div class="p-3 my-3 rounded-2 border border-info border-opacity-50" style="background: rgba(14, 165, 233, 0.08);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="spinner-grow spinner-grow-sm text-info" role="status"></span>
+                            <strong class="text-info small"><i class="fas fa-satellite-dish me-1"></i>Live GPS Broadcasting Active</strong>
+                        </div>
+                        <span class="badge bg-info text-dark" id="gpsStatusBadge{{ record.id }}">Broadcasting</span>
+                    </div>
+                    <p class="small text-secondary mb-2">
+                        Customer is tracking your route on their live moving map in real-time.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-info py-1 px-2" onclick="sendWorkerLocation({{ record.id }})" style="font-size: 0.75rem;">
+                            <i class="fas fa-location-arrow me-1"></i>Update My Location Now
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light py-1 px-2" onclick="simulateMoveStep({{ record.id }}, {{ record.requests.latitude|default:'23.8103' }}, {{ record.requests.longitude|default:'90.4125' }})" style="font-size: 0.75rem;">
+                            <i class="fas fa-motorcycle me-1"></i>Simulate Moving Closer
+                        </button>
+                    </div>
+                    <div class="small text-muted mt-2" id="gpsFeedback{{ record.id }}" style="font-size: 0.72rem;">
+                        {% if record.worker_latitude and record.worker_longitude %}
+                        Last broadcast: {{ record.worker_latitude|floatformat:4 }}, {{ record.worker_longitude|floatformat:4 }} ({{ record.last_location_update|timesince }} ago)
+                        {% else %}
+                        GPS position syncing automatically every 5 seconds...
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if record.status %}
-                    <span class="badge fs-6 bg-success-subtle text-success-emphasis p-2"><i class="fas fa-check-circle me-2"></i>Job Completed</span>
+                <div class="p-3 my-3 rounded-2 bg-black bg-opacity-25 border border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between small text-secondary mb-1">
+                        <span>Duration: <strong class="text-white">{{ record.hours_worked }} hrs</strong> @ ৳{{ record.hourly_rate }}/hr</span>
+                        <span>Total Bill: <strong class="text-white">৳{{ record.total_amount }}</strong></span>
+                    </div>
+                    <div class="d-flex justify-content-between small mt-1">
+                        <span class="text-success"><i class="fas fa-coins me-1"></i>Your Payout (90%): <strong>৳{{ record.worker_earning }}</strong></span>
+                        <span class="text-secondary">Platform (10%): ৳{{ record.admin_commission }}</span>
+                    </div>
+                    <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <span class="small text-secondary">Customer Payment:</span>
+                        {% if record.payment_status == 'Paid' %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Paid via {{ record.payment_method }}</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Payment Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="task-card-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
+                {% if record.status %}
+                    <span class="badge fs-6 bg-success-subtle text-success-emphasis p-2"><i class="fas fa-check-circle me-1"></i>Job Completed</span>
+                    {% if record.payment_status == 'Paid' %}
+                    <a href="{% url 'invoice_detail' record.id %}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-file-invoice me-1"></i>View Invoice
+                    </a>
+                    {% endif %}
                 {% else %}
-                    <a href="{% url 'reject' action='reject' id=record.id %}" class="btn btn-sm btn-outline-danger">Reject Job</a>
-                    <a href="{% url 'markcompleted' action='completed' id=record.id %}" class="btn btn-sm btn-success"><i class="fas fa-check me-1"></i> Mark as Completed</a>
+                    <div>
+                        <a href="{% url 'update_job_status' id=record.id new_status='cancel' %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this job? It will be returned to the open requests pool.');">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if record.job_status == 'Accepted' %}
+                            <a href="{% url 'update_job_status' id=record.id new_status='on_the_way' %}" class="btn btn-sm btn-info text-white fw-medium">
+                                <i class="fas fa-car-side me-1"></i>Start Heading (On The Way)
+                            </a>
+                        {% elif record.job_status == 'On the Way' %}
+                            <a href="{% url 'update_job_status' id=record.id new_status='in_progress' %}" class="btn btn-sm btn-warning text-dark fw-medium">
+                                <i class="fas fa-tools me-1"></i>Arrived (Start Work)
+                            </a>
+                        {% elif record.job_status == 'In Progress' %}
+                            <button type="button" class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#completeJobModal{{ record.id }}">
+                                <i class="fas fa-check-circle me-1"></i>Finish & Mark Completed
+                            </button>
+                        {% endif %}
+                    </div>
                 {% endif %}
             </div>
         </div>
+
+        <!-- Complete Job Modal -->
+        {% if not record.status %}
+        <div class="modal fade" id="completeJobModal{{ record.id }}" tabindex="-1" aria-labelledby="modalLabel{{ record.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background-color: var(--dark-bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                    <form action="{% url 'markcompleted' action='completed' id=record.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="modal-header border-bottom" style="border-color: var(--border-color) !important;">
+                            <h5 class="modal-title text-white" id="modalLabel{{ record.id }}">
+                                <i class="fas fa-clipboard-check text-success me-2"></i>Complete Job & Log Hours
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-4">
+                            <p class="text-secondary small mb-3">
+                                Service: <strong class="text-white">{{ record.requests.service.Name }}</strong><br>
+                                Standard Rate: <span class="text-primary fw-bold">৳{{ record.requests.service.hourly_rate }}/hour</span>
+                                {% if record.requests.addons_total and record.requests.addons_total > 0 %}
+                                <br>Package Add-ons Total: <span class="text-info fw-bold">+৳{{ record.requests.addons_total }}</span>
+                                {% endif %}
+                            </p>
+
+                            <div class="mb-4">
+                                <label for="hoursInput{{ record.id }}" class="form-label text-white fw-semibold">
+                                    Total Hours Worked:
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text" style="background-color: var(--dark-bg-primary); border-color: var(--border-color); color: var(--text-secondary);"><i class="fas fa-clock"></i></span>
+                                    <input type="number" step="0.5" min="0.5" max="48" class="form-control form-control-dark hours-input" id="hoursInput{{ record.id }}" name="hours_worked" value="1.0" data-rate="{{ record.requests.service.hourly_rate }}" data-addon="{{ record.requests.addons_total|default:'0.00' }}" data-id="{{ record.id }}" required>
+                                    <span class="input-group-text" style="background-color: var(--dark-bg-primary); border-color: var(--border-color); color: var(--text-secondary);">Hours</span>
+                                </div>
+                                <small class="text-secondary mt-1 d-block">Log actual time spent (e.g. 1.0, 1.5, 2.0, 3.5 hrs).</small>
+                            </div>
+
+                            <!-- Live Calculation Breakdown -->
+                            <div class="card p-3 bg-black bg-opacity-25 border border-secondary border-opacity-25">
+                                <div class="d-flex justify-content-between mb-2 small text-secondary">
+                                    <span>Calculated Bill:</span>
+                                    <span class="text-white fw-bold" id="billTotal{{ record.id }}">৳{{ record.requests.service.hourly_rate }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 small">
+                                    <span class="text-success"><i class="fas fa-arrow-down me-1"></i>Your Payout (90%):</span>
+                                    <strong class="text-success" id="workerShare{{ record.id }}">৳{{ record.requests.service.hourly_rate }}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between small text-secondary">
+                                    <span><i class="fas fa-building me-1"></i>Platform Fee (10%):</span>
+                                    <span id="adminShare{{ record.id }}">৳0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top" style="border-color: var(--border-color) !important;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success px-4 fw-bold">
+                                <i class="fas fa-check-circle me-1"></i>Confirm & Generate Bill
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
     {% empty %}
     <div class="col-12">
@@ -154,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     filterButtons.forEach(button => {
         button.addEventListener('click', function() {
-            // Manage active class on buttons
             filterButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             
@@ -170,7 +359,133 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Live calculation for completion modals (including add-ons)
+    document.querySelectorAll('.hours-input').forEach(input => {
+        function updateCalc() {
+            const rate = parseFloat(input.dataset.rate) || 300;
+            const hours = parseFloat(input.value) || 1;
+            const addon = parseFloat(input.dataset.addon) || 0;
+            const id = input.dataset.id;
+            const total = ((hours * rate) + addon).toFixed(2);
+            const adminFee = (total * 0.10).toFixed(2);
+            const workerShare = (total - adminFee).toFixed(2);
+
+            const billEl = document.getElementById('billTotal' + id);
+            const workerEl = document.getElementById('workerShare' + id);
+            const adminEl = document.getElementById('adminShare' + id);
+            if (billEl) billEl.textContent = '৳' + total;
+            if (workerEl) workerEl.textContent = '৳' + workerShare;
+            if (adminEl) adminEl.textContent = '৳' + adminFee;
+        }
+        input.addEventListener('input', updateCalc);
+        input.addEventListener('change', updateCalc);
+        updateCalc();
+    });
+
+    // Worker GPS Broadcaster
+    const activeBroadcastJobs = [];
+    {% for record in Response_records %}
+        {% if not record.status and record.job_status == 'On the Way' %}
+            activeBroadcastJobs.push({
+                id: {{ record.id }},
+                destLat: {{ record.requests.latitude|default:'23.8103' }},
+                destLng: {{ record.requests.longitude|default:'90.4125' }}
+            });
+        {% endif %}
+    {% endfor %}
+
+    if (activeBroadcastJobs.length > 0) {
+        // Automatically sync worker position periodically every 6 seconds
+        setInterval(() => {
+            activeBroadcastJobs.forEach(job => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => postLocation(job.id, pos.coords.latitude, pos.coords.longitude),
+                        err => simulateMoveStep(job.id, job.destLat, job.destLng),
+                        { enableHighAccuracy: true, timeout: 5000 }
+                    );
+                } else {
+                    simulateMoveStep(job.id, job.destLat, job.destLng);
+                }
+            });
+        }, 6000);
+    }
 });
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function postLocation(responseId, lat, lng, successCallback) {
+    fetch(`/job_status/${responseId}/update_location/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ latitude: lat, longitude: lng })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const fb = document.getElementById('gpsFeedback' + responseId);
+            if (fb) fb.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i>Location broadcasted: ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)} (${data.updated_at})</span>`;
+            if (successCallback) successCallback(data);
+        }
+    })
+    .catch(err => console.error('GPS broadcast error:', err));
+}
+
+function sendWorkerLocation(responseId) {
+    const fb = document.getElementById('gpsFeedback' + responseId);
+    if (!navigator.geolocation) {
+        if (fb) fb.innerText = 'Geolocation is not supported by your browser.';
+        return;
+    }
+    if (fb) fb.innerHTML = '<span class="text-warning"><i class="fas fa-spinner fa-spin me-1"></i>Acquiring device GPS...</span>';
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            postLocation(responseId, pos.coords.latitude, pos.coords.longitude);
+        },
+        err => {
+            if (fb) fb.innerHTML = `<span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>GPS permission not granted, advancing simulated location.</span>`;
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+}
+
+const simulatedWorkerCoords = {};
+function simulateMoveStep(responseId, destLat, destLng) {
+    if (!simulatedWorkerCoords[responseId]) {
+        simulatedWorkerCoords[responseId] = {
+            lat: destLat - 0.015,
+            lng: destLng - 0.012
+        };
+    }
+    const cur = simulatedWorkerCoords[responseId];
+    cur.lat += (destLat - cur.lat) * 0.22 + (Math.random() - 0.5) * 0.0004;
+    cur.lng += (destLng - cur.lng) * 0.22 + (Math.random() - 0.5) * 0.0004;
+
+    postLocation(responseId, cur.lat, cur.lng, () => {
+        const badge = document.getElementById('gpsStatusBadge' + responseId);
+        if (badge) {
+            badge.innerText = 'Moving Closer';
+            badge.className = 'badge bg-success';
+        }
+    });
+}
 </script>
 
 {% endblock %}
