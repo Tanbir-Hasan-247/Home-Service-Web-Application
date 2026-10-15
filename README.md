@@ -11,15 +11,16 @@
  ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ 
 ```
 
-### 🔧 Connecting Customers with Trusted Home Service Professionals
+### 🔧 Next-Gen On-Demand Home Services & Technician Management Platform
 
 <br/>
 
 [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
+[![Django](https://img.shields.io/badge/Django-6.0+-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.4+-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-Maps-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
 
 <br/>
 
@@ -42,29 +43,32 @@
 
 - [About The Project](#-about-the-project)
 - [Screenshots](#-screenshots)
-- [Key Features](#-key-features)
+- [Top Real-World Features](#-top-real-world-features)
+- [Role-Based Feature Matrix](#-role-based-feature-matrix)
 - [Tech Stack](#-tech-stack)
-- [Architecture Overview](#-architecture-overview)
+- [Architecture & Workflow](#-architecture--workflow)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-- [Usage](#-usage)
+  - [Database Setup & Migrations](#database-setup--migrations)
+  - [Automated Verification Test Suite](#automated-verification-test-suite)
+- [Environment Variables](#-environment-variables)
 - [Project Structure](#-project-structure)
 - [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
+- [License](#-license)
 - [Contact](#-contact)
 
 ---
 
 ## 🌟 About The Project
 
-**ServiceHub** is a production-ready, full-stack home services marketplace built with Django and PostgreSQL. It bridges the gap between **customers** who need household work done and **skilled professionals** who deliver it — managed end-to-end by a powerful **admin control panel**.
+**ServiceHub** is an enterprise-grade, full-stack on-demand home service marketplace web application built with **Django** and **PostgreSQL/SQLite**. It connects customers seeking household repairs, maintenance, and cleaning services with verified, skilled technicians — all supervised in real time by an administrative operations panel.
 
-From booking a plumber to tracking an ongoing repair job, ServiceHub provides a smooth, transparent, and role-aware experience for every user type on the platform.
+From **interactive map pin-drops** and **live GPS technician tracking (Uber/Pathao style)** to **multi-gateway payment processing (bKash, Nagad, Cards)**, **worker wallet payout requests**, **bilingual language toggling (EN/বাংলা)**, and **automated PDF invoices**, ServiceHub delivers an end-to-end, production-ready SaaS experience.
 
 > 💡 **Why ServiceHub?**  
-> Finding reliable home service providers is frustrating. ServiceHub solves this by creating a verified, reviewed, and fully trackable marketplace — with real-time job management, a star-rating feedback system, and admin-controlled worker verification baked right in.
+> Finding trustworthy home technicians with upfront pricing is painful. ServiceHub eliminates guesswork with transparent hourly rates, customizable service packages/add-ons, live ETA tracking, instant in-app messaging, verified reviews, and automated 90/10 revenue sharing.
 
 ---
 
@@ -72,63 +76,88 @@ From booking a plumber to tracking an ongoing repair job, ServiceHub provides a 
 
 <div align="center">
 
-| 🏠 Homepage | 🛡️ Admin Dashboard | 👷 Worker Dashboard |
+| 🏠 Customer Home & Services | 🛡️ Admin Analytics & Revenue | 👷 Technician Workspace & Wallet |
 |:---:|:---:|:---:|
-| ![Homepage](Home%20Service%20Django%20Project/media/ss/home.png) | ![Admin Dashboard](Home%20Service%20Django%20Project/media/ss/admin.png) | ![Worker Profile](Home%20Service%20Django%20Project/media/ss/worker.png) |
+| ![Homepage](media/ss/home.png) | ![Admin Dashboard](media/ss/admin.png) | ![Worker Profile](media/ss/worker.png) |
 
 </div>
 
 ---
 
-## ✨ Key Features
+## 🔥 Top Real-World Features
 
-The platform supports **three distinct user roles**, each with its own dedicated dashboard and tailored set of features.
+### 1. 🛵 Live GPS Technician Tracking & Interactive Maps
+- **Interactive Map Pin-Drop:** During booking, customers drop a pin on an interactive Leaflet/Google Maps view to pinpoint their exact location with latitude and longitude.
+- **Live Moving Location:** When a worker switches their job status to **"On the Way"**, the technician's live coordinates stream to the server every 3–5 seconds using the browser `navigator.geolocation.watchPosition` API.
+- **Real-Time Customer Map Modal:** Customers view the technician's vehicle/bike moving toward their home on an interactive live map with real-time **Haversine distance (km)** and **live ETA (minutes)** calculations.
+- **One-Click Google Maps Directions:** Technicians have a 1-click **"Open in Google Maps"** button that opens turn-by-turn navigation directly to the customer's doorstep.
 
-<details>
-<summary><b>👤 Customer Features</b></summary>
-<br/>
+### 2. 💳 Smart Billing, Commission Split & Multi-Gateway Checkout
+- **Automated Bill Calculation:** Calculated as:
+  $$\text{Total Bill} = (\text{Hourly Rate} \times \text{Hours Worked}) + \sum \text{Selected Add-on Packages}$$
+- **Automated 90/10 Revenue Split:** 90% is allocated directly to the worker's payout balance and 10% is recorded as platform commission.
+- **Multi-Method Checkout:** Customers can pay online using **bKash**, **Nagad**, **Rocket**, **Credit/Debit Card**, or select **Cash on Service**.
+- **Unique Transaction ID:** Each paid booking receives a unique TrxID (`TXN-...`) with instant receipt generation.
 
-| Feature | Description |
-|---|---|
-| Secure Authentication | Full registration, login, logout, and password reset flow |
-| Service Browsing | Stylish and intuitive interface to browse, search, and filter services |
-| Multi-Step Booking | Easy booking form with detailed service requirements |
-| Appointment Tracking | Dashboard to monitor pending, active, and completed bookings |
-| Feedback & Ratings | Star-rating and comment system to review service providers |
-| Profile Management | View, update, and securely delete account information |
+### 3. 💰 Worker Virtual Wallet & Payout Withdrawal System
+- **Virtual Earnings Wallet:** Technicians track their accrued earnings, lifetime withdrawals, and pending payouts in a dedicated wallet (`/worker/wallet/`).
+- **Withdrawal Requests:** Workers submit payout requests specifying their withdrawal method (**bKash**, **Nagad**, or **Bank Account**) and account details.
+- **Admin Review Panel:** Administrators review, approve, or reject withdrawal requests at `/manage_withdrawals/`, which instantly deducts the worker's wallet balance upon approval.
 
-</details>
+### 4. 📄 Downloadable PDF Invoices & Money Receipts
+- **Professional PDF Generation:** Customers and technicians can download official PDF receipts generated via `ReportLab` (`/appointment/invoice/<id>/pdf/`).
+- **Detailed Invoice Breakdown:** Features auto-generated invoice numbers, service date, technician info, hourly rate breakdown, add-ons itemization, VAT/tax, and digital stamp verification.
+- **Printable Modal Receipts:** 1-click browser-printable payment receipts with clean transaction metadata.
 
-<details>
-<summary><b>👷 Worker (Service Provider) Features</b></summary>
-<br/>
+### 5. 📦 Service Packages & Extra Add-On Collection
+- **Modular Add-Ons:** Customers can select optional equipment and deep-service materials (e.g., *Gas Refill (+৳1200)*, *Jet Wash (+৳400)*, *Anti-Bacterial Sanitize (+৳500)*).
+- **Live Bill Estimator:** The booking form dynamically computes estimated total costs as add-ons are toggled on and off.
+- **Pre-populated Add-on Catalog:** Comes pre-seeded with 26 service packages across categories like AC repair, plumbing, house cleaning, electrical, painting, and carpentry.
 
-| Feature | Description |
-|---|---|
-| Specialized Registration | Dedicated sign-up flow for professionals with extended profile fields |
-| Personalized Dashboard | Overview of completed jobs, active jobs, and average rating |
-| Job Management | Accept new jobs, update job status, and mark them as completed |
-| Availability Toggle | Instantly set status to Available or Unavailable |
-| Feedback Review | View all customer ratings and written reviews |
-| Colleague Directory | Visual directory of all professionals on the platform |
+### 6. 💬 In-App Direct Customer-Worker Messaging & Quick Call
+- **In-App Job Chat:** Active bookings feature a dedicated, private chat room (`/chat/<response_id>/`) for clear communication regarding service requirements and location directions.
+- **One-Click Dialing:** Instant `Call Worker` and `Call Customer` buttons (`tel:`) enable quick phone calls with zero friction.
 
-</details>
+### 7. 📈 Visual Executive Analytics Dashboard (Chart.js)
+- **Monthly Platform Revenue Curve:** Visualizes Gross Merchandise Value (GMV) alongside platform commission over time.
+- **City Demand Distribution:** Interactive doughnut chart displaying booking demand by metropolitan area.
+- **Top Earning Technicians Leaderboard:** Ranks top service professionals by total earnings and completed jobs with custom rank badges (#1 Gold, #2 Silver, #3 Bronze).
+- **Interactive KPI Cards:** Real-time metrics for total revenue, active jobs, pending payments, and customer reviews with filtered query links.
 
-<details>
-<summary><b>👑 Admin Features</b></summary>
-<br/>
+### 8. 🌐 Bilingual Support (English & Bengali [EN | বাংলা])
+- **Instant Client-Side Toggle:** A persistent `[EN | বাংলা]` toggle pill in the navbar instantly switches navigation, headings, status badges, and booking forms without reloading the page.
+- **Saved User Preference:** Language selection persists across sessions using browser `localStorage`.
 
-| Feature | Description |
-|---|---|
-| Comprehensive Dashboard | KPIs, charts, and live activity feeds for a full platform overview |
-| User & Worker Management | View, edit, or remove all registered customers and service providers |
-| Worker Verification | Approve or reject incoming service provider applications |
-| Service Management | Full CRUD for service categories with custom icons |
-| Location Management | Add and manage countries, states, and cities |
-| Manual Job Assignment | Directly assign jobs to specific available workers |
-| Full Oversight | Access all requests, feedback logs, and operational metrics |
+### 9. 🔔 Real-Time Notification Bell System
+- **Dynamic Notification Center:** Bell dropdown with live unread badge counters.
+- **Automated Lifecycle Alerts:** Notifies users on worker assignment, arrival status, job completion, payment receipts, and payout approvals.
+- **Mark As Read Controls:** Individual and "Mark all read" actions.
 
-</details>
+### 10. 👤 Modern SaaS UI & Dynamic Profile Picture Integration
+- **Dynamic Profile Avatars:** If the user has an uploaded photo, a circular avatar image is rendered in navbars and dropdowns; otherwise, an icon fallback (`<i class="fa fa-user"></i>`) renders cleanly.
+- **Glassmorphic Design:** Sticky headers, custom dark-mode scrollbars, card hover elevations, and status timeline progress bars.
+
+---
+
+## 👥 Role-Based Feature Matrix
+
+| Feature | 👤 Customer | 👷 Technician | 👑 Administrator |
+|---|:---:|:---:|:---:|
+| **Account Registration & Role Separation** | ✅ | ✅ (Needs Verification) | ✅ (Superuser) |
+| **Browse Services & Search Filters** | ✅ | ✅ | ✅ |
+| **Interactive Map Pin-Drop Booking** | ✅ | — | — |
+| **Service Add-On Packages Selection** | ✅ | — | ✅ (Manageable) |
+| **Live Order Timeline (6-Stage Stepper)** | ✅ | ✅ | ✅ |
+| **Live GPS Technician Tracking (Map & ETA)**| ✅ | ✅ (Auto-Stream GPS) | — |
+| **In-App Real-Time Messaging & Direct Call** | ✅ | ✅ | ✅ (Audit Access) |
+| **Online Payments (bKash/Nagad/Card)** | ✅ | — | — |
+| **Virtual Wallet & Payout Withdrawals** | — | ✅ | ✅ (Approve/Reject) |
+| **Official PDF Invoice & Print Receipts** | ✅ | ✅ | ✅ |
+| **Star Rating & Written Reviews** | ✅ | ✅ (View Ratings) | ✅ (Moderation) |
+| **Worker Availability Status Toggle** | — | ✅ | ✅ |
+| **Multi-City Service Area Coverage** | — | ✅ (Multi-Select) | ✅ (Full CRUD) |
+| **Visual Analytics & Chart.js Dashboards** | — | ✅ (Rating Trend) | ✅ (Revenue Curve & Pie) |
+| **Language Toggle (English / বাংলা)** | ✅ | ✅ | ✅ |
 
 ---
 
@@ -136,47 +165,56 @@ The platform supports **three distinct user roles**, each with its own dedicated
 
 <div align="center">
 
-| Layer | Technology |
-|:---:|:---:|
-| **Language** | Python 3.12+ |
-| **Framework** | Django 5.2 |
-| **Database** | PostgreSQL 14+ |
-| **Frontend** | HTML5, CSS3, JavaScript (ES6+) |
-| **UI Framework** | Bootstrap 5.3 |
-| **Icons & UI** | Font Awesome 6 |
-| **Tables** | jQuery DataTables |
-| **Auth** | Django Authentication System |
-| **Messaging** | Django Messages Framework |
-| **Config** | python-decouple (`.env` management) |
-| **Image Handling** | Pillow |
+| Component | Technology | Description |
+|:---|:---|:---|
+| **Backend Framework** | **Django 6.0+ / Python 3.12+** | Robust, scalable web framework using Class-Based Views (CBVs) |
+| **Database** | **PostgreSQL 14+ / SQLite** | Relational storage with optimized foreign-key relationships |
+| **Frontend Styling** | **Bootstrap 5.3 + Custom CSS** | Responsive dark glassmorphism design system |
+| **Icons & Fonts** | **Font Awesome 6 & Inter** | Modern typography and vector iconography |
+| **Visual Analytics** | **Chart.js 4.4+** | Responsive, interactive line, bar, and doughnut charts |
+| **Mapping & Location**| **Leaflet 1.9+ & Geolocation API** | GPS pinpointing, live tracking markers, and Haversine ETA |
+| **PDF Generation** | **ReportLab 4.0+** | Server-side pixel-perfect commercial invoice generation |
+| **Data Tables** | **jQuery DataTables** | Searchable, paginated operational data views |
+| **Configuration** | **python-decouple** | Secure environment variable handling via `.env` |
+| **Image Engine** | **Pillow 10.0+** | Dynamic avatar and service thumbnail processing |
 
 </div>
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture & Workflow
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                         ServiceHub                           │
-│                                                              │
-│  ┌────────────┐    ┌────────────┐    ┌────────────────────┐  │
-│  │  Customer  │    │   Worker   │    │    Administrator   │  │
-│  └─────┬──────┘    └─────┬──────┘    └─────────┬──────────┘  │
-│        │                 │                     │             │
-│  ┌─────▼─────────────────▼─────────────────────▼──────────┐  │
-│  │              Django View Layer (FBV)                    │  │
-│  └─────────────────────────┬───────────────────────────────┘  │
-│                            │                                  │
-│  ┌─────────────────────────▼───────────────────────────────┐  │
-│  │              Django ORM  ←→  PostgreSQL                 │  │
-│  └──────┬──────────────────┬───────────────────┬───────────┘  │
-│         │                  │                   │              │
-│  ┌──────▼──────┐  ┌────────▼────────┐  ┌──────▼──────────┐   │
-│  │   Booking   │  │ Job Assignment  │  │ Feedback &      │   │
-│  │   Module    │  │    Engine       │  │ Rating System   │   │
-│  └─────────────┘  └─────────────────┘  └─────────────────┘   │
-└──────────────────────────────────────────────────────────────┘
+                               ┌────────────────────────────────────────┐
+                               │               ServiceHub               │
+                               │        Django Class-Based Views        │
+                               └───────────────────┬────────────────────┘
+                                                   │
+         ┌─────────────────────────────────────────┼────────────────────────────────────────┐
+         │                                         │                                        │
+         ▼                                         ▼                                        ▼
+┌──────────────────┐                     ┌──────────────────┐                     ┌──────────────────┐
+│  Customer Portal │                     │  Worker Portal   │                     │   Admin Portal   │
+├──────────────────┤                     ├──────────────────┤                     ├──────────────────┤
+│ • Map Pin-Drop   │                     │ • GPS Location   │                     │ • Verification   │
+│ • Service Add-ons│ ─── Booking Req ──► │   Streaming      │ ◄── Job Assign ──── │ • Job Allocation │
+│ • Multi-Pay Gate │                     │ • Virtual Wallet │                     │ • Payout Approval│
+│ • Live ETA Track │ ◄── Live Track ──── │ • In-App Chat    │                     │ • Visual Charts  │
+│ • PDF Invoices   │                     │ • Status Update  │                     │ • Full Audit Logs│
+└──────────────────┘                     └──────────────────┘                     └──────────────────┘
+         │                                         │                                        │
+         └─────────────────────────────────────────┼────────────────────────────────────────┘
+                                                   │
+                                                   ▼
+                               ┌────────────────────────────────────────┐
+                               │           Django ORM Engine            │
+                               │  ServiceRequests • Response • Wallet   │
+                               └───────────────────┬────────────────────┘
+                                                   │
+                                                   ▼
+                               ┌────────────────────────────────────────┐
+                               │    PostgreSQL / SQLite Database        │
+                               └────────────────────────────────────────┘
 ```
 
 ---
@@ -185,219 +223,189 @@ The platform supports **three distinct user roles**, each with its own dedicated
 
 ### Prerequisites
 
-Make sure the following are installed before proceeding:
-
+Ensure the following runtimes are installed on your system:
 - **Python** `>= 3.12` — [Download](https://python.org/downloads)
-- **PostgreSQL** `>= 14` — [Download](https://www.postgresql.org/download/)
 - **Git** — [Download](https://git-scm.com/)
+- **PostgreSQL** `>= 14` *(Optional, SQLite works out of the box for development)*
 
 ---
 
 ### Installation
 
-**Step 1 — Clone the repository**
-
+**1. Clone the repository**
 ```bash
 git clone https://github.com/Tanbir-Hasan-247/ServiceHub.git
-cd ServiceHub
+cd "Home-Service-Web-Application/Home Service Django Project"
 ```
 
-**Step 2 — Create and activate a virtual environment**
-
+**2. Create and activate a virtual environment**
 ```bash
-python -m venv venv
+# Windows
+python -m venv home_env
+.\home_env\Scripts\activate
 
-# On Windows
-.\venv\Scripts\activate
-
-# On macOS / Linux
-source venv/bin/activate
+# macOS / Linux
+python3 -m venv home_env
+source home_env/bin/activate
 ```
 
-**Step 3 — Install dependencies**
-
+**3. Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-> If `requirements.txt` is not yet generated, install the core packages manually:
-> ```bash
-> pip install Django psycopg2-binary Pillow python-decouple
-> ```
+---
 
-**Step 4 — Configure environment variables**
+### Database Setup & Migrations
 
-Create a `.env` file in the project root (see [Environment Variables](#environment-variables) below).
-
-**Step 5 — Set up the PostgreSQL database**
-
-Open your PostgreSQL shell and run:
-
-```sql
-CREATE DATABASE servicehub_db;
-```
-
-**Step 6 — Run database migrations**
-
+**1. Run migrations**
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-**Step 7 — Create a superuser (Admin account)**
+**2. Seed service packages & add-on catalog (Optional)**
+```bash
+# Populates 26 add-on accessories (AC cleaning, gas refill, pipe leak kits, etc.)
+python test_all_features.py
+```
 
+**3. Create an administrator account**
 ```bash
 python manage.py createsuperuser
 ```
 
-**Step 8 — Start the development server**
-
+**4. Start the development server**
 ```bash
 python manage.py runserver
 ```
 
-🎉 Open your browser and navigate to **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**
+Open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser.
 
 ---
 
-### Environment Variables
+### Automated Verification Test Suite
 
-Create a `.env` file in your project root and fill in the following values:
+ServiceHub includes an automated test script (`test_all_features.py`) to verify all core functional modules:
+
+```bash
+python test_all_features.py
+```
+
+**Test Coverage:**
+- ✅ **Test 1:** Service Add-Ons seeding & category matching.
+- ✅ **Test 2:** Hourly billing, add-on total, and 90/10 revenue split formula.
+- ✅ **Test 3:** Worker live GPS location endpoint & Haversine distance ETA calculation.
+- ✅ **Test 4:** Admin Analytics charts serialization & technician leaderboard aggregation.
+- ✅ **Test 5:** Bilingual translation dictionary assets & template integrity.
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the project root alongside `manage.py`:
 
 ```env
-# ─── Django ───────────────────────────────────────────────────
-SECRET_KEY=your_super_secret_django_key_here
+# ─── Django Security ──────────────────────────────────────────
+SECRET_KEY=your_secret_key_here
 DEBUG=True
 
-# ─── Database (PostgreSQL) ────────────────────────────────────
+# ─── Database Configuration (PostgreSQL) ─────────────────────
+# Leave empty or omit if running SQLite
 DB_NAME=servicehub_db
-DB_USER=your_postgres_username
-DB_PASSWORD=your_postgres_password
+DB_USER=postgres
+DB_PASSWORD=your_password
 DB_HOST=localhost
 DB_PORT=5432
 
-# ─── Email (Gmail SMTP) ───────────────────────────────────────
+# ─── Email Configuration (Gmail SMTP) ─────────────────────────
 EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_16_character_app_password
+EMAIL_PASS=your_16_digit_app_password
 ```
-
-Then update `settings.py` to read from your `.env` using `python-decouple`:
-
-```python
-# settings.py
-from decouple import config
-
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
-}
-
-EMAIL_HOST_USER = config('EMAIL_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_PASS')
-```
-
-> ⚠️ **Security Note:** Never commit your `.env` file to version control. Add it to `.gitignore` immediately.  
-> 📩 **Gmail App Password:** Enable 2FA on your Google account and generate a password at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
-
----
-
-## 🧭 Usage
-
-Once the server is running, explore the platform using the following roles:
-
-| Role | How to Access | Capabilities |
-|---|---|---|
-| **Customer** | Register at `/register/` as a regular user | Browse services, book appointments, leave reviews |
-| **Worker** | Register via the "Become a Provider" flow | Manage jobs, toggle availability, view ratings |
-| **Admin** | Log in with your superuser credentials | Full platform control, verify workers, assign jobs |
-
-> 🔒 **Note:** Worker accounts remain **inactive** until reviewed and approved by an Admin.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-ServiceHub/
+Home Service Django Project/
 │
-├── manage.py
-├── requirements.txt
-├── .env                         # Environment variables (not committed)
+├── manage.py                          # Django CLI utility
+├── requirements.txt                   # Production dependencies
+├── test_all_features.py               # Comprehensive automated QA test suite
+├── .env                               # Environment configurations (Git-ignored)
 │
-├── servicehub/                  # Core project configuration
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
+├── HomeServices_project/              # Project Configuration
+│   ├── settings.py                    # Global settings, context processors, auth backends
+│   ├── urls.py                        # Root URL routing
+│   ├── wsgi.py                        # WSGI server gateway
+│   └── asgi.py                        # ASGI server gateway
 │
-├── apps/
-│   ├── users/                   # Custom user model, auth views, profiles
-│   ├── services/                # Service categories & listings
-│   ├── bookings/                # Booking & appointment management
-│   ├── feedback/                # Star ratings & written reviews
-│   └── dashboard/               # Role-based dashboards (Admin, Worker, Customer)
+├── HomeServices_app/                  # Core Business Application
+│   ├── models.py                      # Models (users, workers, ServiceRequests, Response, Wallet, etc.)
+│   ├── views.py                       # Modular Class-Based Views (CBVs) & handlers
+│   ├── urls.py                        # Application URL mapping
+│   ├── context_processors.py          # Global notification counter & dynamic profile avatar helper
+│   │
+│   ├── static/                        # Static Assets
+│   │   ├── css/                       # Custom styles
+│   │   └── js/
+│   │       └── bilingual.js           # Client-side English & Bengali translation engine
+│   │
+│   └── templates/                     # UI Templates
+│       ├── userpages/                 # Customer views (index, booking, history, checkout, invoice)
+│       ├── workerpages/               # Technician views (dashboard, jobs, wallet, profile)
+│       ├── adminpages/                # Admin views (analytics, workers, withdrawals, services)
+│       └── chat/                      # Customer-Worker live messaging room
 │
-├── templates/                   # HTML templates (organized per app)
-├── static/                      # CSS, JS, images, and other static assets
-└── media/                       # User-uploaded files (profile photos, screenshots)
+└── media/                             # Uploaded media (profile pictures, service icons)
 ```
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] ✅ Three-role user system (Customer, Worker, Admin)
-- [x] ✅ Multi-step service booking form
-- [x] ✅ Worker verification & approval workflow
-- [x] ✅ Job acceptance & real-time status management
-- [x] ✅ Star-rating and written feedback system
-- [x] ✅ Admin manual job assignment engine
-- [x] ✅ Location management (Country → State → City)
-- [x] ✅ Worker availability toggle
-- [ ] 🔄 **Refactor to Class-Based Views (CBV)** — cleaner, more scalable architecture
-- [ ] 💳 **Payment Gateway Integration** — in-platform service payments
-- [ ] 🔔 **Real-Time Notifications** — WebSocket-powered alerts via Django Channels
-- [ ] 🗺️ **Map Integration** — worker location discovery via Google Maps API
-- [ ] 📱 **Progressive Web App (PWA)** — offline-ready mobile experience
-- [ ] 📊 **Advanced Admin Analytics** — charts for revenue, bookings, and platform growth
+- [x] ✅ **Three-Role User Hierarchy** (Customer, Technician, Super Admin)
+- [x] ✅ **Service Add-On Packages & Modular Item Selection**
+- [x] ✅ **Interactive Map Pin-Drop Location Selection** (Leaflet / Google tiles)
+- [x] ✅ **Live GPS Technician Tracking** (3–5s coordinate polling & Haversine ETA)
+- [x] ✅ **Class-Based View (CBV) Architectural Refactor**
+- [x] ✅ **Multi-Gateway Payment System** (bKash, Nagad, Rocket, Cards, Cash)
+- [x] ✅ **Worker Virtual Wallet & Admin Payout Withdrawal Engine**
+- [x] ✅ **Downloadable Commercial PDF Invoices & Money Receipts** (`ReportLab`)
+- [x] ✅ **In-App Direct Customer-Worker Messaging & 1-Click Dialing**
+- [x] ✅ **Executive Visual Analytics Dashboard** (Chart.js Revenue Curve & Demand Pie)
+- [x] ✅ **Bilingual Localization** (`[EN | বাংলা]` instant toggle)
+- [x] ✅ **In-App Notification Bell Center with Unread Counters**
+- [x] ✅ **Dynamic Circular Profile Picture vs. Icon Fallback System**
+- [ ] 🔄 **WebSocket Real-Time Chat Upgrade** (Django Channels & Redis)
+- [ ] 📱 **Progressive Web App (PWA) Offline Technician Mode**
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are always welcome!
+Contributions are welcomed! Follow these steps to contribute:
 
-1. **Fork** the repository
-2. **Create** a feature branch → `git checkout -b feature/AmazingFeature`
-3. **Commit** your changes → `git commit -m 'Add AmazingFeature'`
-4. **Push** to the branch → `git push origin feature/AmazingFeature`
+1. **Fork** the project
+2. **Create** your feature branch (`git checkout -b feature/NewFeature`)
+3. **Commit** your changes (`git commit -m 'Add NewFeature'`)
+4. **Push** to the branch (`git push origin feature/NewFeature`)
 5. **Open a Pull Request**
-
-Please ensure your code is well-commented and follows the existing project structure.
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 ---
 
-## 📬 Contact
+## 📬 Contact & Author
 
 <div align="center">
 
 ### Tanbir Hasan
-
-*Aspiring Software Developer & Competitive Programmer*
+*Software Developer & Competitive Programmer*
 
 <br/>
 
@@ -407,18 +415,10 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more informa
 
 <br/>
 
-*If this project helped you, consider dropping a ⭐ on GitHub — it means the world!*
-
-</div>
-
----
-
-<div align="center">
-
-Made with ❤️ and ☕ by **Tanbir Hasan**
+*If you find this project valuable, please give it a ⭐ on GitHub — thank you!*
 
 <br/>
 
-*ServiceHub — Trusted help, right at your door.*
+Made with ❤️ and ☕ by **Tanbir Hasan**
 
 </div>
